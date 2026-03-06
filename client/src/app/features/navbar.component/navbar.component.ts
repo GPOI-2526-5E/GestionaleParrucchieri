@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '../../../../node_modules/@angular/common/common_module.d';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar.component',
