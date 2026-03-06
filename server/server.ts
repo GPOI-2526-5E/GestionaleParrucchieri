@@ -38,56 +38,11 @@ if(!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir);
 }
 
-app.post("/upload",(req,res)=>{
-    //Controllo che il file esista
-    if(!req.files || !req.files.file)
-        return(res.status(400).send("Nessun file caricato"));
 
-    //Cast del file ricevuto
-    let file = req.files.file as UploadedFile;
-
-    let uploadPath=`${uploadDir}/${file.name}`;
-
-    file.mv(uploadPath, (err)=>{
-        if(err)
-            return(res.status(500).send(err.message));
-
-        res.send({
-           message:"File caricato con successo!",
-           filePath:uploadPath
-        });
-    })
-
-});
-
-app.post("/api/cloudinary", async(req, res) => {
-    let file;
-    try{
-        //Controllo che il file esista
-        if(!req.files || !req.files.file)
-            return(res.status(400).send("Manca l'immagine"));
-
-        file= req.files.file as UploadedFile;
-        const result= await cloudinary.v2.uploader.upload(
-            file.tempFilePath,
-            {folder:"EsUpload"}
-        );
-        res.json(result);
-    }
-    catch(err){
-        res.status(500).send("Errore upload Cloudinary");
-    }
-    finally{
-        if(fs.existsSync(file.tempFile)){
-            fs.unlinkSync(file.tempFile);
-        }
-    }
-});
-
-app.get("/api/cloudinaryList", async(req, res)=>{
+app.get("/api/imgParrucchieri", async(req, res)=>{
     try{
         const result = await cloudinary.v2.search
-            .expression("folder:EsUpload")
+            .expression("folder:ImgParrucchieri")
             .sort_by("created_at","desc")
             .max_results(100)
             .execute();
