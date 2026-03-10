@@ -1,10 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './features/navbar.component/navbar.component';
+import { HomeBodyComponent } from './features/home-body.component/home-body.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet, NavbarComponent, HomeBodyComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
