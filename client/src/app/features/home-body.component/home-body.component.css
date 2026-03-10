@@ -27,7 +27,7 @@
 .gestionale-section {
   position: relative;
   z-index: 2;
-  padding-top: 160px; /* spazio per navbar fixed */
+  padding-top: 160px;
   padding-bottom: 120px;
   color: white;
 }
