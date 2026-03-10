@@ -1,41 +1,94 @@
+/* ===== SFONDO GENERALE ===== */
 body {
-            background: #111;
-        }
+    background: #111;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
 
-        .navbar {
-            background-color: #0f0f0f;
-        }
+/* ===== NAVBAR BASE (TRASPARENTE) ===== */
+.navbar {
+    background: transparent;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 999;
+    transition: all 0.4s ease;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
 
-        .navbar-nav .nav-link {
-            color: white;
-            font-weight: 500;
-            margin-right: 20px;
-            letter-spacing: 0.5px;
-        }
+/* Effetto blur moderno */
+.navbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.25);
+    z-index: -1;
+}
 
-        .navbar-nav .nav-link:hover {
-            color: #d4b06a;
-        }
+/* ===== NAVBAR DOPO SCROLL ===== */
+.navbar.scrolled {
+    background: rgba(15, 15, 15, 0.95);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
 
-        .navbar-nav .nav-link.active {
-            color: #d4b06a;
-        }
+/* ===== LOGO ===== */
+.navbar-brand img {
+    height: 60px;
+    transition: 0.3s ease;
+}
 
-        .icon-btn {
-            color: white;
-            font-size: 20px;
-            margin-left: 20px;
-        }
+.navbar-brand img:hover {
+    opacity: 0.85;
+}
 
-        .icon-btn:hover {
-            color: #d4b06a;
-        }
+/* ===== MENU ===== */
+.navbar-nav .nav-link {
+    color: white;
+    font-weight: 500;
+    margin-right: 25px;
+    letter-spacing: 1px;
+    font-size: 14px;
+    transition: 0.3s ease;
+}
 
-        .login-text {
-            color: white;
-            margin-left: 8px;
-        }
+.navbar-nav .nav-link:hover {
+    color: #d4b06a;
+}
 
-        .login-text:hover {
-            color: #d4b06a;
-        }
+.navbar-nav .nav-link.active {
+    color: #d4b06a;
+}
+
+/* ===== ICONE ===== */
+.icon-btn {
+    color: white;
+    font-size: 20px;
+    margin-left: 20px;
+    transition: 0.3s ease;
+}
+
+.icon-btn:hover {
+    color: #d4b06a;
+}
+
+.login-text {
+    color: white;
+    margin-left: 8px;
+}
+
+.login-text:hover {
+    color: #d4b06a;
+}
+
+/* ===== MOBILE ===== */
+.navbar-toggler {
+    border: none;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
