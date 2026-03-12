@@ -1,0 +1,28 @@
+<!-- overlay -->
+<div class="ai-overlay" *ngIf="chatUi.isOpen()" (click)="close()"></div>
+
+<!-- drawer -->
+<aside class="ai-drawer" [class.open]="chatUi.isOpen()" aria-label="Chat AI">
+  <header class="ai-header">
+    <div>
+      <div class="ai-title">Assistente AI</div>
+      <div class="ai-subtitle">Chiedimi qualsiasi cosa sul salone</div>
+    </div>
+
+    <button class="ai-close" type="button" (click)="close()" aria-label="Chiudi">✕</button>
+  </header>
+
+  <section class="ai-body">
+
+  <div class="ai-message ai-message-bot">
+    Ciao 👋<br />
+    Come posso aiutarti oggi?
+  </div>
+
+</section>
+
+  <footer class="ai-footer">
+    <input class="ai-input" placeholder="Scrivi un messaggio…" />
+    <button class="ai-send" type="button">Invia</button>
+  </footer>
+</aside>

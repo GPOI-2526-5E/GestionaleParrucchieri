@@ -1,5 +1,6 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChatUiService } from '../../services/chat-ui';
 
 @Component({
   selector: 'app-navbar',
@@ -11,8 +12,14 @@ import { CommonModule } from '@angular/common';
 export class NavbarComponent {
   isScrolled = false;
 
+  private chatUi = inject(ChatUiService);
+
   @HostListener('window:scroll', [])
   onWindowScroll() {
     this.isScrolled = window.scrollY > 50;
+  }
+
+  openAi() {
+    this.chatUi.open('navbar');
   }
 }
