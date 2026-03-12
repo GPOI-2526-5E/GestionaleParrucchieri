@@ -1,28 +1,53 @@
-<!-- overlay -->
 <div class="ai-overlay" *ngIf="chatUi.isOpen()" (click)="close()"></div>
 
-<!-- drawer -->
 <aside class="ai-drawer" [class.open]="chatUi.isOpen()" aria-label="Chat AI">
   <header class="ai-header">
     <div>
       <div class="ai-title">Assistente AI</div>
-      <div class="ai-subtitle">Chiedimi qualsiasi cosa sul salone</div>
+      <div class="ai-subtitle">Consigli su taglio, colore, trattamenti e prodotti</div>
     </div>
-
     <button class="ai-close" type="button" (click)="close()" aria-label="Chiudi">✕</button>
   </header>
 
   <section class="ai-body">
+    <!-- Stato iniziale (nessun messaggio) -->
+    <div class="ai-empty" *ngIf="messages.length === 0 && !isSending">
+      <div class="ai-empty-title">Inizia a scrivere con l’AI ✨</div>
+      <div class="ai-empty-subtitle">
+        Esempi: “Che taglio mi consigli?” oppure “Vorrei un balayage, come funziona?”
+      </div>
 
-  <div class="ai-message ai-message-bot">
-    Ciao 👋<br />
-    Come posso aiutarti oggi?
-  </div>
+      <div class="ai-suggestions">
+        <button type="button" class="ai-chip" (click)="quick('Che servizi offrite?')">Servizi</button>
+        <button type="button" class="ai-chip" (click)="quick('Consigliami un taglio adatto ai miei capelli')">Taglio</button>
+        <button type="button" class="ai-chip" (click)="quick('Vorrei un balayage: come si mantiene?')">Balayage</button>
+        <button type="button" class="ai-chip" (click)="quick('Che trattamento consigli per capelli rovinati?')">Trattamenti</button>
+      </div>
+    </div>
 
-</section>
+    <!-- Messaggi -->
+    <div
+      *ngFor="let m of messages"
+      class="ai-message"
+      [class.ai-message-bot]="m.role === 'assistant'"
+      [class.ai-message-user]="m.role === 'user'">
+      {{ m.content }}
+    </div>
+
+    <!-- Typing -->
+    <div class="ai-typing" *ngIf="isSending">Sto scrivendo…</div>
+  </section>
 
   <footer class="ai-footer">
-    <input class="ai-input" placeholder="Scrivi un messaggio…" />
-    <button class="ai-send" type="button">Invia</button>
+    <input
+      class="ai-input"
+      [(ngModel)]="inputText"
+      (keydown.enter)="send()"
+      [disabled]="isSending"
+      placeholder="Scrivi un messaggio…" />
+
+    <button class="ai-send" type="button" (click)="send()" [disabled]="isSending">
+      Invia
+    </button>
   </footer>
 </aside>
