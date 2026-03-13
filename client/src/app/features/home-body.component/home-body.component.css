@@ -91,6 +91,11 @@
   object-position: center 70%;
 }
 
+/* HERO LI */
+.li-hero{
+  cursor: default;
+}
+
 /* SERVICES GRID */
 .services-section{ margin-top:40px; }
 .section-title{ color:#fff; font-size:20px; margin-bottom:18px; }

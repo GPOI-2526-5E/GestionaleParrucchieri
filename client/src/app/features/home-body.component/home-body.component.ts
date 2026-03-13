@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ChatUiService } from '../../services/chat-ui';
 import { NavbarComponent } from "../navbar.component/navbar.component";
 import { AiChatDrawerComponent } from "../ai-chat-drawer.component/ai-chat-drawer.component";
-import { RouterLink } from "@angular/router";
+import { RouterLink, RouterLinkActive } from "@angular/router";
 
 @Component({
   selector: 'app-home-body',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, AiChatDrawerComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, AiChatDrawerComponent, RouterLink, RouterLinkActive],
   templateUrl: './home-body.component.html',
   styleUrl: './home-body.component.css',
 })

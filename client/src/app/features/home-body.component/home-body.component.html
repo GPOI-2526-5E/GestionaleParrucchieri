@@ -11,14 +11,14 @@
           trattamenti premium per capelli sani e luminosi.</p>
 
         <div class="hero-ctas">
-          <a routerLink="/servizi" class="btn luxury-btn">Scopri i servizi</a>
+          <a [routerLink]="['/servizi']" routerLinkActive="active" class="btn luxury-btn">Scopri i servizi</a>
           <button class="btn luxury-btn-outline" type="button" (click)="openAiFromCard()">Chiedi all'IA</button>
         </div>
 
         <ul class="hero-features">
-          <li>Tagli su misura</li>
-          <li>Colori & balayage professionali</li>
-          <li>Trattamenti ristrutturanti</li>
+          <li class="li-hero">Tagli su misura</li>
+          <li class="li-hero">Colori & balayage professionali</li>
+          <li class="li-hero">Trattamenti ristrutturanti</li>
         </ul>
       </div>
 
@@ -150,7 +150,7 @@
             </div>
           </div>
 
-          <a href="tel:+393478085277" class="footer-link footer-primary-action">Prenota ora</a>
+          <a [routerLink]="['/appuntamenti']" routerLinkActive="active" class="footer-link footer-primary-action">Prenota ora</a>
         </div>
 
       </div>
