@@ -2,90 +2,99 @@
 
 <div class="hero-background">
 
-    <div class="container gestionale-section">
+  <div class="container gestionale-section">
 
-        <div class="text-center section-header mb-5">
-            <h1>Benvenuti da I Parrucchieri</h1>
-            <p>Dove stile, eleganza e cura dei dettagli si incontrano.</p>
+    <!-- HERO / INTRO -->
+    <div class="hero-grid">
+      <div class="hero-text">
+        <h1 class="hero-title">Benvenuti da <span class="brand">I Parrucchieri</span></h1>
+        <p class="hero-lead">Dove stile, eleganza e cura dei dettagli si incontrano. Tagli su misura, colori ricercati e trattamenti premium per capelli sani e luminosi.</p>
+
+        <div class="hero-ctas">
+          <a routerLink="/servizi" class="btn luxury-btn">Scopri i servizi</a>
+          <button class="btn luxury-btn-outline" type="button" (click)="openAiFromCard()">Chiedi all'IA</button>
         </div>
 
-        <div class="row g-4">
+        <ul class="hero-features">
+          <li>Tagli su misura</li>
+          <li>Colori & balayage professionali</li>
+          <li>Trattamenti ristrutturanti</li>
+        </ul>
+      </div>
 
-            <!-- Prodotti -->
-            <div class="col-md-4">
-                <div class="card luxury-card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Prodotti</h5>
-                        <p class="card-text">
-                            Visualizza e gestisci i prodotti disponibili nel salone.
-                        </p>
-                        <a routerLink="/prodotti" class="btn luxury-btn">Vai ai prodotti</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Servizi -->
-            <div class="col-md-4">
-                <div class="card luxury-card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Servizi</h5>
-                        <p class="card-text">
-                            Consulta i servizi offerti dal salone e i relativi prezzi.
-                        </p>
-                        <a routerLink="/servizi" class="btn luxury-btn">Vai ai servizi</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Appuntamenti -->
-            <div class="col-md-4">
-                <div class="card luxury-card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Appuntamenti</h5>
-                        <p class="card-text">
-                            Gestisci e controlla gli appuntamenti dei clienti.
-                        </p>
-                        <a routerLink="/appuntamenti" class="btn luxury-btn">
-                            Gestisci appuntamenti
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chi siamo -->
-            <div class="col-md-6">
-                <div class="card luxury-card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Chi Siamo</h5>
-                        <p class="card-text">
-                            Scopri informazioni sul salone e sul nostro team.
-                        </p>
-                        <a routerLink="/chi-siamo" class="btn luxury-btn-outline">
-                            Scopri di più
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- IA -->
-            <div class="col-md-6">
-                <div class="card luxury-card h-100">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Chiedi all'IA</h5>
-                        <p class="card-text">
-                            Hai bisogno di aiuto? Chiedi all'intelligenza artificiale.
-                        </p>
-                        <button class="btn luxury-btn" type="button" (click)="openAiFromCard()">
-                            Apri assistente
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
+      <div class="hero-media" aria-hidden="true">
+        <!-- Sostituisci src con immagini nel tuo /assets o CDN -->
+        <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394487/imgTrucchi_xhxy9o.avif"
+             alt="Salone e styling" class="hero-image" />
+      </div>
     </div>
 
+    <!-- SEZIONE SERVIZI (layout a griglia, immagini + testo) -->
+    <section class="services-section">
+      <h2 class="section-title">I nostri servizi</h2>
+
+      <div class="services-grid">
+        <article class="service-card">
+          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394488/imgServizio_xhhf55.avif" alt="Taglio" class="service-img" />
+          <div class="service-body">
+            <h3>Taglio & Styling</h3>
+            <p>Consulenza personalizzata, tagli moderni e classici per uomo e donna. Styling professionale per ogni occasione.</p>
+            <a routerLink="/servizi#taglio" class="link-plain">Scopri di più →</a>
+          </div>
+        </article>
+
+        <article class="service-card">
+          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394488/imgAcconciatura_dce3jw.avif" alt="Colore" class="service-img" />
+          <div class="service-body">
+            <h3>Colore & Balayage</h3>
+            <p>Colorazioni su misura, tecniche balayage e schiariture con prodotti professionali e trattamento di mantenimento.</p>
+            <a routerLink="/servizi#colore" class="link-plain">Scopri di più →</a>
+          </div>
+        </article>
+
+        <article class="service-card">
+          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394490/imgPhone_qvvy9u.avif" alt="Trattamenti" class="service-img" />
+          <div class="service-body">
+            <h3>Trattamenti</h3>
+            <p>Trattamenti ristrutturanti, alla cheratina, maschere rigeneranti e protocolli anti-crespo per capelli nutriti e lucenti.</p>
+            <a routerLink="/servizi#trattamenti" class="link-plain">Scopri di più →</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- BARRA INFO / CTA SECONDARIA -->
+    <div class="info-strip">
+      <div>
+        <strong>Vuoi consigli personalizzati?</strong>
+        <span>Fai una domanda all'Assistente AI o prenota una consulenza nel salone.</span>
+      </div>
+      <div>
+        <button class="btn luxury-btn" type="button" (click)="openAiFromCard()">Chiedi all'IA</button>
+      </div>
+    </div>
+
+    <!-- FOOTER MINI: about + contatti -->
+    <footer class="home-footer">
+      <div class="footer-columns">
+        <div>
+          <h4>Chi siamo</h4>
+          <p>Salone artigianale con esperienza pluriennale. Passione per i dettagli e attenzione alla salute dei capelli.</p>
+        </div>
+
+        <div>
+          <h4>Contatti</h4>
+          <p>Telefono: <a href="tel:+39000000000">000 000 0000</a><br/>Indirizzo: Via Esempio, 1</p>
+        </div>
+
+        <div>
+          <h4>Orari</h4>
+          <p>Mar–Sab: 09:00–19:00<br/>Lun: chiuso</p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
 </div>
 
 <app-ai-chat-drawer></app-ai-chat-drawer>
