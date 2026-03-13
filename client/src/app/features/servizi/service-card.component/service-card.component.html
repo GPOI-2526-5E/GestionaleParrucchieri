@@ -6,11 +6,11 @@
             </a>
         </h5>
         <p class="card-text text-muted">di {{ service.descrizione }}</p>
-        <p class="card-text text-truncate">{{ service.durata }}</p>
+        <p class="card-text text-truncate">Durata: {{ service.durata }} min</p>
         <div class="mt-auto d-flex justify-content-between align-items-center">
             <span class="fs-5 fw-bold text-success">{{ service.prezzo | currency: 'EUR'}}</span>
             <button class="btn btn-primary btn-sm" (click)="addToCart()">
-                🛍️ Aggiungi
+                🛍️ Prenota
             </button>
         </div>
     </div>

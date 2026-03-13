@@ -4,6 +4,7 @@ import { NavbarComponent } from '../../navbar.component/navbar.component';
 import { AiChatDrawerComponent } from '../../ai-chat-drawer.component/ai-chat-drawer.component';
 import { ServiceCardComponent } from '../service-card.component/service-card.component';
 import { Servizio, ServiziService } from '../../../data/service';
+import { Observable } from 'rxjs/internal/Observable';
 
 @Component({
   selector: 'app-services-list',
@@ -12,16 +13,13 @@ import { Servizio, ServiziService } from '../../../data/service';
   templateUrl: './services-list.component.html',
   styleUrl: './services-list.component.css'
 })
-export class ServicesListComponent implements OnInit {
+export class ServicesListComponent {
 
-  services: Servizio[] = [];
+  servicesMD!: Observable<Servizio[]>;
 
-  constructor(private serviziService: ServiziService) { }
+  constructor(private serviziService: ServiziService) {}
 
   ngOnInit(): void {
-    this.serviziService.getServizi().subscribe(data => {
-      console.log(data);
-      this.services = data;
-    });
+    this.servicesMD = this.serviziService.getServizi();
   }
 }
