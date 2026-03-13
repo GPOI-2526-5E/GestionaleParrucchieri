@@ -4,11 +4,11 @@
 
   <div class="container gestionale-section">
 
-    <!-- HERO / INTRO -->
     <div class="hero-grid">
       <div class="hero-text">
         <h1 class="hero-title">Benvenuti da <span class="brand">I Parrucchieri</span></h1>
-        <p class="hero-lead">Dove stile, eleganza e cura dei dettagli si incontrano. Tagli su misura, colori ricercati e trattamenti premium per capelli sani e luminosi.</p>
+        <p class="hero-lead">Dove stile, eleganza e cura dei dettagli si incontrano. Tagli su misura, colori ricercati e
+          trattamenti premium per capelli sani e luminosi.</p>
 
         <div class="hero-ctas">
           <a routerLink="/servizi" class="btn luxury-btn">Scopri i servizi</a>
@@ -23,47 +23,50 @@
       </div>
 
       <div class="hero-media" aria-hidden="true">
-        <!-- Sostituisci src con immagini nel tuo /assets o CDN -->
         <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394487/imgTrucchi_xhxy9o.avif"
-             alt="Salone e styling" class="hero-image" />
+          alt="Salone e styling" class="hero-image" />
       </div>
     </div>
 
-    <!-- SEZIONE SERVIZI (layout a griglia, immagini + testo) -->
     <section class="services-section">
       <h2 class="section-title">I nostri servizi</h2>
 
       <div class="services-grid">
         <article class="service-card">
-          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394488/imgServizio_xhhf55.avif" alt="Taglio" class="service-img" />
+          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394488/imgServizio_xhhf55.avif" alt="Taglio"
+            class="service-img-shampoo" />
           <div class="service-body">
             <h3>Taglio & Styling</h3>
-            <p>Consulenza personalizzata, tagli moderni e classici per uomo e donna. Styling professionale per ogni occasione.</p>
-            <a routerLink="/servizi#taglio" class="link-plain">Scopri di più →</a>
+            <p>Consulenza personalizzata, tagli moderni e classici per uomo e donna. Styling professionale per ogni
+              occasione.</p>
+            <a [routerLink]="['/servizi']" routerLinkActive="active" class="link-plain">Scopri di più →</a>
           </div>
         </article>
 
         <article class="service-card">
-          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394488/imgAcconciatura_dce3jw.avif" alt="Colore" class="service-img" />
+          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394488/imgAcconciatura_dce3jw.avif"
+            alt="Colore" class="service-img" />
           <div class="service-body">
             <h3>Colore & Balayage</h3>
-            <p>Colorazioni su misura, tecniche balayage e schiariture con prodotti professionali e trattamento di mantenimento.</p>
-            <a routerLink="/servizi#colore" class="link-plain">Scopri di più →</a>
+            <p>Colorazioni su misura, tecniche balayage e schiariture con prodotti professionali e trattamento di
+              mantenimento.</p>
+            <a [routerLink]="['/servizi']" routerLinkActive="active" class="link-plain">Scopri di più →</a>
           </div>
         </article>
 
         <article class="service-card">
-          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394490/imgPhone_qvvy9u.avif" alt="Trattamenti" class="service-img" />
+          <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773394490/imgPhone_qvvy9u.avif"
+            alt="Trattamenti" class="service-img" />
           <div class="service-body">
             <h3>Trattamenti</h3>
-            <p>Trattamenti ristrutturanti, alla cheratina, maschere rigeneranti e protocolli anti-crespo per capelli nutriti e lucenti.</p>
-            <a routerLink="/servizi#trattamenti" class="link-plain">Scopri di più →</a>
+            <p>Trattamenti ristrutturanti, alla cheratina, maschere rigeneranti e protocolli anti-crespo per capelli
+              nutriti e lucenti.</p>
+            <a [routerLink]="['/servizi']" routerLinkActive="active" class="link-plain">Scopri di più →</a>
           </div>
         </article>
       </div>
     </section>
 
-    <!-- BARRA INFO / CTA SECONDARIA -->
     <div class="info-strip">
       <div>
         <strong>Vuoi consigli personalizzati?</strong>
@@ -74,22 +77,52 @@
       </div>
     </div>
 
-    <!-- FOOTER MINI: about + contatti -->
     <footer class="home-footer">
       <div class="footer-columns">
         <div>
           <h4>Chi siamo</h4>
-          <p>Salone artigianale con esperienza pluriennale. Passione per i dettagli e attenzione alla salute dei capelli.</p>
+          <p>
+            Salone artigianale con esperienza pluriennale. Passione per i dettagli e
+            attenzione alla salute dei capelli.
+          </p>
+
+          <a href="https://www.google.com/maps/place/I+Parrucchieri+Fossano/@44.5475516,7.7250225,21z/data=!4m22!1m15!4m14!1m6!1m2!1s0x12cd59090baa1e53:0x2e9b29de9daa4050!2sI+Parrucchieri+Fossano,+Piazza+Vittorio+Veneto,+12045+Fossano+CN!2m2!1d7.7252961!2d44.5475514!1m6!1m2!1s0x12cd59090baa1e53:0x2e9b29de9daa4050!2sI+Parrucchieri+Fossano,+Piazza+Vittorio+Veneto,+12045+Fossano+CN!2m2!1d7.7252961!2d44.5475514!3m5!1s0x12cd59090baa1e53:0x2e9b29de9daa4050!8m2!3d44.5475707!4d7.725291!16s%2Fg%2F12jskjjxq?entry=ttu&g_ep=EgoyMDI2MDMxMC4wIKXMDSoASAFQAw%3D%3D"
+            target="_blank" class="btn luxury-btn mt-2">
+            Dove siamo
+          </a>
         </div>
 
         <div>
           <h4>Contatti</h4>
-          <p>Telefono: <a href="tel:+39000000000">000 000 0000</a><br/>Indirizzo: Via Esempio, 1</p>
+          <p>Telefono: <a href="tel:+39000000000">347 808 5277</a><br />Indirizzo: Piazza Vittorio Veneto, 12045 Fossano
+            CN</p>
         </div>
 
-        <div>
-          <h4>Orari</h4>
-          <p>Mar–Sab: 09:00–19:00<br/>Lun: chiuso</p>
+        <div class="opening-hours">
+          <h4>
+            Orari
+            <span class="status" [class.open]="isOpen" [class.closed]="!isOpen">
+              {{ statusMessage }}
+            </span>
+          </h4>
+
+          <p class="today-hours">
+            <strong>{{ todayName }}:</strong> {{ todayHours }}
+          </p>
+
+          <details>
+            <summary>Vedi tutti gli orari</summary>
+
+            <ul class="hours-list">
+              <li>Lunedì: Chiuso</li>
+              <li>Martedì: 08:00 – 12:30, 14:00 – 19:30</li>
+              <li>Mercoledì: 13:00 – 21:30</li>
+              <li>Giovedì: 08:00 – 12:30, 14:00 – 19:30</li>
+              <li>Venerdì: 07:00 – 19:30</li>
+              <li>Sabato: 07:00 – 18:00</li>
+              <li>Domenica: Chiuso</li>
+            </ul>
+          </details>
         </div>
       </div>
     </footer>
