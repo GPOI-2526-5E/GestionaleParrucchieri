@@ -5,10 +5,17 @@ import fs from "fs";
 import dotenv from "dotenv";
 import cloudinary, { UploadStream } from "cloudinary";
 import OpenAI from "openai";
+import mysql from 'mysql2';
 
 //Configurazione server express
 const app = express();
 const PORT = 3000;
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'db_parrucchieri'
+});
 
 //Carico le variabili di ambiente dal file .env
 dotenv.config({ path: ".env" });
@@ -52,6 +59,7 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
+//imgCloudinary
 
 app.get("/api/imgParrucchieri", async (req, res) => {
     try {
@@ -67,6 +75,8 @@ app.get("/api/imgParrucchieri", async (req, res) => {
         res.status(500).send("Errore nel recupero delle immagini da Cloudinary");
     }
 })
+
+//Richiesta IA
 
 app.post("/api/chat", async (req, res) => {
     try {
@@ -170,6 +180,30 @@ Quando l’utente è generico (“cosa puoi dirmi?”) rispondi con 3-4 esempi c
         });
     }
 });
+
+//Richieste DB
+
+//UTENTI
+app.get("/api/utenti", async (req, res) => {
+    db.query('SELECT * FROM utenti', (err, result) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.json(result);
+    }
+  });
+}) 
+
+//SERVIZI
+app.get("/api/servizi", async (req, res) => {
+    db.query('SELECT * FROM servizi', (err, result) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.json(result);
+    }
+  });
+}) 
 
 app.listen(PORT, () => {
     console.log(`Server in ascolto su http://localhost:${PORT}`);
