@@ -13,6 +13,9 @@ import { RouterLink } from "@angular/router";
   styleUrl: './home-body.component.css',
 })
 export class HomeBodyComponent {
+
+  hoursOpen = false;
+
   chatUi = inject(ChatUiService);
 
   openAiFromCard() {
