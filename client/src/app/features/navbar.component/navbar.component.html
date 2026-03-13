@@ -1,62 +1,58 @@
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" [class.scrolled]="isScrolled">
 
-    <div class="container">
+  <div class="container">
 
-        <a class="navbar-brand" href="#">
-            <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773159172/LogoSfondoScuro_as3vry.png"
-                alt="LogoScuro" height="55">
+    <a class="navbar-brand" [routerLink]="['/home']">
+      <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773159172/LogoSfondoScuro_as3vry.png"
+           alt="LogoScuro">
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarMain">
+
+      <ul class="navbar-nav mx-auto">
+
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/home']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">HOME</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/products']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">PRODOTTI</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/services']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">SERVIZI</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/appointments']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">APPUNTAMENTI</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/about']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">CHI SIAMO</a>
+        </li>
+
+        <li class="nav-item">
+          <button class="nav-link ai-nav-btn" type="button" (click)="openAi()">CHIEDI ALL'IA</button>
+        </li>
+
+      </ul>
+
+      <div class="d-flex align-items-center">
+        <a href="#" class="icon-btn">
+          <i class="bi bi-cart3"></i>
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarMain">
-
-            <ul class="navbar-nav mx-auto">
-
-                <li class="nav-item">
-                    <a class="nav-link active" [routerLink]="['/home']">HOME</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['/products']" routerLinkActive="active">PRODOTTI</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" [routerLink]="['/services']" routerLinkActive="active">SERVIZI</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="#">APPUNTAMENTI</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="#">CHI SIAMO</a>
-                </li>
-
-                <li class="nav-item">
-                    <button class="nav-link ai-nav-btn" type="button" (click)="openAi()">
-                        CHIEDI ALL'IA
-                    </button>
-                </li>
-
-            </ul>
-
-            <div class="d-flex align-items-center">
-
-                <a href="#" class="icon-btn">
-                    <i class="bi bi-cart3"></i>
-                </a>
-
-                <a href="#" class="icon-btn d-flex align-items-center text-decoration-none">
-                    <i class="bi bi-person-circle"></i>
-                    <span class="login-text"></span>
-                </a>
-
-            </div>
-
-        </div>
+        <a href="#" class="icon-btn d-flex align-items-center text-decoration-none">
+          <i class="bi bi-person-circle"></i>
+          <span class="login-text">Login</span>
+        </a>
+      </div>
 
     </div>
+
+  </div>
 </nav>
