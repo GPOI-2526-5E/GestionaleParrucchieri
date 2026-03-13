@@ -3,21 +3,20 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-center">Catalogo Prodotti</h2>
 
-    @if(books.length == 0)
+    @if(products.length == 0)
     {
     <div class="alert alert-info text-center">
-        Nessun libro disponibile al momento
+        Nessun prodotto disponibile al momento
     </div>
     }
     @else
     {
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @for(book of books; track book.id)
+        @for(product of products; track product.id)
         {
         <div class="col">
-            <!-- [book] = "book" -->
-            <app-book-card [book]="book" (addBookToCart)="onAddToCart($event)">
-            </app-book-card>
+            <!-- [product] = "product" -->
+            <app-product-card></app-product-card>
         </div>
         }
     </div>
@@ -56,7 +55,7 @@
     @else {
         <div class="text-center mt-5">
             <div class="spinner-border" role="status">
-                <p>Caricamento libri...</p>
+                <p>Caricamento prodotti...</p>
             </div>
         </div>
     }
