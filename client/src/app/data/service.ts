@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 export interface Servizio {
   id: number;
@@ -20,6 +20,16 @@ export class ServiziService {
   constructor(private http: HttpClient) {}
 
   getServizi(): Observable<Servizio[]> {
-    return this.http.get<Servizio[]>(this.apiUrl);
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map(servizi =>
+        servizi.map(s => ({
+          id: s.idServizio,
+          nome: s.nome,
+          descrizione: s.descrizione,
+          durata: s.durata,
+          prezzo: Number(s.prezzo)
+        }))
+      )
+    );
   }
 }
