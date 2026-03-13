@@ -5,7 +5,7 @@ import { ProductCardComponent } from '../product-card.component/product-card.com
 
 @Component({
   selector: 'app-products-list.component',
-  imports: [AiChatDrawerComponent, NavbarComponent, ProductCardComponent],
+  imports: [AiChatDrawerComponent, NavbarComponent],
   templateUrl: './products-list.component.html',
   styleUrl: './products-list.component.css',
 })

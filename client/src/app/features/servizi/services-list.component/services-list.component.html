@@ -1,0 +1,25 @@
+<!-- <app-navbar></app-navbar> -->
+
+<div class="container mt-4">
+
+    <h2 class="mb-4 text-center">Catalogo Servizi</h2>
+
+    @if (services.length == 0) {
+    <div class="alert alert-info text-center">
+        Nessun servizio disponibile al momento
+    </div>
+    }
+    @else {
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+        @for (service of services; track service.id) {
+        <div class="col">
+            <app-service-card [service]="service"></app-service-card>
+        </div>
+        }
+
+    </div>
+    }
+</div>
+
+<app-ai-chat-drawer></app-ai-chat-drawer>

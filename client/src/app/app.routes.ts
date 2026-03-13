@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
-import { ProductsListComponent } from './features/products/products-list.component/products-list.component';
 import { HomeBodyComponent } from './features/home-body.component/home-body.component';
+import { ProductsListComponent } from './features/prodotti/products-list.component/products-list.component';
+import { ServicesListComponent } from './features/servizi/services-list.component/services-list.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'home', component: HomeBodyComponent },
-    { path: 'products', component: ProductsListComponent }
+    { path: 'products', component: ProductsListComponent },
+    { path: 'services', component: ServicesListComponent }
 ];
