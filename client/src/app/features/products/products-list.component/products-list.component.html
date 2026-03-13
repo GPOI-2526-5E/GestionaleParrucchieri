@@ -1,1 +1,64 @@
-<p>products-list.component works!</p>
+<app-navbar></app-navbar>
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Catalogo Prodotti</h2>
+
+    @if(products.length == 0)
+    {
+    <div class="alert alert-info text-center">
+        Nessun prodotto disponibile al momento
+    </div>
+    }
+    @else
+    {
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @for(product of products; track product.id)
+        {
+        <div class="col">
+            <!-- [product] = "product" -->
+            <app-product-card></app-product-card>
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<br>
+<br>
+
+<app-navbar></app-navbar>
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Catalogo Libri</h2>
+
+    @if (booksMD | async; as books) {
+        @if(books.length == 0)
+        {
+        <div class="alert alert-info text-center">
+            Nessun libro disponibile al momento
+        </div>
+        }
+        @else
+        {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @for(book of books; track book.id)
+            {
+            <div class="col">
+                <!-- [book] = "book" -->
+                <app-book-card [book]="book" (addBookToCart)="onAddToCart($event)">
+                </app-book-card>
+            </div>
+            }
+        </div>
+        }
+    }
+    @else {
+        <div class="text-center mt-5">
+            <div class="spinner-border" role="status">
+                <p>Caricamento prodotti...</p>
+            </div>
+        </div>
+    }
+</div>
+
+<app-ai-chat-drawer></app-ai-chat-drawer>
