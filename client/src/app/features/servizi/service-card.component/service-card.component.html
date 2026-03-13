@@ -1,4 +1,4 @@
-<div class="service-card card h-100 shadow-sm border-0">
+<!-- <div class="service-card card h-100 shadow-sm border-0">
 
     <div class="card-body d-flex flex-column">
 
@@ -26,6 +26,42 @@
 
             <button class="btn btn-book" (click)="addToCart()">
                 🛍️ Prenota
+            </button>
+
+        </div>
+
+    </div>
+
+</div> -->
+
+<div class="service-card">
+
+    <div class="service-card-body">
+
+        <div class="service-header">
+            <h5 class="service-title">
+                <a [routerLink]="['/service', service.id]" class="service-link">
+                    {{ service.nome }}
+                </a>
+            </h5>
+
+            <span class="duration-badge">
+                {{ service.durata }} min
+            </span>
+        </div>
+
+        <p class="service-description">
+            {{ service.descrizione }}
+        </p>
+
+        <div class="service-footer">
+
+            <span class="service-price">
+                {{ service.prezzo | currency:'EUR' }}
+            </span>
+
+            <button class="btn-book" (click)="addToCart()">
+                Prenota
             </button>
 
         </div>

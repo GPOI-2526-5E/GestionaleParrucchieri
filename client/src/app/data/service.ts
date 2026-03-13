@@ -27,7 +27,7 @@ export class ServiziService {
           nome: s.nome,
           descrizione: s.descrizione,
           durata: s.durata,
-          prezzo: Number(s.prezzo)
+          prezzo: Number(s.prezzo),
         }))
       )
     );

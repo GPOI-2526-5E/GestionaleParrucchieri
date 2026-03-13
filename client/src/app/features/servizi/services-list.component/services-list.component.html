@@ -1,37 +1,49 @@
 <app-navbar></app-navbar>
 
-<div class="gestionale-section">
-    <div class="container mt-4">
-        <h2 class="mb-4 text-center">Catalogo Servizi</h2>
+<div class="services-page">
+
+    <div class="services-overlay"></div>
+
+    <div class="gestionale-section container">
+
+        <h2 class="services-title">Catalogo Servizi</h2>
 
         @if (servicesMD | async; as services) {
 
-        @if(services.length == 0) {
-        <div class="alert alert-info text-center">
-            Nessun servizio disponibile al momento
-        </div>
-        }
-        @else {
+            @if(services.length == 0) {
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <div class="services-empty">
+                    Nessun servizio disponibile al momento
+                </div>
 
-            @for(service of services; track service.id) {
-            <div class="col">
-                <app-service-card [service]="service"></app-service-card>
-            </div>
+            }
+            @else {
+
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 services-grid">
+
+                    @for(service of services; track service.id) {
+
+                        <div class="col">
+                            <app-service-card [service]="service"></app-service-card>
+                        </div>
+
+                    }
+
+                </div>
+
             }
 
-        </div>
-
-        }
-
         }
         @else {
-        <div class="text-center mt-5">
-            <div class="spinner-border" role="status">
+
+            <div class="services-loading">
+
+                <div class="spinner-border text-light" role="status"></div>
+
                 <p>Caricamento servizi...</p>
+
             </div>
-        </div>
+
         }
 
     </div>
