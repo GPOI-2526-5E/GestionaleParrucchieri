@@ -1,99 +1,261 @@
 .service-card {
-  background: linear-gradient(180deg, #2e2e2e, #383838);
-  border-radius: 14px;
-  border: 1px solid rgba(212, 176, 106, 0.2);
+  background:
+    linear-gradient(180deg, rgba(58, 58, 58, 0.78) 0%, rgba(42, 42, 42, 0.82) 100%);
+  border-radius: 18px;
+  border: 1px solid rgba(212, 176, 106, 0.22);
   overflow: hidden;
   position: relative;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease,
+    background 0.35s ease;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.28),
+    0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .service-card::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at top right, rgba(212, 176, 106, 0.12), transparent 60%);
-  opacity: 0.6;
+  background:
+    radial-gradient(circle at top right, rgba(212, 176, 106, 0.16), transparent 42%),
+    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.04), transparent 30%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.service-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18);
   pointer-events: none;
 }
 
 .service-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(212, 176, 106, 0.35);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  transform: translateY(-8px);
+  border-color: rgba(212, 176, 106, 0.42);
+  box-shadow:
+    0 22px 46px rgba(0, 0, 0, 0.42),
+    0 8px 18px rgba(212, 176, 106, 0.08);
 }
 
 .service-card-body {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 22px;
   height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .service-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.service-title-wrap {
+  flex: 1;
+  min-width: 0;
 }
 
 .service-title {
   margin: 0;
-  font-size: 18px;
+  font-size: 21px;
+  line-height: 1.15;
+  min-width: 0;
 }
 
 .service-link {
-  color: #f0f0f0;
+  display: block;
+  max-width: 100%;
+  color: #f7f4ee;
   text-decoration: none;
-  font-weight: 600;
-  transition: color 0.25s ease;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: color 0.25s ease, text-shadow 0.25s ease;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .service-link:hover {
-  color: #e0c97a;
+  color: #e8c982;
+  text-shadow: 0 0 18px rgba(212, 176, 106, 0.12);
+}
+
+.service-mini-text {
+  margin-top: 7px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.58);
+  letter-spacing: 0.25px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .service-description {
-  color: #cfcfcf;
+  color: #dddddd;
   font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 16px;
+  line-height: 1.7;
+  margin: 0 0 18px 0;
+  flex-grow: 1;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .duration-badge {
-  background: rgba(212, 176, 106, 0.18);
-  color: #d4b06a;
+  background: linear-gradient(
+    180deg,
+    rgba(212, 176, 106, 0.22),
+    rgba(212, 176, 106, 0.12)
+  );
+  color: #f0cf8d;
   font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(212, 176, 106, 0.3);
+  font-weight: 700;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 176, 106, 0.34);
   white-space: nowrap;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.service-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.service-info-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 176, 106, 0.16);
+  color: #dddddd;
+  font-size: 12px;
+  line-height: 1;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .service-footer {
   margin-top: auto;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
+  gap: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.service-price-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.service-price-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: rgba(255, 255, 255, 0.48);
 }
 
 .service-price {
-  font-size: 20px;
-  font-weight: 700;
-  color: #2ecc71;
+  font-size: 26px;
+  font-weight: 800;
+  color: #e3be72;
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(212, 176, 106, 0.08);
 }
 
 .btn-book {
-  background-color: #444;
-  border: 1px solid #d4b06a;
-  padding: 8px 18px;
+  background: linear-gradient(180deg, #5a4a28 0%, #45371e 100%);
+  border: 1px solid rgba(212, 176, 106, 0.62);
+  padding: 11px 18px;
   font-size: 13px;
-  font-weight: 600;
-  border-radius: 10px;
-  color: #d4b06a;
-  transition: all 0.25s ease;
+  font-weight: 700;
+  border-radius: 12px;
+  color: #fff5d8;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease;
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
 }
 
 .btn-book:hover {
-  background-color: #5a5a5a;
-  color: #fff8dc;
+  background: linear-gradient(180deg, #6a5730 0%, #514021 100%);
+  color: #fffbee;
+  border-color: rgba(212, 176, 106, 0.88);
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 24px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(212, 176, 106, 0.08);
+}
+
+.btn-book:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .service-card {
+    border-radius: 16px;
+  }
+
+  .service-card::after {
+    border-radius: 16px;
+  }
+
+  .service-card-body {
+    padding: 18px;
+  }
+
+  .service-title {
+    font-size: 19px;
+  }
+
+  .service-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .service-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .btn-book {
+    width: 100%;
+    justify-content: center;
+  }
 }

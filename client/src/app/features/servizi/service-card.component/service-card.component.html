@@ -1,35 +1,45 @@
 <div class="service-card">
+  <div class="service-card-body">
 
-    <div class="service-card-body">
+    <div class="service-header">
+      <div class="service-title-wrap">
+        <h5 class="service-title">
+          <a [routerLink]="['/service', service.id]" class="service-link">
+            {{ service.nome }}
+          </a>
+        </h5>
 
-        <div class="service-header">
-            <h5 class="service-title">
-                <a [routerLink]="['/service', service.id]" class="service-link">
-                    {{ service.nome }}
-                </a>
-            </h5>
-
-            <span class="duration-badge">
-                {{ service.durata }} min
-            </span>
+        <div class="service-mini-text">
+          Servizio professionale del salone
         </div>
+      </div>
 
-        <p class="service-description">
-            {{ service.descrizione }}
-        </p>
-
-        <div class="service-footer">
-
-            <span class="service-price">
-                {{ service.prezzo | currency:'EUR' }}
-            </span>
-
-            <button class="btn-book" (click)="addToCart()">
-                🛍️ Prenota
-            </button>
-
-        </div>
-
+      <span class="duration-badge">
+        {{ service.durata }} min
+      </span>
     </div>
 
+    <p class="service-description">
+      {{ service.descrizione }}
+    </p>
+
+    <div class="service-info-row">
+      <span class="service-info-pill">Consulenza inclusa</span>
+      <span class="service-info-pill">Risultato personalizzato</span>
+    </div>
+
+    <div class="service-footer">
+      <div class="service-price-box">
+        <span class="service-price-label">Prezzo</span>
+        <span class="service-price">
+          {{ service.prezzo | currency:'EUR' }}
+        </span>
+      </div>
+
+      <button class="btn-book" (click)="addToCart()">
+        Aggiungi + 
+      </button>
+    </div>
+
+  </div>
 </div>

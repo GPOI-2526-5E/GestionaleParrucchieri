@@ -11,6 +11,7 @@
   right: 0;
   height: 100vh;
   width: min(420px, 92vw);
+  max-width: 100%;
   background: rgba(15,15,15,.92);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -24,7 +25,9 @@
   flex-direction: column;
 }
 
-.ai-drawer.open{ transform: translateX(0); }
+.ai-drawer.open{
+  transform: translateX(0);
+}
 
 .ai-header{
   display: flex;
@@ -32,6 +35,7 @@
   align-items: flex-start;
   padding: 18px 16px;
   border-bottom: 1px solid rgba(212,176,106,.18);
+  flex-shrink: 0;
 }
 
 .ai-title{
@@ -44,6 +48,7 @@
   color:#bbb;
   font-size:12px;
   margin-top:4px;
+  line-height: 1.4;
 }
 
 .ai-close{
@@ -53,23 +58,34 @@
   font-size: 18px;
   cursor: pointer;
   opacity: .85;
+  flex-shrink: 0;
 }
-.ai-close:hover{ opacity: 1; color:#d4b06a; }
+
+.ai-close:hover{
+  opacity: 1;
+  color:#d4b06a;
+}
 
 /* BODY */
 .ai-body{
   padding:16px;
   flex:1;
   overflow:auto;
+  min-height: 0;
+  scroll-behavior: smooth;
 }
 
 /* Scrollbar (Chrome/Edge) */
-.ai-body::-webkit-scrollbar{ width: 10px; }
+.ai-body::-webkit-scrollbar{
+  width: 10px;
+}
+
 .ai-body::-webkit-scrollbar-thumb{
   background: rgba(255,255,255,.10);
   border-radius: 999px;
   border: 2px solid rgba(15,15,15,.92);
 }
+
 .ai-body::-webkit-scrollbar-thumb:hover{
   background: rgba(212,176,106,.25);
 }
@@ -80,10 +96,12 @@
   gap:10px;
   padding:12px 16px;
   border-top:1px solid rgba(212,176,106,.18);
+  flex-shrink: 0;
 }
 
 .ai-input{
   flex:1;
+  min-width: 0;
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(212,176,106,.18);
   border-radius: 10px;
@@ -91,7 +109,15 @@
   color:#fff;
   outline:none;
 }
-.ai-input::placeholder{ color: rgba(255,255,255,.45); }
+
+.ai-input::placeholder{
+  color: rgba(255,255,255,.45);
+}
+
+.ai-input:disabled{
+  opacity: .7;
+  cursor: not-allowed;
+}
 
 .ai-send{
   background:#d4b06a;
@@ -101,8 +127,13 @@
   padding:10px 14px;
   font-weight:600;
   cursor:pointer;
+  flex-shrink: 0;
 }
-.ai-send:hover{ background:#e6c27a; }
+
+.ai-send:hover{
+  background:#e6c27a;
+}
+
 .ai-send:disabled{
   opacity: .65;
   cursor: not-allowed;
@@ -114,20 +145,17 @@
   border: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
-
   color: inherit;
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
-
   line-height: 1;
   display: inline-flex;
   align-items: center;
-
   box-shadow: none !important;
 }
 
-/* ===== STATO VUOTO (Inizia a scrivere...) ===== */
+/* ===== STATO VUOTO ===== */
 
 .ai-empty{
   border: 1px dashed rgba(212,176,106,.22);
@@ -168,6 +196,7 @@
   cursor: pointer;
   transition: transform .15s ease, border-color .15s ease, background .15s ease;
 }
+
 .ai-chip:hover{
   border-color: rgba(212,176,106,.7);
   background: rgba(212,176,106,.12);
@@ -184,9 +213,10 @@
   font-size: 14px;
   line-height: 1.4;
   white-space: pre-line;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-/* Messaggio AI (sinistra) */
 .ai-message-bot{
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(212,176,106,.2);
@@ -194,7 +224,6 @@
   border-top-left-radius: 4px;
 }
 
-/* Messaggio utente (destra) */
 .ai-message-user{
   background: #d4b06a;
   color: #111;
@@ -207,4 +236,76 @@
   color:#bbb;
   font-size:12px;
   margin-top: 8px;
+}
+
+/* Mobile */
+@media (max-width: 640px){
+  .ai-drawer{
+    width: 100vw;
+  }
+
+  .ai-message{
+    max-width: 88%;
+  }
+
+  .ai-footer{
+    padding: 12px;
+  }
+}
+
+/* ===== CARD SERVIZI ===== */
+
+.ai-services{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.ai-service-card{
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+  border: 1px solid rgba(212,176,106,.22);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
+
+.ai-service-top{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ai-service-name{
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.ai-service-price{
+  color: #d4b06a;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.ai-service-desc{
+  color: #d5d5d5;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.ai-service-meta{
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(212,176,106,.10);
+  border: 1px solid rgba(212,176,106,.18);
+  color: #f0d8a4;
+  font-size: 12px;
 }

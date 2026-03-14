@@ -2,7 +2,7 @@ import { Component, HostListener, inject, ChangeDetectorRef } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatUiService } from '../../services/chat-ui';
-import { AiChatService, ChatMessage } from '../../services/ai-chat';
+import { AiChatService, ChatMessage, ServiceCard } from '../../services/ai-chat';
 
 @Component({
   selector: 'app-ai-chat-drawer',
@@ -16,11 +16,10 @@ export class AiChatDrawerComponent {
   ai = inject(AiChatService);
   private cdr = inject(ChangeDetectorRef);
 
-  // ✅ Nessun messaggio iniziale
   messages: ChatMessage[] = [];
-
   inputText = '';
   isSending = false;
+  services: ServiceCard[] = [];
 
   @HostListener('window:keydown.escape')
   onEsc() {
@@ -31,45 +30,70 @@ export class AiChatDrawerComponent {
     this.chatUi.close();
   }
 
-  // ✅ Per i bottoni suggeriti (chip)
   quick(text: string) {
+    if (this.isSending) return;
     this.inputText = text;
     this.send();
   }
 
-  // (opzionale) migliora rendering
   trackByIndex(i: number) {
     return i;
   }
 
+  trackByService(_: number, s: ServiceCard) {
+    return s.idServizio;
+  }
+
   async send() {
     const text = this.inputText.trim();
+
     if (!text || this.isSending) return;
 
     this.messages.push({ role: 'user', content: text });
     this.inputText = '';
     this.isSending = true;
+    this.services = [];
+
     this.cdr.detectChanges();
+    this.scrollToBottom();
 
     try {
-      const reply = await this.ai.send(this.messages);
-      this.messages.push({ role: 'assistant', content: reply });
+      const res = await this.ai.send(this.messages);
+
+      let assistantText = res.reply || 'Vuoi parlarmi di taglio, colore, barba o trattamenti?';
+
+      if (Array.isArray(res.services) && res.services.length > 0) {
+        assistantText = 'Ecco alcuni servizi disponibili nel salone:';
+      }
+
+      this.messages.push({
+        role: 'assistant',
+        content: assistantText
+      });
+
+      this.services = Array.isArray(res.services) ? res.services : [];
     } catch (e: any) {
       const msg = String(e?.message || e);
+
       this.messages.push({
         role: 'assistant',
         content: msg.includes('TIMEOUT')
           ? 'Sto impiegando troppo tempo a rispondere. Riprova tra qualche secondo 🙂'
           : 'Errore di connessione. Riprova.'
       });
+
+      this.services = [];
     } finally {
       this.isSending = false;
       this.cdr.detectChanges();
+      this.scrollToBottom();
+}
+  }
 
-      setTimeout(() => {
-        const el = document.querySelector('.ai-body') as HTMLElement | null;
-        if (el) el.scrollTop = el.scrollHeight;
-      }, 0);
-    }
+  private scrollToBottom() {
+    setTimeout(() => {
+      const el = document.querySelector('.ai-body') as HTMLElement | null;
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 0);
   }
 }

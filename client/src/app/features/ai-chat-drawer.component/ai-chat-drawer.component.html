@@ -10,43 +10,93 @@
   </header>
 
   <section class="ai-body">
-    <!-- Stato iniziale (nessun messaggio) -->
+
     <div class="ai-empty" *ngIf="messages.length === 0 && !isSending">
       <div class="ai-empty-title">Inizia a scrivere con l’AI ✨</div>
+
       <div class="ai-empty-subtitle">
         Esempi: “Che taglio mi consigli?” oppure “Vorrei un balayage, come funziona?”
       </div>
 
       <div class="ai-suggestions">
-        <button type="button" class="ai-chip" (click)="quick('Che servizi offrite?')">Servizi</button>
-        <button type="button" class="ai-chip" (click)="quick('Consigliami un taglio adatto ai miei capelli')">Taglio</button>
-        <button type="button" class="ai-chip" (click)="quick('Vorrei un balayage: come si mantiene?')">Balayage</button>
-        <button type="button" class="ai-chip" (click)="quick('Che trattamento consigli per capelli rovinati?')">Trattamenti</button>
+        <button
+          type="button"
+          class="ai-chip"
+          (click)="quick('Che servizi offrite?')">
+          Servizi
+        </button>
+
+        <button
+          type="button"
+          class="ai-chip"
+          (click)="quick('Consigliami un taglio adatto ai miei capelli')">
+          Taglio
+        </button>
+
+        <button
+          type="button"
+          class="ai-chip"
+          (click)="quick('Vorrei un balayage: come si mantiene?')">
+          Balayage
+        </button>
+
+        <button
+          type="button"
+          class="ai-chip"
+          (click)="quick('Che trattamento consigli per capelli rovinati?')">
+          Trattamenti
+        </button>
       </div>
     </div>
 
-    <!-- Messaggi -->
     <div
-      *ngFor="let m of messages"
+      *ngFor="let m of messages; trackBy: trackByIndex"
       class="ai-message"
       [class.ai-message-bot]="m.role === 'assistant'"
       [class.ai-message-user]="m.role === 'user'">
       {{ m.content }}
     </div>
 
-    <!-- Typing -->
-    <div class="ai-typing" *ngIf="isSending">Sto scrivendo…</div>
+    <!-- card servizi -->
+    <div class="ai-services" *ngIf="services.length > 0">
+      <div
+        class="ai-service-card"
+        *ngFor="let s of services; trackBy: trackByService">
+
+        <div class="ai-service-top">
+          <div class="ai-service-name">{{ s.nome }}</div>
+          <div class="ai-service-price" *ngIf="s.prezzo != null">€ {{ s.prezzo }}</div>
+        </div>
+
+        <div class="ai-service-desc" *ngIf="s.descrizione">
+          {{ s.descrizione }}
+        </div>
+
+        <div class="ai-service-meta" *ngIf="s.durata">
+          Durata: {{ s.durata }} min
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-typing" *ngIf="isSending">
+      Sto scrivendo…
+    </div>
+
   </section>
 
   <footer class="ai-footer">
     <input
       class="ai-input"
       [(ngModel)]="inputText"
-      (keydown.enter)="send()"
+      (keydown.enter)="!isSending && send()"
       [disabled]="isSending"
       placeholder="Scrivi un messaggio…" />
 
-    <button class="ai-send" type="button" (click)="send()" [disabled]="isSending">
+    <button
+      class="ai-send"
+      type="button"
+      (click)="send()"
+      [disabled]="isSending">
       Invia
     </button>
   </footer>

@@ -6,43 +6,57 @@
 
     <div class="gestionale-section container">
 
-        <h2 class="services-title">Catalogo Servizi</h2>
+        <div class="services-hero">
+            <p class="services-eyebrow">I Parrucchieri</p>
+            <h2 class="services-title">Catalogo Servizi</h2>
+            <p class="services-subtitle">
+                Scopri i servizi del salone: taglio, colore, trattamenti e soluzioni pensate
+                per valorizzare il tuo stile con un risultato curato e professionale.
+            </p>
+        </div>
 
         @if (servicesMD | async; as services) {
 
-            @if(services.length == 0) {
+        @if(services.length == 0) {
 
-                <div class="services-empty">
-                    Nessun servizio disponibile al momento
-                </div>
-
-            }
-            @else {
-
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 services-grid">
-
-                    @for(service of services; track service.id) {
-
-                        <div class="col">
-                            <app-service-card [service]="service"></app-service-card>
-                        </div>
-
-                    }
-
-                </div>
-
-            }
+        <div class="services-empty">
+            <div class="services-empty-title">Nessun servizio disponibile al momento</div>
+            <div class="services-empty-text">
+                Torna tra poco per visualizzare il catalogo aggiornato del salone.
+            </div>
+        </div>
 
         }
         @else {
 
-            <div class="services-loading">
+        <div class="services-topbar">
+            <div class="services-topbar-line"></div>
 
-                <div class="spinner-border text-light" role="status"></div>
-
-                <p>Caricamento servizi...</p>
-
+            <div class="services-count">
+                <span class="services-count-number">{{ services.length }}</span>
+                <span class="services-count-label">
+                    {{ services.length === 1 ? 'servizio disponibile' : 'servizi disponibili' }}
+                </span>
             </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 services-grid">
+            @for(service of services; track service.id) {
+            <div class="col">
+                <app-service-card [service]="service"></app-service-card>
+            </div>
+            }
+        </div>
+
+        }
+
+        }
+        @else {
+
+        <div class="services-loading">
+            <div class="spinner-border text-light" role="status"></div>
+            <p>Caricamento servizi...</p>
+        </div>
 
         }
 

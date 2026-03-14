@@ -7,21 +7,58 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface ServiceCard {
+  idServizio: number;
+  nome: string;
+  descrizione: string;
+  durata: number;
+  prezzo: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AiChatService {
   constructor(private http: HttpClient) {}
 
-  async send(messages: ChatMessage[]): Promise<string> {
+  async send(messages: ChatMessage[]): Promise<{ reply: string; services: ServiceCard[] }> {
     const request = firstValueFrom(
-      this.http.post<{ reply: string }>('http://localhost:3000/api/chat', { messages })
+      this.http.post<{ reply?: string; services?: ServiceCard[] }>(
+        'http://localhost:3000/api/chat',
+        { messages }
+      )
     );
 
-    // ✅ timeout 30s
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error('TIMEOUT')), 30000)
     );
 
-    const res = await Promise.race([request, timeout]);
-    return res.reply;
+    try {
+      const res = await Promise.race([request, timeout]);
+
+      return {
+        reply: res?.reply || 'Nessuna risposta disponibile',
+        services: Array.isArray(res?.services) ? res.services : []
+      };
+    } catch (error: any) {
+      console.error('AI CHAT SERVICE ERROR:', error);
+
+      if (error?.message === 'TIMEOUT') {
+        return {
+          reply: 'Sto impiegando troppo tempo a rispondere. Riprova tra qualche secondo 🙂',
+          services: []
+        };
+      }
+
+      if (error?.status) {
+        return {
+          reply: `Errore server (${error.status}). Controlla il backend.`,
+          services: []
+        };
+      }
+
+      return {
+        reply: 'Errore di connessione. Controlla che il server sia attivo.',
+        services: []
+      };
+    }
   }
 }
