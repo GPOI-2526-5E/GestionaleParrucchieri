@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
@@ -12,19 +12,29 @@ import { ServiziService, Servizio } from '../../../services/servizio';
   templateUrl: './service-details.component.html',
   styleUrls: ['./service-details.component.css']
 })
-export class ServiceDetailsComponent {
+export class ServiceDetailsComponent implements OnInit {
 
   service: Servizio | undefined;
 
-  constructor(private route: ActivatedRoute, private serviziService: ServiziService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private serviziService: ServiziService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     const serviceId = Number(this.route.snapshot.paramMap.get('id'));
-    if (serviceId) {
-      // Sottoscrizione dell'observable
+
+    if (!isNaN(serviceId)) {
       this.serviziService.getServiceById(serviceId).subscribe({
-        next: s => this.service = s,
-        error: () => this.service = undefined
+        next: s => {
+          this.service = s;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.service = undefined;
+          this.cdr.detectChanges();
+        }
       });
     } else {
       this.service = undefined;

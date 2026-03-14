@@ -1,47 +1,90 @@
 <app-navbar></app-navbar>
 
-<div class="gestionale-section">
-    <div class="container mt-4">
+<div class="service-showcase">
+  <div class="service-showcase-left">
+    <p class="service-kicker">Trattamento esclusivo</p>
+    <h1 class="service-showcase-title">{{ service?.nome }}</h1>
+    <p class="service-showcase-text">{{ service?.descrizione }}</p>
 
-        @if(service){
-        <div class="card shadow-lg p-3">
-            <div class="row g-0">
-                <div class="col-md-12">
-                    <div class="card-body">
-                        <h1 class="card-title">{{ service.nome }}</h1>
-                        <h4 class="card-subtitle mb-2 text-muted">{{ service.descrizione }}</h4>
-                        <p class="card-text"><strong>Durata:</strong> {{ service.durata }} min</p>
-                        <p class="card-text">{{ service.descrizione }}</p>
-                        <hr>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fs-4 fw-bold text-success">{{ service.prezzo | currency:'EUR' }}</span>
-                            <button class="btn btn-lg btn-primary" (click)="addToCart()">
-                                <i class="bi bi-cart-plus-fill me-2"></i>
-                                Aggiungi al Carrello
-                            </button>
-                        </div>
-                        <hr>
-                        <button [routerLink]="['/services']" class="btn btn-secondary mt-3">
-                            <i class="bi bi-arrow-left me-2"></i>
-                            Torna al catalogo
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        }
-        @else {
-        <div class="alert alert-warning text-center" role="alert">
-            <h4 class="alert-heading">Servizio non trovato!</h4>
-            <p>Spiacenti, il servizio che stai cercando non esiste o non è disponibile</p>
-            <hr>
-            <button class="btn btn-info" [routerLink]="['/services']">
-                <i class="bi bi-arrow-left me-2"></i>
-                Torna al catalogo
-            </button>
-        </div>
-        }
+    <div class="service-meta">
+      <span class="service-meta-pill">
+        <i class="bi bi-clock me-2"></i>
+        {{ service?.durata }} min
+      </span>
+      <span class="service-meta-pill">
+        <i class="bi bi-stars me-2"></i>
+        Consulenza inclusa
+      </span>
     </div>
+  </div>
+
+  <div class="service-showcase-center">
+    <div class="service-highlight-card">
+      <p class="highlight-eyebrow">Perché sceglierlo</p>
+
+      <div class="highlight-list">
+        <div class="highlight-item">
+          <i class="bi bi-scissors"></i>
+          <div>
+            <span class="highlight-title">Trattamento professionale</span>
+            <span class="highlight-text">Eseguito con attenzione e tecnica personalizzata.</span>
+          </div>
+        </div>
+
+        <div class="highlight-item">
+          <i class="bi bi-droplet-half"></i>
+          <div>
+            <span class="highlight-title">Prodotti di qualità</span>
+            <span class="highlight-text">Formule professionali per un risultato curato e duraturo.</span>
+          </div>
+        </div>
+
+        <div class="highlight-item">
+          <i class="bi bi-person-check"></i>
+          <div>
+            <span class="highlight-title">Consulenza inclusa</span>
+            <span class="highlight-text">Scelta del trattamento più adatto alle tue esigenze.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="service-quote">
+        <i class="bi bi-stars me-2"></i>
+        Un servizio pensato per valorizzare il tuo stile con un risultato armonioso e curato.
+      </div>
+    </div>
+  </div>
+
+  <div class="service-showcase-right">
+    <div class="service-price-card-top">
+      <span class="service-price-label">Prezzo</span>
+      <div class="service-price">{{ service?.prezzo | currency:'EUR' }}</div>
+      <p class="service-price-note">Servizio disponibile su appuntamento</p>
+    </div>
+
+    <div class="service-price-divider"></div>
+
+    <div class="service-summary">
+      <div class="service-summary-row">
+        <span>Durata</span>
+        <strong>{{ service?.durata }} min</strong>
+      </div>
+      <div class="service-summary-row">
+        <span>Tipologia</span>
+        <strong>Trattamento premium</strong>
+      </div>
+    </div>
+
+    <button class="btn btn-add-cart" (click)="addToCart()">
+      <i class="bi bi-calendar-plus me-2"></i>
+      Aggiungi all'appuntamento
+    </button>
+
+    <button [routerLink]="['/services']" class="btn btn-back">
+      <i class="bi bi-arrow-left me-2"></i>
+      Torna al catalogo
+    </button>
+  </div>
 </div>
 
 <app-ai-chat-drawer></app-ai-chat-drawer>

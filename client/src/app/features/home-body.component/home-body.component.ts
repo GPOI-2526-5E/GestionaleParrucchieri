@@ -77,20 +77,24 @@ export class HomeBodyComponent {
       }
     }
 
-    // Caso: tutti gli orari di oggi sono già passati
     if (!this.statusMessage) {
-      this.isOpen = false;
+    this.isOpen = false;
+
+    if (day === 6) {
+      this.statusMessage = 'Chiuso — riapre martedì';
+    } else {
       this.statusMessage = 'Chiuso — riapre domani';
     }
+  }
 
     this.todayHours = today.intervals
-      .map((i: any) => {
-        const sh = Math.floor(i[0] / 60);
-        const sm = (i[0] % 60).toString().padStart(2, '0');
-        const eh = Math.floor(i[1] / 60);
-        const em = (i[1] % 60).toString().padStart(2, '0');
-        return `${sh}:${sm} – ${eh}:${em}`;
-      })
-      .join(', ');
+  .map((i: any) => {
+    const sh = Math.floor(i[0] / 60);
+    const sm = (i[0] % 60).toString().padStart(2, '0');
+    const eh = Math.floor(i[1] / 60);
+    const em = (i[1] % 60).toString().padStart(2, '0');
+    return `${sh}:${sm} – ${eh}:${em}`;
+  })
+  .join(', ');
   }
 }
