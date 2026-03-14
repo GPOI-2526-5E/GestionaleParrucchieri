@@ -1,0 +1,47 @@
+<app-navbar></app-navbar>
+
+<div class="gestionale-section">
+    <div class="container mt-4">
+
+        @if(service){
+        <div class="card shadow-lg p-3">
+            <div class="row g-0">
+                <div class="col-md-12">
+                    <div class="card-body">
+                        <h1 class="card-title">{{ service.nome }}</h1>
+                        <h4 class="card-subtitle mb-2 text-muted">{{ service.descrizione }}</h4>
+                        <p class="card-text"><strong>Durata:</strong> {{ service.durata }} min</p>
+                        <p class="card-text">{{ service.descrizione }}</p>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="fs-4 fw-bold text-success">{{ service.prezzo | currency:'EUR' }}</span>
+                            <button class="btn btn-lg btn-primary" (click)="addToCart()">
+                                <i class="bi bi-cart-plus-fill me-2"></i>
+                                Aggiungi al Carrello
+                            </button>
+                        </div>
+                        <hr>
+                        <button [routerLink]="['/services']" class="btn btn-secondary mt-3">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Torna al catalogo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+        @else {
+        <div class="alert alert-warning text-center" role="alert">
+            <h4 class="alert-heading">Servizio non trovato!</h4>
+            <p>Spiacenti, il servizio che stai cercando non esiste o non è disponibile</p>
+            <hr>
+            <button class="btn btn-info" [routerLink]="['/services']">
+                <i class="bi bi-arrow-left me-2"></i>
+                Torna al catalogo
+            </button>
+        </div>
+        }
+    </div>
+</div>
+
+<app-ai-chat-drawer></app-ai-chat-drawer>

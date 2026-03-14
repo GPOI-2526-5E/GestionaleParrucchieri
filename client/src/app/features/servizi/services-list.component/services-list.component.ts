@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
 import { AiChatDrawerComponent } from '../../ai-chat-drawer.component/ai-chat-drawer.component';
 import { ServiceCardComponent } from '../service-card.component/service-card.component';
-import { Servizio, ServiziService } from '../../../data/service';
-import { Observable } from 'rxjs/internal/Observable';
+import { Servizio } from '../../../services/servizio';
+import { ServiziService } from '../../../services/servizio';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-services-list',
@@ -17,9 +18,13 @@ export class ServicesListComponent {
 
   servicesMD!: Observable<Servizio[]>;
 
-  constructor(private serviziService: ServiziService) {}
+  constructor(private serviziService: ServiziService) { }
 
   ngOnInit(): void {
     this.servicesMD = this.serviziService.getServizi();
+  }
+
+  trackById(index: number, service: Servizio) {
+    return service.id;
   }
 }
