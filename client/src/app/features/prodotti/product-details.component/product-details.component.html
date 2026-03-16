@@ -1,0 +1,59 @@
+<app-navbar></app-navbar>
+
+<div class="product-showcase">
+    <div class="product-showcase-left">
+        <p class="product-kicker">Prodotto esclusivo</p>
+        <h1 class="product-showcase-title">{{ product?.nome }}</h1>
+        <p class="product-showcase-text">{{ product?.descrizione }}</p>
+
+        <div class="product-meta">
+            <span class="product-meta-pill">
+                <i class="bi bi-tag me-2"></i>
+                Categoria: {{ product?.categoria }}
+            </span>
+            <span class="product-meta-pill">
+                <i class="bi bi-box-seam me-2"></i>
+                Disponibili: {{ product?.qta }}
+            </span>
+        </div>
+    </div>
+
+    <div class="product-showcase-center">
+        <div class="product-image-card">
+            <img [src]="product?.foto" alt="{{ product?.nome }}" />
+        </div>
+    </div>
+
+    <div class="product-showcase-right">
+        <div class="product-price-card-top">
+            <span class="product-price-label">Prezzo</span>
+            <div class="product-price">{{ product?.prezzo | currency:'EUR' }}</div>
+            <p class="product-price-note">Disponibile in stock limitato</p>
+        </div>
+
+        <div class="product-price-divider"></div>
+
+        <div class="product-summary">
+            <div class="product-summary-row">
+                <span>Quantità in magazzino</span>
+                <strong>{{ product?.qta }}</strong>
+            </div>
+            <div class="product-summary-row">
+                <span>Categoria</span>
+                <strong>{{ product?.categoria }}</strong>
+            </div>
+        </div>
+
+        <button class="btn btn-add-cart" (click)="addToCart()">
+            <i class="bi bi-cart-plus me-2"></i>
+            Aggiungi al carrello
+        </button>
+
+        <button [routerLink]="['/products']" class="btn btn-back">
+            <i class="bi bi-arrow-left me-2"></i>
+            Torna al catalogo
+        </button>
+    </div>
+</div>
+
+<app-ai-chat-drawer></app-ai-chat-drawer>

@@ -1,1 +1,54 @@
-<p>product-card.component works!</p>
+<div class="product-card">
+
+    <img class="product-image" [src]="product.foto" [alt]="product.nome">
+
+    <div class="product-card-body">
+
+        <div class="product-header">
+
+            <div class="product-title-wrap">
+
+                <h5 class="product-title">
+                    <a [routerLink]="['/product', product.id]" class="product-link">
+                        {{ product.nome }}
+                    </a>
+                </h5>
+
+            </div>
+
+        </div>
+
+        <p class="product-description">
+            {{ product.descrizione }}
+        </p>
+
+        <div class="product-info-row">
+
+            <span class="product-info-pill">
+                {{ product.qta }} disponibili
+            </span>
+
+            <span class="product-info-pill">
+                {{ product.categoria }}
+            </span>
+
+        </div>
+
+        <div class="product-footer">
+
+            <div class="product-price-box">
+                <span class="product-price-label">Prezzo</span>
+                <span class="product-price">
+                    {{ product.prezzo | currency:'EUR' }}
+                </span>
+            </div>
+
+            <button class="btn-product bi bi-scissors" (click)="addToCart()">
+                Aggiungi
+            </button>
+
+        </div>
+
+    </div>
+
+</div>

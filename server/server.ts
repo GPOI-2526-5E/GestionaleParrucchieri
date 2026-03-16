@@ -59,11 +59,27 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
-//imgCloudinary
+//imgParrucchieri
 app.get("/api/imgParrucchieri", async (req, res) => {
     try {
         const result = await cloudinary.v2.search
             .expression("folder:ImgParrucchieri")
+            .sort_by("created_at", "desc")
+            .max_results(100)
+            .execute();
+
+        const images = result.resources.map((img: any) => img.secure_url);
+        res.json(images);
+    } catch (err) {
+        res.status(500).send("Errore nel recupero delle immagini da Cloudinary");
+    }
+});
+
+//imgProdotti
+app.get("/api/imgProdotti", async (req, res) => {
+    try {
+        const result = await cloudinary.v2.search
+            .expression("folder:ImgParrucchieri/prodotti")
             .sort_by("created_at", "desc")
             .max_results(100)
             .execute();
@@ -859,6 +875,17 @@ app.get("/api/utenti", async (req, res) => {
 //SERVIZI
 app.get("/api/servizi", async (req, res) => {
     db.query("SELECT * FROM servizi", (err, result) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.json(result);
+        }
+    });
+});
+
+//PRODOTTI
+app.get("/api/prodotti", async (req, res) => {
+    db.query("SELECT * FROM prodotti", (err, result) => {
         if (err) {
             res.status(500).send(err);
         } else {

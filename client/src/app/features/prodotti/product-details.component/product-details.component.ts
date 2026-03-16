@@ -3,48 +3,48 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
 import { AiChatDrawerComponent } from '../../ai-chat-drawer.component/ai-chat-drawer.component';
-import { ServiziService, Servizio } from '../../../services/servizio';
+import { ProdottoService, Prodotto } from '../../../services/prodotto';
 
 @Component({
-  selector: 'app-service-details',
+  selector: 'app-product-details',
   standalone: true,
   imports: [CommonModule, NavbarComponent, AiChatDrawerComponent, RouterLink],
-  templateUrl: './service-details.component.html',
-  styleUrls: ['./service-details.component.css']
+  templateUrl: './product-details.component.html',
+  styleUrls: ['./product-details.component.css']
 })
-export class ServiceDetailsComponent {
+export class ProductDetailsComponent {
 
-  service: Servizio | undefined;
+  product: Prodotto | undefined;
 
   constructor(
     private route: ActivatedRoute,
-    private serviziService: ServiziService,
+    private prodottoService: ProdottoService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    const serviceId = Number(this.route.snapshot.paramMap.get('id'));
+    const productId = Number(this.route.snapshot.paramMap.get('id'));
 
-    if (!isNaN(serviceId)) {
-      this.serviziService.getServiceById(serviceId).subscribe({
-        next: s => {
-          this.service = s;
+    if (!isNaN(productId)) {
+      this.prodottoService.getProdottoById(productId).subscribe({
+        next: p => {
+          this.product = p;
           this.cdr.detectChanges();
         },
         error: () => {
-          this.service = undefined;
+          this.product = undefined;
           this.cdr.detectChanges();
         }
       });
     } else {
-      this.service = undefined;
+      this.product = undefined;
     }
   }
 
   addToCart(): void {
-    if (this.service) {
-      this.serviziService.addServiceToCart(this.service);
-      alert(`${this.service.nome} è stato aggiunto al carrello`);
+    if (this.product) {
+      this.prodottoService.addProductToCart(this.product);
+      alert(`${this.product.nome} è stato aggiunto al carrello`);
     }
   }
 }

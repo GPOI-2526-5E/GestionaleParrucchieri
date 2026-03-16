@@ -1,0 +1,147 @@
+.product-card {
+  background: linear-gradient(180deg, rgba(58,58,58,0.78), rgba(42,42,42,0.82));
+  border-radius: 18px;
+  border: 1px solid rgba(212,176,106,0.22);
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.28),
+    0 2px 8px rgba(0,0,0,0.18);
+}
+
+/* IMMAGINE PRODOTTO */
+
+.product-image {
+  width: 100%;
+  height: 220px;
+
+  object-fit: contain;      /* mantiene proporzioni corrette */
+  object-position: center;  /* centra sempre l'immagine */
+
+  background: #1b1b1b;
+  padding: 16px;
+
+  border-bottom: 1px solid rgba(212,176,106,0.18);
+}
+
+/* BODY */
+
+.product-card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  flex-grow: 1;
+}
+
+/* HEADER */
+
+.product-header {
+  margin-bottom: 12px;
+}
+
+.product-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.product-link {
+  color: #f7f4ee;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color .25s;
+}
+
+.product-link:hover {
+  color: #e8c982;
+}
+
+/* DESCRIZIONE */
+
+.product-description {
+  color: #dddddd;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+/* INFO PILLS */
+
+.product-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.product-info-pill {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(212,176,106,0.16);
+  color: #dddddd;
+  font-size: 12px;
+}
+
+/* FOOTER */
+
+.product-footer {
+  margin-top: auto;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  gap: 16px;
+}
+
+/* PREZZO */
+
+.product-price-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-price-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.48);
+
+  white-space: nowrap; /* evita andare a capo */
+}
+
+.product-price {
+  font-size: 26px;
+  font-weight: 800;
+  color: #e3be72;
+  line-height: 1;
+}
+
+/* BOTTONE */
+
+.btn-product {
+  background: linear-gradient(180deg,#5a4a28,#45371e);
+  border: 1px solid rgba(212,176,106,0.62);
+
+  padding: 11px 18px;
+  font-size: 13px;
+  font-weight: 700;
+
+  border-radius: 12px;
+  color: #fff5d8;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  transition: transform .2s, box-shadow .2s;
+}
+
+.btn-product:hover {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}

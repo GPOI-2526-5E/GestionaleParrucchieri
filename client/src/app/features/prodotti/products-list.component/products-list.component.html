@@ -1,68 +1,68 @@
 <app-navbar></app-navbar>
 
-<div class="gestionale-section">
-    <p>prod list</p>
-</div>
+<div class="products-page">
 
-<!-- <div class="container mt-4">
-    <h2 class="mb-4 text-center">Catalogo Prodotti</h2>
+  <div class="products-overlay"></div>
 
-    @if(products.length == 0)
-    {
-    <div class="alert alert-info text-center">
-        Nessun prodotto disponibile al momento
+  <div class="products-section container">
+
+    <div class="products-hero">
+      <p class="products-eyebrow">I Parrucchieri</p>
+      <h2 class="products-title">Catalogo Prodotti</h2>
+
+      <p class="products-subtitle">
+        Scopri i prodotti professionali utilizzati nel salone per la cura,
+        lo styling e la salute dei tuoi capelli.
+      </p>
     </div>
-    }
-    @else
-    {
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @for(product of products; track product.id)
-        {
+
+    @if (productsMD | async; as products) {
+
+      @if(products.length == 0) {
+
+      <div class="products-empty">
+        <div class="products-empty-title">Nessun prodotto disponibile</div>
+        <div class="products-empty-text">
+          Torna tra poco per visualizzare il catalogo aggiornato.
+        </div>
+      </div>
+
+      }
+      @else {
+
+      <div class="products-topbar">
+        <div class="products-topbar-line"></div>
+
+        <div class="products-count">
+          <span class="products-count-number">{{ products.length }}</span>
+          <span class="products-count-label">
+            {{ products.length == 1 ? 'Prodotto disponibile' : 'Prodotti disponibili' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 products-grid">
+        @for(product of products; track product.id) {
         <div class="col">
-            
-            <app-product-card></app-product-card>
+          <app-product-card [product]="product"></app-product-card>
         </div>
         }
-    </div>
-    }
-</div>
+      </div>
 
-<br>
-<br>
+      }
 
-<app-navbar></app-navbar>
-
-<div class="container mt-4">
-    <h2 class="mb-4 text-center">Catalogo Libri</h2>
-
-    @if (booksMD | async; as books) {
-        @if(books.length == 0)
-        {
-        <div class="alert alert-info text-center">
-            Nessun libro disponibile al momento
-        </div>
-        }
-        @else
-        {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            @for(book of books; track book.id)
-            {
-            <div class="col">
- 
-                <app-book-card [book]="book" (addBookToCart)="onAddToCart($event)">
-                </app-book-card>
-            </div>
-            }
-        </div>
-        }
     }
     @else {
-        <div class="text-center mt-5">
-            <div class="spinner-border" role="status">
-                <p>Caricamento prodotti...</p>
-            </div>
-        </div>
+
+    <div class="products-loading">
+      <div class="spinner-border text-light"></div>
+      <p>Caricamento prodotti...</p>
+    </div>
+
     }
-</div> -->
+
+  </div>
+
+</div>
 
 <app-ai-chat-drawer></app-ai-chat-drawer>

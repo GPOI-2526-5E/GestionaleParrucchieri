@@ -24,4 +24,11 @@ export class NavbarComponent {
   openAi() {
     this.chatUi.open('navbar');
   }
+
+  scrollToFragment(fragment: string) {
+    const el = document.getElementById(fragment);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 }

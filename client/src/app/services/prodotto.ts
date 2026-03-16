@@ -38,7 +38,7 @@ export class ProdottoService {
     );
   }
 
-  getProductById(id: number): Observable<Prodotto | undefined> {
+  getProdottoById(id: number): Observable<Prodotto | undefined> {
     return this.getProdotti().pipe(
       map(prodotti => prodotti.find(p => p.id == id))
     );
