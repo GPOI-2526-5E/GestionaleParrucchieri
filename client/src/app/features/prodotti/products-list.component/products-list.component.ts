@@ -16,8 +16,8 @@ import { Observable } from 'rxjs';
     FormsModule,
     NavbarComponent,
     AiChatDrawerComponent,
-    ProductCardComponent
-  ],
+    ProductCardComponent,
+],
   templateUrl: './products-list.component.html',
   styleUrls: ['./products-list.component.css']
 })

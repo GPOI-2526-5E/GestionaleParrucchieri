@@ -1,0 +1,81 @@
+<footer class="home-footer">
+    <div class="footer-columns">
+        <div id="chi-siamo">
+            <h4>Chi siamo</h4>
+            <p>
+                I Parrucchieri Fossano è un salone artigianale nel cuore della città, dove esperienza e passione si
+                traducono in cura del dettaglio e attenzione alla persona. Offriamo consulenze personalizzate, tagli
+                su
+                misura e colorazioni moderne, utilizzando tecniche aggiornate e prodotti professionali per garantire
+                capelli
+                sani, luminosi e sempre valorizzati.
+            </p>
+
+            <a href="https://www.google.com/maps/place/I+Parrucchieri+Fossano/@44.5475516,7.7250225,21z/data=!4m16!1m9!4m8!1m0!1m6!1m2!1s0x12cd59090baa1e53:0x2e9b29de9daa4050!2sI+Parrucchieri+Fossano,+Piazza+Vittorio+Veneto,+12045+Fossano+CN!2m2!1d7.7252961!2d44.5475514!3m5!1s0x12cd59090baa1e53:0x2e9b29de9daa4050!8m2!3d44.5475707!4d7.725291!16s%2Fg%2F12jskjjxq?entry=ttu&g_ep=EgoyMDI2MDMxMC4wIKXMDSoASAFQAw%3D%3D"
+                target="_blank" class="btn luxury-btn mt-3">
+                Dove siamo
+            </a>
+        </div>
+
+        <div class="footer-card footer-contacts">
+            <h4>Contatti</h4>
+
+            <ul class="footer-list">
+                <li>
+                    <span class="label">Telefono</span>
+                    <a href="tel:+393478085277" class="value footer-tel">+39 347 808 5277</a>
+                </li>
+                <li>
+                    <span class="label">Indirizzo</span>
+                    <span class="value">Piazza Vittorio Veneto, 12045 Fossano (CN)</span>
+                </li>
+            </ul>
+
+            <div class="footer-actions">
+                <a href="tel:+393478085277" class="footer-link">Chiama ora</a>
+                <a href="https://wa.me/393478085277" target="_blank" class="footer-link">WhatsApp</a>
+            </div>
+        </div>
+
+        <div class="footer-card opening-hours" [class.hours-open]="hoursOpen">
+            <h4>
+                Orari
+                <span class="status" [class.open]="isOpen" [class.closed]="!isOpen">
+                    {{ statusMessage }}
+                </span>
+            </h4>
+
+            <p class="today-hours">
+                <strong>{{ todayName }}:</strong> {{ todayHours }}
+            </p>
+
+            <p class="footer-note">
+                Prenotazione consigliata, soprattutto venerdì e sabato.
+            </p>
+
+            <div class="hours-accordion">
+                <button type="button" class="hours-trigger" (click)="hoursOpen = !hoursOpen"
+                    [attr.aria-expanded]="hoursOpen">
+                    <span>Vedi tutti gli orari</span>
+                    <span class="chev" aria-hidden="true">▾</span>
+                </button>
+
+                <div class="hours-panel" [class.open]="hoursOpen">
+                    <ul class="hours-list">
+                        <li><span>Lunedì</span><span>Chiuso</span></li>
+                        <li><span>Martedì</span><span>08:00–12:30 • 14:00–19:30</span></li>
+                        <li><span>Mercoledì</span><span>13:00–21:30</span></li>
+                        <li><span>Giovedì</span><span>08:00–12:30 • 14:00–19:30</span></li>
+                        <li><span>Venerdì</span><span>07:00–19:30</span></li>
+                        <li><span>Sabato</span><span>07:00–18:00</span></li>
+                        <li><span>Domenica</span><span>Chiuso</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <a [routerLink]="['/appuntamenti']" routerLinkActive="active"
+                class="footer-link footer-primary-action">Prenota ora</a>
+        </div>
+
+    </div>
+</footer>

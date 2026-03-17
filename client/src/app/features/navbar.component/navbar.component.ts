@@ -1,8 +1,7 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { ChatUiService } from '../../services/chat-ui';
-import { RouterLink } from "@angular/router";
-import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -15,6 +14,7 @@ export class NavbarComponent {
   isScrolled = false;
 
   private chatUi = inject(ChatUiService);
+  private router = inject(Router);
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
@@ -26,9 +26,22 @@ export class NavbarComponent {
   }
 
   scrollToFragment(fragment: string) {
-    const el = document.getElementById(fragment);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const isHome = this.router.url === '/' || this.router.url.startsWith('/#');
+
+    if (isHome) {
+      const el = document.getElementById(fragment);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      this.router.navigate(['/'], { fragment }).then(() => {
+        setTimeout(() => {
+          const el = document.getElementById(fragment);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
+      });
     }
   }
 }

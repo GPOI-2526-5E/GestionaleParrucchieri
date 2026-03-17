@@ -1,0 +1,333 @@
+/* ===== FOOTER ===== */
+.home-footer{
+  border-top: none;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 18px 0;
+}
+
+.footer-columns{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+@media (max-width: 900px){
+  .footer-columns{ grid-template-columns: 1fr; gap: 16px; }
+}
+
+.footer-columns > div{
+  padding: 14px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(212,176,106,.06);
+  background: rgba(255,255,255,.02);
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  gap: 12px;
+  min-height: 255px;
+}
+
+/* quando aperta: si allunga solo ORARI */
+.opening-hours.hours-open{
+  min-height: 370px;
+}
+
+.footer-columns h4{
+  color:#fff;
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  letter-spacing: .2px;
+}
+.footer-columns p{
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color:#c9c9c9;
+}
+
+.home-footer a{
+  text-decoration: none;
+  font-weight: 600;
+}
+.home-footer a:hover{ text-decoration: underline; }
+
+.footer-tel{
+  color:#d4b06a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ===== CONTATTI ===== */
+.footer-list{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+}
+.footer-list li{
+  display:flex;
+  flex-direction:column;
+  gap: 4px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.06);
+}
+.footer-list .label{ font-size: 12px; color: #b9b9b9; }
+.footer-list .value{ font-size: 14px; color: #e3e3e3; line-height: 1.4; }
+
+.footer-actions{
+  display:flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+/* link pill footer (non tocca .luxury-btn) */
+.footer-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration:none;
+  color:#d4b06a;
+  border:1px solid rgba(212,176,106,.18);
+  background: rgba(212,176,106,.06);
+}
+.footer-link:hover{
+  text-decoration:none;
+  border-color: rgba(212,176,106,.30);
+  background: rgba(212,176,106,.10);
+}
+
+.footer-primary-action{
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* ===== ORARI ===== */
+.opening-hours .status{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+}
+.opening-hours .status.open{
+  color:#2ecc71;
+  border-color: rgba(46,204,113,.25);
+  background: rgba(46,204,113,.08);
+}
+.opening-hours .status.closed{
+  color:#e74c3c;
+  border-color: rgba(231,76,60,.25);
+  background: rgba(231,76,60,.08);
+}
+
+.today-hours{
+  margin: 8px 0 6px 0;
+  font-size: 14px;
+  color:#d6d6d6;
+}
+.footer-note{
+  font-size: 13px;
+  color: #bfbfbf;
+  margin: 0;
+}
+
+.hours-summary::-webkit-details-marker{ display:none; }
+
+/* PANNELLO ANIMATO */
+.hours-panel{
+  display:grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .45s cubic-bezier(.4,0,.2,1);
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.hours-panel > *{ overflow: hidden; }
+
+.opening-hours.hours-open .hours-panel{
+  grid-template-rows: 1fr;
+}
+
+/* lista */
+.hours-list{
+  list-style:none;
+  margin: 0;
+  padding: 10px 12px 12px 12px;
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+}
+
+.hours-list li{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  font-size: 13px;
+  color:#c9c9c9;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255,255,255,.10);
+}
+.hours-list li:first-child{
+  border-top: 0;
+  padding-top: 0;
+}
+.hours-list li span:first-child{
+  color:#e6e6e6;
+  min-width: 86px;
+}
+
+/* freccia */
+.chev{
+  transition: transform .25s ease;
+  opacity: .9;
+}
+.opening-hours.hours-open .chev{
+  transform: rotate(180deg);
+}
+
+/* mobile */
+@media (max-width: 420px){
+  .hours-list li{
+    flex-direction:column;
+    gap: 2px;
+  }
+  .hours-list li span:first-child{
+    min-width: auto;
+  }
+}
+
+/* BUTTONS (rimangono come li avevi) */
+.luxury-btn{
+  background:#d4b06a;
+  color:#111;
+  padding:10px 18px;
+  border-radius:8px;
+  border:0;
+  font-weight:600;
+}
+.luxury-btn-outline{
+  background:transparent;
+  border:1px solid rgba(212,176,106,.22);
+  color:#d4b06a;
+  padding:9px 16px;
+  border-radius:8px;
+}
+
+/* piccoli aggiustamenti responsive */
+@media (max-width:420px){
+  .hero-title{ font-size:28px; }
+  .hero-lead{ font-size:14px; }
+  .hero-image{ max-width:100%; height:220px; }
+}
+
+/* ===== ORARI: accordion custom (100% stabile) ===== */
+
+.hours-accordion{
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.02);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* “summary” custom */
+.hours-trigger{
+  width: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* freccia */
+.hours-trigger .chev{
+  transition: transform .25s ease;
+  opacity: .9;
+}
+
+/* ===== PANNELLO ORARI ===== */
+
+.hours-panel{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .45s cubic-bezier(.4,0,.2,1);
+  border-top: 0;
+}
+
+.hours-panel > *{
+  overflow: hidden;
+}
+
+/* Quando aperto */
+.hours-panel.open{
+  grid-template-rows: 1fr;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+/* ruota la freccia quando open */
+.hours-accordion:has(.hours-panel.open) .chev{
+  transform: rotate(180deg);
+}
+
+/* se :has non è supportato, fallback semplice */
+.opening-hours.hours-open .hours-trigger .chev{
+  transform: rotate(180deg);
+}
+
+/* ===== LISTA ===== */
+
+.hours-list{
+  list-style: none;
+  margin: 0;
+  padding: 0; /* chiuso = zero padding */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* padding SOLO quando aperto */
+.hours-panel.open .hours-list{
+  padding: 10px 12px 12px 12px;
+}
+
+.hours-list li{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  font-size: 13px;
+  color:#c9c9c9;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255,255,255,.10);
+}
+.hours-list li:first-child{
+  border-top: 0;
+  padding-top: 0;
+}
+.hours-list li span:first-child{
+  color:#e6e6e6;
+  min-width: 86px;
+}
+
+@media (max-width: 420px){
+  .hours-list li{ flex-direction:column; gap:2px; }
+  .hours-list li span:first-child{ min-width:auto; }
+}
