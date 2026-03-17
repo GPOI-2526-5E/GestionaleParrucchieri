@@ -45,15 +45,28 @@
         </div>
 
         <div class="products-filter">
-          <select [(ngModel)]="selectedCategory">
+          <div class="products-filter custom-dropdown" [class.open]="isCategoryOpen">
+            <button type="button" class="dropdown-trigger" (click)="isCategoryOpen = !isCategoryOpen">
+              <span>
+                {{ selectedCategory === 'all' ? 'Tutti' : selectedCategory }}
+              </span>
+              <span class="chev"></span>
+            </button>
 
-            <option value="all">Tutti</option>
+            <div class="dropdown-panel" [class.open]="isCategoryOpen">
+              <ul class="dropdown-list">
+                <li (click)="selectCategory('all')" [class.active]="selectedCategory === 'all'">
+                  Tutti
+                </li>
 
-            @for(category of categories; track category) {
-            <option [value]="category">{{ category }}</option>
-            }
-
-          </select>
+                @for(category of categories; track category) {
+                <li (click)="selectCategory(category)" [class.active]="selectedCategory === category">
+                  {{ category }}
+                </li>
+                }
+              </ul>
+            </div>
+          </div>
         </div>
 
       </div>
