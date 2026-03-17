@@ -54,17 +54,19 @@
             </button>
 
             <div class="dropdown-panel" [class.open]="isCategoryOpen">
-              <ul class="dropdown-list">
-                <li (click)="selectCategory('all')" [class.active]="selectedCategory === 'all'">
-                  Tutti
-                </li>
+              <div class="dropdown-panel-inner">
+                <ul class="dropdown-list">
+                  <li (click)="selectCategory('all')" [class.active]="selectedCategory === 'all'">
+                    Tutti
+                  </li>
 
-                @for(category of categories; track category) {
-                <li (click)="selectCategory(category)" [class.active]="selectedCategory === category">
-                  {{ category }}
-                </li>
-                }
-              </ul>
+                  @for(category of categories; track category) {
+                  <li (click)="selectCategory(category)" [class.active]="selectedCategory === category">
+                    {{ category }}
+                  </li>
+                  }
+                </ul>
+              </div>
             </div>
           </div>
         </div>
