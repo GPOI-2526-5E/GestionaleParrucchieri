@@ -4,7 +4,7 @@
 
     <a class="navbar-brand" [routerLink]="['/home']">
       <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1773159172/LogoSfondoScuro_as3vry.png"
-           alt="LogoScuro">
+        alt="LogoScuro">
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
@@ -16,23 +16,28 @@
       <ul class="navbar-nav mx-auto">
 
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/home']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">HOME</a>
+          <a class="nav-link" [routerLink]="['/home']" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">HOME</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/products']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">PRODOTTI</a>
+          <a class="nav-link" [routerLink]="['/products']" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">PRODOTTI</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/services']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">SERVIZI</a>
+          <a class="nav-link" [routerLink]="['/services']" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">SERVIZI</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/appointments']" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">APPUNTAMENTI</a>
+          <a class="nav-link" [routerLink]="['/appointments']" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">APPUNTAMENTI</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/home']" fragment="chi-siamo" (click)="scrollToFragment('chi-siamo')">CHI SIAMO</a>
+          <a class="nav-link" [routerLink]="['/home']" fragment="chi-siamo" (click)="scrollToFragment('chi-siamo')">CHI
+            SIAMO</a>
         </li>
 
         <li class="nav-item">
@@ -42,7 +47,8 @@
       </ul>
 
       <div class="d-flex align-items-center">
-        <a [routerLink]="['/cart']" class="icon-btn">
+        <a [routerLink]="['/cart']" class="icon-btn" routerLinkActive="active-icon"
+          [routerLinkActiveOptions]="{ exact: true }">
           <i class="bi bi-bag"></i>
         </a>
 
