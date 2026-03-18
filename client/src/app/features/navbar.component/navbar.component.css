@@ -107,6 +107,10 @@ body {
   color: white;
 }
 
+.icon-btn.active-icon i {
+  color: #d4b06a;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .navbar-nav .nav-link {

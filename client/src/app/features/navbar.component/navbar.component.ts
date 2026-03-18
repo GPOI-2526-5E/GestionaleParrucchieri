@@ -26,7 +26,7 @@ export class NavbarComponent {
   }
 
   scrollToFragment(fragment: string) {
-    const isHome = this.router.url === '/' || this.router.url.startsWith('/#');
+    const isHome = this.router.url == '/' || this.router.url.startsWith('/#');
 
     if (isHome) {
       const el = document.getElementById(fragment);
