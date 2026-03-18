@@ -1,90 +1,270 @@
+<app-navbar></app-navbar>
+
 <div class="cart-page">
-
-    <app-navbar></app-navbar>
-
-    <div class="cart-section container">
-
-        <div class="cart-hero">
-            <p class="cart-eyebrow">I Parrucchieri</p>
-            <h2 class="cart-title">Il tuo carrello</h2>
-        </div>
-
-        @if (cartItems().length > 0){
-
-        <div class="cart-list">
-
-            @for(item of cartItems(); track item.id){
-
-            <div class="cart-item">
-
-                <div class="cart-item-left">
-                    <img [src]="item.foto" class="cart-item-img">
-
-                    <div class="cart-item-info">
-                        <h5 class="cart-item-title">
-                            <a [routerLink]="['/product', item.id]" class="product-link">
-                                {{ item.nome }}
-                            </a>
-                        </h5>
-
-                        <div class="cart-item-meta">
-                            <span class="cart-item-desc">{{ item.descrizione }}</span>
-                            <span class="cart-item-category">{{ item.categoria }}</span>
-                        </div>
-
-                        <div class="cart-item-unit-price">
-                            {{ item.prezzo | currency:'EUR' }}
-                        </div>
-                    </div>
+    <section class="cart-section">
+        <div class="container">
+            <div *ngIf="cartItems().length > 0; else emptyCart">
+                <div class="cart-hero">
+                    <p class="cart-eyebrow">I PARRUCCHIERI</p>
+                    <h1 class="cart-title">Carrello</h1>
+                    <p class="cart-subtitle">
+                        Controlla i prodotti selezionati, scegli il metodo di consegna più adatto
+                        e completa il tuo acquisto in pochi passaggi.
+                    </p>
                 </div>
 
-                <div class="cart-item-right">
+                <div class="cart-layout">
+                    <div class="cart-main">
+                        <div class="cart-block-title">
+                            <span class="cart-block-title-dot"></span>
+                            Prodotti selezionati
+                        </div>
 
-                    <div class="cart-quantity">
-                        <button (click)="decrease(item.id!)">−</button>
-                        <span>{{ item.quantita || 1 }}</span>
-                        <button (click)="increase(item.id!)">+</button>
+                        <div class="cart-list">
+                            <div class="cart-item" *ngFor="let item of cartItems()">
+                                <div class="cart-item-left">
+                                    <div class="cart-item-image-wrap">
+                                        <img class="cart-item-img" [src]="item.foto" [alt]="item.nome" />
+                                    </div>
+
+                                    <div class="cart-item-info">
+                                        <h3 class="cart-item-title">
+                                            <a [routerLink]="['/product', item.id]">{{ item.nome }}</a>
+                                        </h3>
+
+                                        <div class="cart-item-meta">
+                                            <span class="cart-item-category" *ngIf="item.categoria">
+                                                {{ item.categoria }}
+                                            </span>
+                                            <span class="cart-item-unit-price">
+                                                Prezzo unitario: € {{ item.prezzo.toFixed(2) }}
+                                            </span>
+                                        </div>
+
+                                        <div class="cart-item-desc" *ngIf="item.descrizione">
+                                            {{ item.descrizione }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cart-item-right">
+                                    <div class="cart-quantity">
+                                        <button type="button" (click)="decrease(item.id)">−</button>
+                                        <span>{{ item.quantita || 1 }}</span>
+                                        <button type="button" (click)="increase(item.id)">+</button>
+                                    </div>
+
+                                    <div class="cart-price">
+                                        € {{ (item.prezzo * (item.quantita || 1)).toFixed(2) }}
+                                    </div>
+
+                                    <button
+                                        class="cart-remove"
+                                        type="button"
+                                        (click)="removeFromCart(item.id)"
+                                        aria-label="Rimuovi prodotto"
+                                        title="Rimuovi prodotto">
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <span class="cart-price">
-                        {{ (item.prezzo * (item.quantita || 1)) | currency:'EUR' }}
-                    </span>
+                    <aside class="cart-summary-card">
+                        <div class="cart-summary-header">
+                            <p class="cart-summary-eyebrow">Riepilogo</p>
+                            <h2 class="cart-summary-title">Il tuo ordine</h2>
+                        </div>
 
-                    <button class="cart-remove" (click)="removeFromCart(item.id!)">
-                        ✕
-                    </button>
+                        <div class="cart-summary-lines compact">
+                            <div class="cart-summary-line">
+                                <span>Prodotti diversi</span>
+                                <strong>{{ differentProductsCount() }}</strong>
+                            </div>
 
+                            <div class="cart-summary-line">
+                                <span>Quantità totale</span>
+                                <strong>{{ totalQuantity() }}</strong>
+                            </div>
+
+                            <div class="cart-summary-line">
+                                <span>Subtotale</span>
+                                <strong>€ {{ cartSubtotal().toFixed(2) }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="cart-delivery-box">
+                            <div class="cart-delivery-head">
+                                <h3 class="cart-delivery-title">Metodo di consegna</h3>
+                                <span class="cart-delivery-badge">Seleziona</span>
+                            </div>
+
+                            <div class="cart-delivery-grid">
+                                <button
+                                    type="button"
+                                    class="cart-delivery-card"
+                                    [class.active]="selectedDeliveryMethod() === 'home-standard'"
+                                    (click)="setDeliveryMethod('home-standard')">
+                                    <div class="cart-delivery-card-icon">
+                                        <i class="bi bi-house"></i>
+                                    </div>
+                                    <div class="cart-delivery-card-content">
+                                        <span class="cart-delivery-card-title">Standard a domicilio</span>
+                                        <span class="cart-delivery-card-text">
+                                            Consegna comoda al tuo indirizzo.
+                                        </span>
+                                    </div>
+                                    <div class="cart-delivery-card-price">
+                                        {{ getDeliveryLabel('home-standard') }}
+                                    </div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="cart-delivery-card"
+                                    [class.active]="selectedDeliveryMethod() === 'home-express'"
+                                    (click)="setDeliveryMethod('home-express')">
+                                    <div class="cart-delivery-card-icon">
+                                        <i class="bi bi-lightning-charge"></i>
+                                    </div>
+                                    <div class="cart-delivery-card-content">
+                                        <span class="cart-delivery-card-title">Express a domicilio</span>
+                                        <span class="cart-delivery-card-text">
+                                            Più veloce, per ricevere tutto prima.
+                                        </span>
+                                    </div>
+                                    <div class="cart-delivery-card-price">
+                                        {{ getDeliveryLabel('home-express') }}
+                                    </div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="cart-delivery-card"
+                                    [class.active]="selectedDeliveryMethod() === 'store-pickup'"
+                                    (click)="setDeliveryMethod('store-pickup')">
+                                    <div class="cart-delivery-card-icon">
+                                        <i class="bi bi-shop"></i>
+                                    </div>
+                                    <div class="cart-delivery-card-content">
+                                        <span class="cart-delivery-card-title">Ritiro in negozio</span>
+                                        <span class="cart-delivery-card-text">
+                                            Ritira gratuitamente presso il punto vendita.
+                                        </span>
+                                    </div>
+                                    <div class="cart-delivery-card-price">
+                                        {{ getDeliveryLabel('store-pickup') }}
+                                    </div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="cart-delivery-card"
+                                    [class.active]="selectedDeliveryMethod() === 'locker'"
+                                    (click)="setDeliveryMethod('locker')">
+                                    <div class="cart-delivery-card-icon">
+                                        <i class="bi bi-box-seam"></i>
+                                    </div>
+                                    <div class="cart-delivery-card-content">
+                                        <span class="cart-delivery-card-title">Consegna in locker</span>
+                                        <span class="cart-delivery-card-text">
+                                            Scegli un locker vicino a te e ritira quando vuoi.
+                                        </span>
+                                    </div>
+                                    <div class="cart-delivery-card-price">
+                                        {{ getDeliveryLabel('locker') }}
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div class="cart-locker-box" *ngIf="selectedDeliveryMethod() === 'locker'">
+                                <div class="cart-locker-top">
+                                    <div>
+                                        <label class="cart-locker-label">Seleziona un locker</label>
+                                        <p class="cart-locker-subtext">
+                                            Puoi usare la tua posizione oppure scegliere manualmente
+                                            dalla mappa qui sotto.
+                                        </p>
+                                    </div>
+
+                                    <button type="button" class="cart-locate-btn" (click)="locateUser()">
+                                        <i class="bi bi-geo-alt"></i>
+                                        Trova i più vicini
+                                    </button>
+                                </div>
+
+                                <div *ngIf="lockersLoading()" class="cart-nearby-note">
+                                    Caricamento locker in corso...
+                                </div>
+
+                                <div *ngIf="lockersError()" class="cart-nearby-note">
+                                    {{ lockersError() }}
+                                </div>
+
+                                <div #lockerMap class="cart-locker-map"></div>
+
+                                <div class="cart-nearby-note" *ngIf="userPosition()">
+                                    Ti stiamo mostrando i locker ordinati anche in base alla tua posizione.
+                                </div>
+
+                                <div class="cart-locker-selected" *ngIf="selectedLocker() as locker">
+                                    <strong>Locker selezionato:</strong><br />
+                                    {{ locker.name }}<br />
+                                    {{ locker.address }}<br />
+                                    {{ locker.postalCode }} {{ locker.city }}
+                                    <span *ngIf="locker.province">({{ locker.province }})</span><br />
+                                    <span *ngIf="locker.note">{{ locker.note }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cart-summary-lines summary-bottom">
+                            <div class="cart-summary-line">
+                                <span>Spedizione</span>
+                                <strong>€ {{ deliveryPrice().toFixed(2) }}</strong>
+                            </div>
+
+                            <div class="cart-summary-line total">
+                                <span>Totale</span>
+                                <strong>€ {{ finalTotal().toFixed(2) }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="cart-summary-footer">
+                            <p
+                                class="cart-summary-note"
+                                *ngIf="selectedDeliveryMethod() === 'locker' && selectedLocker()">
+                                Ritiro presso:<br />
+                                <strong>{{ selectedLocker()!.name }}</strong><br />
+                                {{ selectedLocker()!.address }}<br />
+                                {{ selectedLocker()!.postalCode }} {{ selectedLocker()!.city }}
+                                <span *ngIf="selectedLocker()!.province">({{ selectedLocker()!.province }})</span>
+                            </p>
+
+                            <button class="cart-checkout" type="button" (click)="checkout()">
+                                <span>Procedi al pagamento</span>
+                            </button>
+                        </div>
+                    </aside>
                 </div>
-
             </div>
 
-            }
-
+            <ng-template #emptyCart>
+                <div class="cart-empty">
+                    <div class="cart-empty-icon">🛍</div>
+                    <p class="cart-empty-eyebrow">Nessun articolo</p>
+                    <h1 class="cart-empty-title">Il tuo carrello è vuoto</h1>
+                    <p class="cart-empty-text">
+                        Non hai ancora aggiunto prodotti. Scopri la collezione e trova il gioiello perfetto.
+                    </p>
+                    <a routerLink="/" class="cart-empty-btn">
+                        Continua lo shopping
+                    </a>
+                </div>
+            </ng-template>
         </div>
-
-        <div class="cart-summary">
-            <span>Totale</span>
-
-            <div class="cart-summary-right">
-                <strong>{{ cartTotal() | currency:'EUR' }}</strong>
-
-                <button class="cart-checkout" (click)="checkout()">
-                    <i class="bi bi-credit-card me-1"></i>
-                    Procedi al pagamento
-                </button>
-            </div>
-        </div>
-
-        }
-
-        @else{
-        <div class="cart-empty">
-            Carrello vuoto
-        </div>
-        }
-
-    </div>
-
-    <app-ai-chat-drawer></app-ai-chat-drawer>
-
+    </section>
 </div>
+
+<app-ai-chat-drawer></app-ai-chat-drawer>

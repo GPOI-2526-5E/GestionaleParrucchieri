@@ -19,16 +19,8 @@ export class ProductCardComponent {
 
   constructor() { }
 
-  showAlert = false;
-
   addToCart() {
     console.log(`Aggiunto al carrello: ${this.product.nome}`);
     this.addProductToCart.emit(this.product);
-
-    this.showAlert = true;
-
-    setTimeout(() => {
-      this.showAlert = false;
-    }, 2000);
   }
 }
