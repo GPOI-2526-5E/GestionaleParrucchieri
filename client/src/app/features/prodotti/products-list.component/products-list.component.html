@@ -82,7 +82,8 @@
       @if(selectedCategory == 'all' || product.categoria == selectedCategory) {
 
       <div class="col">
-        <app-product-card [product]="product"></app-product-card>
+        <app-product-card [product]="product" (addProductToCart)="onAddToCart($event)">
+        </app-product-card>
       </div>
 
       }

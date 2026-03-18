@@ -4,6 +4,7 @@ import { ProductsListComponent } from './features/prodotti/products-list.compone
 import { ProductDetailsComponent } from './features/prodotti/product-details.component/product-details.component';
 import { ServicesListComponent } from './features/servizi/services-list.component/services-list.component';
 import { ServiceDetailsComponent } from './features/servizi/service-details.component/service-details.component';
+import { CartComponent } from './features/cart.component/cart.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -12,5 +13,6 @@ export const routes: Routes = [
     { path: 'product/:id', component: ProductDetailsComponent },
     { path: 'services', component: ServicesListComponent },
     { path: 'service/:id', component: ServiceDetailsComponent },
+    { path: 'cart', component: CartComponent },
     { path: '**', redirectTo: '/home' }
 ];

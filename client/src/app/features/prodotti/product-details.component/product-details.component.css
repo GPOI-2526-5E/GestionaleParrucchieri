@@ -16,12 +16,10 @@
 
   background-image:
     url("https://images.pexels.com/photos/4041392/pexels-photo-4041392.jpeg?auto=compress&cs=tinysrgb&w=1600"),
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       rgba(8, 8, 8, 0.72) 0%,
       rgba(14, 14, 14, 0.62) 35%,
-      rgba(18, 18, 18, 0.72) 100%
-    );
+      rgba(18, 18, 18, 0.72) 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -34,12 +32,10 @@
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(
-      to bottom,
+    linear-gradient(to bottom,
       rgba(0, 0, 0, 0.72) 0%,
       rgba(0, 0, 0, 0.52) 35%,
-      rgba(0, 0, 0, 0.82) 100%
-    ),
+      rgba(0, 0, 0, 0.82) 100%),
     radial-gradient(circle at 18% 22%, rgba(212, 176, 106, 0.14), transparent 32%),
     radial-gradient(circle at 82% 74%, rgba(212, 176, 106, 0.10), transparent 30%);
 }
@@ -146,11 +142,9 @@
   border-radius: 28px;
   overflow: hidden;
   padding: 24px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.04) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.04) 100%);
   border: 1px solid rgba(212, 176, 106, 0.18);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -189,11 +183,9 @@
   justify-content: space-between;
   gap: 18px;
   padding: 28px;
-  background: linear-gradient(
-    180deg,
-    rgba(46, 46, 46, 0.88) 0%,
-    rgba(28, 28, 28, 0.92) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(46, 46, 46, 0.88) 0%,
+      rgba(28, 28, 28, 0.92) 100%);
   border: 1px solid rgba(212, 176, 106, 0.26);
   border-radius: 28px;
   box-shadow:
@@ -215,7 +207,7 @@
   pointer-events: none;
 }
 
-.product-showcase-right > * {
+.product-showcase-right>* {
   position: relative;
   z-index: 1;
 }
@@ -250,14 +242,12 @@
 
 .product-price-divider {
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(212, 176, 106, 0.18) 20%,
-    rgba(212, 176, 106, 0.34) 50%,
-    rgba(212, 176, 106, 0.18) 80%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(212, 176, 106, 0.18) 20%,
+      rgba(212, 176, 106, 0.34) 50%,
+      rgba(212, 176, 106, 0.18) 80%,
+      transparent 100%);
 }
 
 .product-summary {
@@ -449,5 +439,41 @@
   .product-summary-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+.product-alert-wrapper {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  z-index: 9999;
+  min-width: 280px;
+
+  animation: slideIn 0.3s ease;
+}
+
+.product-alert-wrapper .alert {
+  margin: 0;
+  border-radius: 12px;
+
+  background: rgba(25, 135, 84, 0.95);
+  border: none;
+  color: white;
+
+  backdrop-filter: blur(6px);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* animazione */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

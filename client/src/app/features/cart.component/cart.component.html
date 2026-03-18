@@ -1,0 +1,90 @@
+<div class="cart-page">
+
+    <app-navbar></app-navbar>
+
+    <div class="cart-section container">
+
+        <div class="cart-hero">
+            <p class="cart-eyebrow">I Parrucchieri</p>
+            <h2 class="cart-title">Il tuo carrello</h2>
+        </div>
+
+        @if (cartItems().length > 0){
+
+        <div class="cart-list">
+
+            @for(item of cartItems(); track item.id){
+
+            <div class="cart-item">
+
+                <div class="cart-item-left">
+                    <img [src]="item.foto" class="cart-item-img">
+
+                    <div class="cart-item-info">
+                        <h5 class="cart-item-title">
+                            <a [routerLink]="['/product', item.id]" class="product-link">
+                                {{ item.nome }}
+                            </a>
+                        </h5>
+
+                        <div class="cart-item-meta">
+                            <span class="cart-item-desc">{{ item.descrizione }}</span>
+                            <span class="cart-item-category">{{ item.categoria }}</span>
+                        </div>
+
+                        <div class="cart-item-unit-price">
+                            {{ item.prezzo | currency:'EUR' }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cart-item-right">
+
+                    <div class="cart-quantity">
+                        <button (click)="decrease(item.id!)">−</button>
+                        <span>{{ item.quantita || 1 }}</span>
+                        <button (click)="increase(item.id!)">+</button>
+                    </div>
+
+                    <span class="cart-price">
+                        {{ (item.prezzo * (item.quantita || 1)) | currency:'EUR' }}
+                    </span>
+
+                    <button class="cart-remove" (click)="removeFromCart(item.id!)">
+                        ✕
+                    </button>
+
+                </div>
+
+            </div>
+
+            }
+
+        </div>
+
+        <div class="cart-summary">
+            <span>Totale</span>
+
+            <div class="cart-summary-right">
+                <strong>{{ cartTotal() | currency:'EUR' }}</strong>
+
+                <button class="cart-checkout" (click)="checkout()">
+                    <i class="bi bi-credit-card me-1"></i>
+                    Procedi al pagamento
+                </button>
+            </div>
+        </div>
+
+        }
+
+        @else{
+        <div class="cart-empty">
+            Carrello vuoto
+        </div>
+        }
+
+    </div>
+
+    <app-ai-chat-drawer></app-ai-chat-drawer>
+
+</div>

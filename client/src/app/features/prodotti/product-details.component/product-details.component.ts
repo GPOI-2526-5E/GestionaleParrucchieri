@@ -12,9 +12,10 @@ import { ProdottoService, Prodotto } from '../../../services/prodotto';
   templateUrl: './product-details.component.html',
   styleUrls: ['./product-details.component.css']
 })
-export class ProductDetailsComponent {
+export class ProductDetailsComponent implements OnInit {
 
   product: Prodotto | undefined;
+  showAlert = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -42,9 +43,14 @@ export class ProductDetailsComponent {
   }
 
   addToCart(): void {
-    if (this.product) {
-      this.prodottoService.addProductToCart(this.product);
-      alert(`${this.product.nome} è stato aggiunto al carrello`);
-    }
+    if (!this.product) return;
+
+    this.prodottoService.addProductToCart(this.product);
+
+    this.showAlert = true;
+
+    setTimeout(() => {
+      this.showAlert = false;
+    }, 2000);
   }
 }

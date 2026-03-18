@@ -1,5 +1,11 @@
 <app-navbar></app-navbar>
 
+<div class="product-alert-wrapper" *ngIf="showAlert">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>🛍️ Aggiunto al carrello</strong> - {{ product?.nome }}
+    </div>
+</div>
+
 <div class="product-showcase">
     <div class="product-showcase-left">
         <p class="product-kicker">Prodotto esclusivo</p>
@@ -45,7 +51,7 @@
         </div>
 
         <button class="btn btn-add-cart" (click)="addToCart()">
-            <i class="bi bi-cart-plus me-2"></i>
+            <i class="bi bi-bag-plus-fill me-2"></i>
             Aggiungi al carrello
         </button>
 

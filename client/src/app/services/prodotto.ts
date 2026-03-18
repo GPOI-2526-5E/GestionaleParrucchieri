@@ -11,16 +11,22 @@ export interface Prodotto {
   prezzo: number;
   qta: number;
   categoria: string;
+  quantita?: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProdottoService {
-  cart: WritableSignal<Prodotto[]> = signal([]);
+
+  private _cart: WritableSignal<Prodotto[]> = signal([]);
+  cart = this._cart.asReadonly();
+
   private apiUrl = 'http://localhost:3000/api/prodotti';
 
-  constructor(private http: HttpClient) { }
+  private STORAGE_KEY = 'cart';
+
+  constructor(private http: HttpClient) { this.loadCart(); }
 
   getProdotti(): Observable<Prodotto[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
@@ -32,10 +38,23 @@ export class ProdottoService {
           descrizione: p.descrizione,
           prezzo: Number(p.prezzo),
           qta: Number(p.quantitaMagazzino),
-          categoria: p.categoria
+          categoria: p.categoria,
+          quantita: 0
         }))
       )
     );
+  }
+
+  private loadCart() {
+    const data = localStorage.getItem(this.STORAGE_KEY);
+
+    if (data) {
+      this._cart.set(JSON.parse(data));
+    }
+  }
+
+  private saveCart() {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this._cart()));
   }
 
   getProdottoById(id: number): Observable<Prodotto | undefined> {
@@ -45,22 +64,68 @@ export class ProdottoService {
   }
 
   addProductToCart(prod: Prodotto) {
-    this.cart.update(curCart => [...curCart, prod]);
+    this._cart.update(cart => {
+      const existing = cart.find(p => p.id === prod.id);
+      if (existing) {
+        return cart.map(p =>
+          p.id === prod.id
+            ? { ...p, quantita: (p.quantita || 1) + 1 }
+            : p
+        );
+      }
+      return [...cart, { ...prod, quantita: 1 }];
+    });
+    this.saveCart();
   }
 
-  getCart(): Prodotto[] {
-    return this.cart();
+  increaseQuantity(productId: number) {
+    this._cart.update(cart =>
+      cart.map(p =>
+        p.id === productId
+          ? { ...p, quantita: (p.quantita || 1) + 1 }
+          : p
+      )
+    );
+    this.saveCart();
   }
 
-  getCartItemCount(): number {
-    return this.cart().length;
-  }
-
-  clearCart(): void {
-    this.cart.set([]);
+  decreaseQuantity(productId: number) {
+    this._cart.update(cart =>
+      cart
+        .map(p =>
+          p.id === productId
+            ? { ...p, quantita: (p.quantita || 1) - 1 }
+            : p
+        )
+        .filter(p => (p.quantita || 1) > 0)
+    );
+    this.saveCart();
   }
 
   removeProductFromCart(productId: number | string): void {
-    this.cart.update(curCart => curCart.filter(product => product.id != productId));
+    this._cart.update(cart =>
+      cart.filter(product => product.id != productId)
+    );
+    this.saveCart();
+  }
+
+  clearCart(): void {
+    this._cart.set([]);
+    this.saveCart();
+  }
+
+  getCart(): Prodotto[] {
+    return this._cart();
+  }
+
+  getCartItemCount(): number {
+    return this._cart().reduce((sum, p) => sum + (p.quantita || 1), 0);
+  }
+
+  getCartTotal(): number {
+    return this._cart().reduce(
+      (sum, p) => sum + p.prezzo * (p.quantita || 1),
+      0
+    );
   }
 }

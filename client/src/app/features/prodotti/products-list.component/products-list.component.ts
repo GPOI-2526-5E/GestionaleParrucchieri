@@ -17,7 +17,7 @@ import { Observable } from 'rxjs';
     NavbarComponent,
     AiChatDrawerComponent,
     ProductCardComponent,
-],
+  ],
   templateUrl: './products-list.component.html',
   styleUrls: ['./products-list.component.css']
 })
@@ -30,7 +30,7 @@ export class ProductsListComponent implements OnInit {
 
   isCategoryOpen: boolean = false;
 
-  constructor(private prodottiService: ProdottoService) {}
+  constructor(private prodottiService: ProdottoService) { }
 
   ngOnInit(): void {
     this.productsMD = this.prodottiService.getProdotti();
@@ -55,6 +55,10 @@ export class ProductsListComponent implements OnInit {
 
   getSelectedCategoryLabel(): string {
     return this.selectedCategory === 'all' ? 'Tutti' : this.selectedCategory;
+  }
+
+  onAddToCart(product: Prodotto) {
+    this.prodottiService.addProductToCart(product);
   }
 
   @HostListener('document:click', ['$event'])
