@@ -1,8 +1,11 @@
 <app-navbar></app-navbar>
 
-<div class="product-alert-wrapper" *ngIf="showAlert">
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>🛍️ Aggiunto al carrello</strong> - {{ product?.nome }}
+<div class="product-toast-container" *ngIf="showAlert">
+    <div class="product-toast" [class.closing]="isClosing" (click)="goToCart()" role="alert" tabindex="0">
+        <span class="product-toast-icon">🛍️</span>
+        <span class="product-toast-text">
+            <strong>{{ product?.nome }}</strong> aggiunto al carrello!
+        </span>
     </div>
 </div>
 

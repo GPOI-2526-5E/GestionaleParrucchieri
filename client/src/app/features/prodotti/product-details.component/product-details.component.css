@@ -442,38 +442,89 @@
   }
 }
 
-.product-alert-wrapper {
+.product-toast-container {
   position: fixed;
-  top: 100px;
-  right: 20px;
+  right: 24px;
+  bottom: 24px;
   z-index: 9999;
-  min-width: 280px;
-
-  animation: slideIn 0.3s ease;
+  pointer-events: none;
 }
 
-.product-alert-wrapper .alert {
-  margin: 0;
-  border-radius: 12px;
-
-  background: rgba(25, 135, 84, 0.95);
-  border: none;
-  color: white;
-
-  backdrop-filter: blur(6px);
-
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+.product-toast-container {
+  position: fixed;
+  right: 24px;
+  top: 20%;
+  z-index: 9999;
+  pointer-events: none;
 }
 
-/* animazione */
-@keyframes slideIn {
-  from {
+.product-toast {
+  min-width: 300px;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(18, 18, 18, 0.96);
+  border: 1px solid rgba(212, 176, 106, 0.25);
+  color: #f5f5f5;
+  box-shadow:
+    0 22px 48px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  opacity: 1;
+  transform: translateY(-16px); /* entra leggermente dall’alto */
+  animation: productToastEnter 0.3s ease forwards;
+  transition:
+    opacity 0.32s ease,
+    transform 0.32s ease,
+    box-shadow 0.25s ease;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.product-toast:hover {
+  transform: translateY(-20px);
+  box-shadow:
+    0 26px 52px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.product-toast.closing {
+  opacity: 0;
+  transform: translateY(-40px); /* esce verso l’alto */
+}
+
+.product-toast-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(212, 176, 106, 0.16);
+  border: 1px solid rgba(212, 176, 106, 0.22);
+  font-size: 18px;
+}
+
+.product-toast-text {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff5d8;
+}
+
+@keyframes productToastEnter {
+  0% {
     opacity: 0;
-    transform: translateX(40px);
+    transform: translateY(-40px);
   }
-
-  to {
+  100% {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(-16px);
   }
 }
