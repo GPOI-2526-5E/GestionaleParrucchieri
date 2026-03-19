@@ -45,7 +45,7 @@
 
                                         <div class="cart-item-meta">
                                             <span class="cart-item-unit-price">
-                                                €{{ item.prezzo.toFixed(2) }}
+                                                {{ item.prezzo.toFixed(2) | currency:'EUR' }}
                                             </span>
                                         </div>
                                     </div>
@@ -53,7 +53,7 @@
 
                                 <div class="cart-item-right">
                                     <div class="cart-price">
-                                        €{{ (item.prezzo * (item.quantita || 1)).toFixed(2) }}
+                                        {{ (item.prezzo * (item.quantita || 1)).toFixed(2) | currency:'EUR' }}
                                     </div>
 
                                     <div class="cart-quantity">
@@ -101,7 +101,7 @@
                             <div class="cart-summary-lines summary-bottom">
                                 <div class="cart-summary-line total">
                                     <span>Totale</span>
-                                    <strong>{{ finalTotal().toFixed(2) }}€</strong>
+                                    <strong>{{ finalTotal().toFixed(2) | currency:'EUR' }}</strong>
                                 </div>
                             </div>
                         </div>

@@ -107,6 +107,9 @@
     <div class="cart-toast" [class.closing]="isClosing" (click)="goToCart()" role="button" tabindex="0">
       <span class="cart-toast-icon">🛍️</span>
       <span class="cart-toast-text">{{ cartAlertMessage }}</span>
+      <span class="cart-toast-count" [class.d-none]="contProd == 1">
+        X{{ contProd }}
+      </span>
     </div>
   </div>
 

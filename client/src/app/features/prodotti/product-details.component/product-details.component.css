@@ -476,7 +476,8 @@
   -webkit-backdrop-filter: blur(12px);
 
   opacity: 1;
-  transform: translateY(-16px); /* entra leggermente dall’alto */
+  transform: translateY(-16px);
+  /* entra leggermente dall’alto */
   animation: productToastEnter 0.3s ease forwards;
   transition:
     opacity 0.32s ease,
@@ -495,7 +496,8 @@
 
 .product-toast.closing {
   opacity: 0;
-  transform: translateY(-40px); /* esce verso l’alto */
+  transform: translateY(-40px);
+  /* esce verso l’alto */
 }
 
 .product-toast-icon {
@@ -518,11 +520,19 @@
   color: #fff5d8;
 }
 
+.cart-toast-count {
+  font-weight: 700;
+  color: #f0d79e;
+  margin-left: 8px;
+  font-size: 13px;
+}
+
 @keyframes productToastEnter {
   0% {
     opacity: 0;
     transform: translateY(-40px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(-16px);

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
@@ -36,6 +36,9 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   isClosing: boolean = false;
   cartAlertMessage: string = '';
 
+  currentAlertProductId: number | null = null;
+  contProd: number = 1;
+
   private alertTimeout: ReturnType<typeof setTimeout> | null = null;
   private removeAlertTimeout: ReturnType<typeof setTimeout> | null = null;
   private productsSub?: Subscription;
@@ -44,7 +47,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     private prodottiService: ProdottoService,
     private cdr: ChangeDetectorRef,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.productsMD = this.prodottiService.getProdotti();
@@ -88,19 +91,20 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   onAddToCart(product: Prodotto): void {
     this.prodottiService.addProductToCart(product);
 
-    this.cartAlertMessage = `${product.nome} aggiunto al carrello`;
-    this.showCartAlert = true;
-    this.isClosing = false;
-
-    if (this.alertTimeout) {
-      clearTimeout(this.alertTimeout);
-    }
-
-    if (this.removeAlertTimeout) {
-      clearTimeout(this.removeAlertTimeout);
+    if (this.showCartAlert && this.currentAlertProductId === product.id) {
+      this.contProd++;
+    } else {
+      this.contProd = 1;
+      this.currentAlertProductId = product.id;
+      this.cartAlertMessage = `${product.nome} aggiunto al carrello`;
+      this.showCartAlert = true;
+      this.isClosing = false;
     }
 
     this.cdr.detectChanges();
+
+    if (this.alertTimeout) clearTimeout(this.alertTimeout);
+    if (this.removeAlertTimeout) clearTimeout(this.removeAlertTimeout);
 
     this.alertTimeout = setTimeout(() => {
       this.isClosing = true;
@@ -109,6 +113,8 @@ export class ProductsListComponent implements OnInit, OnDestroy {
       this.removeAlertTimeout = setTimeout(() => {
         this.showCartAlert = false;
         this.isClosing = false;
+        this.contProd = 1;
+        this.currentAlertProductId = null; 
         this.cdr.detectChanges();
       }, 320);
     }, 2000);

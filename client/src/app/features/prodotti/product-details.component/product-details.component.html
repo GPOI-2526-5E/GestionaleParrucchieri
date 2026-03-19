@@ -6,6 +6,7 @@
         <span class="product-toast-text">
             <strong>{{ product?.nome }}</strong> aggiunto al carrello!
         </span>
+        <span class="cart-toast-count" [class.d-none]="contProd < 2">X{{ contProd }}</span>
     </div>
 </div>
 

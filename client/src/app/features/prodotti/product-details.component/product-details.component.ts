@@ -18,6 +18,8 @@ export class ProductDetailsComponent implements OnInit {
   showAlert = false;
   isClosing = false;
 
+  contProd: number = 1;
+
   constructor(
     private route: ActivatedRoute,
     private prodottoService: ProdottoService,
@@ -50,10 +52,25 @@ export class ProductDetailsComponent implements OnInit {
     this.prodottoService.addProductToCart(this.product);
 
     this.showAlert = true;
+    this.isClosing = false;
 
+    // Se l'alert è già visibile, incremento il contatore
+    this.contProd = this.showAlert && this.contProd > 0 ? this.contProd + 1 : 1;
+
+    this.cdr.detectChanges();
+
+    // Timer per chiudere alert
     setTimeout(() => {
-      this.showAlert = false;
-    }, 2250);
+      this.isClosing = true;
+      this.cdr.detectChanges();
+
+      setTimeout(() => {
+        this.showAlert = false;
+        this.isClosing = false;
+        this.contProd = 0; // reset
+        this.cdr.detectChanges();
+      }, 350);
+    }, 2500);
   }
 
   goToCart(): void {
