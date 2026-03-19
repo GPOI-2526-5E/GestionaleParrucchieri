@@ -32,39 +32,37 @@
                                             <a [routerLink]="['/product', item.id]">{{ item.nome }}</a>
                                         </h3>
 
-                                        <div class="cart-item-meta">
+                                        <div class="cart-item-bottom">
+                                            <span class="cart-item-desc" *ngIf="item.descrizione">
+                                                {{ item.descrizione }}
+                                            </span>
+
                                             <span class="cart-item-category" *ngIf="item.categoria">
                                                 {{ item.categoria }}
                                             </span>
-                                            <span class="cart-item-unit-price">
-                                                Prezzo unitario: € {{ item.prezzo.toFixed(2) }}
-                                            </span>
                                         </div>
-
-                                        <div class="cart-item-desc" *ngIf="item.descrizione">
-                                            {{ item.descrizione }}
+                                        <div class="cart-item-meta">
+                                            <span class="cart-item-unit-price">
+                                                €{{ item.prezzo.toFixed(2) }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="cart-item-right">
+                                    <div class="cart-price">
+                                        €{{ (item.prezzo * (item.quantita || 1)).toFixed(2) }}
+                                    </div>
+                                    
                                     <div class="cart-quantity">
                                         <button type="button" (click)="decrease(item.id)">−</button>
                                         <span>{{ item.quantita || 1 }}</span>
                                         <button type="button" (click)="increase(item.id)">+</button>
                                     </div>
 
-                                    <div class="cart-price">
-                                        € {{ (item.prezzo * (item.quantita || 1)).toFixed(2) }}
-                                    </div>
-
-                                    <button
-                                        class="cart-remove"
-                                        type="button"
-                                        (click)="removeFromCart(item.id)"
-                                        aria-label="Rimuovi prodotto"
-                                        title="Rimuovi prodotto">
-                                        ×
+                                    <button class="cart-remove" type="button" (click)="removeFromCart(item.id)"
+                                        aria-label="Rimuovi prodotto" title="Rimuovi prodotto">
+                                        <i class="bi bi-trash3"></i>
                                     </button>
                                 </div>
                             </div>
@@ -101,9 +99,7 @@
                             </div>
 
                             <div class="cart-delivery-grid">
-                                <button
-                                    type="button"
-                                    class="cart-delivery-card"
+                                <button type="button" class="cart-delivery-card"
                                     [class.active]="selectedDeliveryMethod() === 'home-standard'"
                                     (click)="setDeliveryMethod('home-standard')">
                                     <div class="cart-delivery-card-icon">
@@ -120,9 +116,7 @@
                                     </div>
                                 </button>
 
-                                <button
-                                    type="button"
-                                    class="cart-delivery-card"
+                                <button type="button" class="cart-delivery-card"
                                     [class.active]="selectedDeliveryMethod() === 'home-express'"
                                     (click)="setDeliveryMethod('home-express')">
                                     <div class="cart-delivery-card-icon">
@@ -139,9 +133,7 @@
                                     </div>
                                 </button>
 
-                                <button
-                                    type="button"
-                                    class="cart-delivery-card"
+                                <button type="button" class="cart-delivery-card"
                                     [class.active]="selectedDeliveryMethod() === 'store-pickup'"
                                     (click)="setDeliveryMethod('store-pickup')">
                                     <div class="cart-delivery-card-icon">
@@ -158,9 +150,7 @@
                                     </div>
                                 </button>
 
-                                <button
-                                    type="button"
-                                    class="cart-delivery-card"
+                                <button type="button" class="cart-delivery-card"
                                     [class.active]="selectedDeliveryMethod() === 'locker'"
                                     (click)="setDeliveryMethod('locker')">
                                     <div class="cart-delivery-card-icon">
@@ -222,7 +212,7 @@
                         <div class="cart-summary-lines summary-bottom">
                             <div class="cart-summary-line">
                                 <span>Spedizione</span>
-                                <strong>€ {{ deliveryPrice().toFixed(2) }}</strong>
+                                <strong>€{{ deliveryPrice().toFixed(2) }}</strong>
                             </div>
 
                             <div class="cart-summary-line total">
@@ -232,8 +222,7 @@
                         </div>
 
                         <div class="cart-summary-footer">
-                            <p
-                                class="cart-summary-note"
+                            <p class="cart-summary-note"
                                 *ngIf="selectedDeliveryMethod() === 'locker' && selectedLocker()">
                                 Ritiro presso:<br />
                                 <strong>{{ selectedLocker()!.name }}</strong><br />
