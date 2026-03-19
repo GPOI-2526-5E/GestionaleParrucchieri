@@ -1,0 +1,129 @@
+/* CONTAINER SPLIT */
+.login-container {
+  display: flex;
+  height: 100vh;
+  background: #111;
+  overflow: hidden;
+}
+
+/* LATO SINISTRO - IMMAGINE */
+.login-image {
+  flex: 1;
+  background: url('https://source.unsplash.com/800x1000/?technology') no-repeat center center;
+  background-size: cover;
+}
+
+/* LATO DESTRO - FORM */
+.login-form-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111;
+}
+
+/* FORM CARD */
+.login-card {
+  background: rgba(20, 20, 20, 0.95);
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 400px;
+  transition: all 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-3px);
+}
+
+/* TITLE */
+.login-card h3 {
+  color: #d4b06a;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+/* INPUTS */
+.login-card .form-control {
+  background: #222;
+  border: 1px solid #444;
+  color: white;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card .form-control:focus {
+  border-color: #d4b06a;
+  box-shadow: 0 0 8px rgba(212,176,106,0.5);
+  background: #222;
+  color: white;
+}
+
+/* LABEL BIANCA */
+.login-card .form-label {
+  color: white;
+  font-weight: 500;
+}
+
+/* CHECKBOX */
+.login-card .form-check-label {
+  color: white;
+  font-size: 14px;
+}
+
+.login-card .form-check-input:checked {
+  background-color: #d4b06a;
+  border-color: #d4b06a;
+}
+
+/* BUTTON */
+.login-card .btn-login {
+  background: #d4b06a;
+  color: #111;
+  font-weight: 600;
+  border-radius: 6px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.login-card .btn-login:hover {
+  background: #fff;
+  color: #111;
+  transform: translateY(-2px);
+}
+
+/* LINKS */
+.login-card .login-link {
+  display: block;
+  text-align: center;
+  color: white;
+  margin-top: 15px;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.login-card .login-link:hover {
+  color: #d4b06a;
+}
+
+/* RESPONSIVE - MOBILE */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+  .login-image {
+    height: 200px;
+    width: 100%;
+  }
+  .login-form-wrapper {
+    flex: unset;
+    width: 100%;
+    padding: 30px 0;
+  }
+}
