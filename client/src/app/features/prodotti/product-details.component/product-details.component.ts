@@ -1,5 +1,5 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
 import { AiChatDrawerComponent } from '../../ai-chat-drawer.component/ai-chat-drawer.component';
@@ -16,12 +16,14 @@ export class ProductDetailsComponent implements OnInit {
 
   product: Prodotto | undefined;
   showAlert = false;
+  isClosing = false;
 
   constructor(
     private route: ActivatedRoute,
     private prodottoService: ProdottoService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     const productId = Number(this.route.snapshot.paramMap.get('id'));
@@ -51,6 +53,10 @@ export class ProductDetailsComponent implements OnInit {
 
     setTimeout(() => {
       this.showAlert = false;
-    }, 2000);
+    }, 2250);
+  }
+
+  goToCart(): void {
+    this.router.navigate(['/cart']);
   }
 }
