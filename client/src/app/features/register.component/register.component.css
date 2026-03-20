@@ -1,0 +1,135 @@
+/* CONTAINER PRINCIPALE (Stesso stile del Login) */
+.register-container {
+  display: flex;
+  min-height: 100vh; /* Usiamo min-height perché il form di registrazione è più lungo */
+  background: #111;
+  overflow-x: hidden;
+}
+
+/* LATO SINISTRO - IMMAGINE (Coerente col login) */
+.register-image {
+  flex: 1;
+  background: url('https://source.unsplash.com/800x1200/?hair-salon') no-repeat center center;
+  background-size: cover;
+  display: block;
+}
+
+/* LATO DESTRO - WRAPPER DEL FORM */
+.register-form-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111;
+  padding: 40px 20px;
+}
+
+/* CARD REGISTRAZIONE */
+.register-card {
+  background: rgba(20, 20, 20, 0.95);
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 550px; /* Un po' più larga del login per ospitare le righe doppie */
+  transition: all 0.3s ease;
+}
+
+.register-card:hover {
+  transform: translateY(-3px);
+}
+
+/* TITOLO GOLD */
+.register-card h3 {
+  color: #d4b06a;
+  text-align: center;
+  margin-bottom: 25px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* INPUT E SELECT */
+.register-card .form-control, 
+.register-card .form-select {
+  background: #222;
+  border: 1px solid #444;
+  color: white;
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Focus degli input */
+.register-card .form-control:focus, 
+.register-card .form-select:focus {
+  border-color: #d4b06a;
+  box-shadow: 0 0 8px rgba(212,176,106,0.5);
+  background: #222;
+  color: white;
+}
+
+/* LABEL */
+.register-card .form-label {
+  color: #bbb;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+/* BOTTONE REGISTRATI (Gold) */
+.register-card .btn-register {
+  background: #d4b06a;
+  color: #111;
+  font-weight: 600;
+  border-radius: 6px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.register-card .btn-register:hover {
+  background: #fff;
+  color: #111;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(212,176,106,0.3);
+}
+
+/* LINK PER TORNARE AL LOGIN */
+.register-card .login-link {
+  display: inline;
+  color: #d4b06a;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.register-card .login-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.register-card .footer-text {
+  color: white;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .register-image {
+    display: none; /* Nascondiamo l'immagine sui tablet/mobile per focus sul form */
+  }
+}
+
+@media (max-width: 768px) {
+  .register-form-wrapper {
+    padding: 20px;
+  }
+  .register-card {
+    padding: 25px 20px;
+  }
+}

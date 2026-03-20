@@ -23,7 +23,7 @@ export class RegisterComponent {
     ruolo: 'cliente' // Valore predefinito dell'ENUM
   };
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(public auth: AuthService, private router: Router) {}
 
   register() {
     console.log('Dati inviati:', this.userData);
