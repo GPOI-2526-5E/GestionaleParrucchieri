@@ -9,6 +9,7 @@ interface User {
     id: number
     email: string
     password: string
+    ruolo: string
 }
 
 // LOGIN
@@ -35,10 +36,13 @@ router.post('/login', async (req: Request, res: Response) => {
         }
 
         const token = jwt.sign(
-            { userId: user.id },
-            process.env.JWT_SECRET as string,
+            {
+                userId: user.id,
+                ruolo: user.ruolo
+            },
+            process.env.JWT_SECRET,
             { expiresIn: "1d" }
-        )
+        );
 
         res.json({ token })
 
