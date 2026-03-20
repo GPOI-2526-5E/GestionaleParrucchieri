@@ -36,11 +36,28 @@ export class CartComponent {
   }
 
   increase(id: number): void {
-    this.prodottoService.increaseQuantity(id);
+    const product = this.cartItems().find(item => item.id === id);
+
+    if (!product) return;
+
+    const quantitaAttuale = product.quantita || 1;
+    const quantitaMassima = product.qta;
+
+    if (quantitaAttuale < quantitaMassima) {
+      this.prodottoService.increaseQuantity(id);
+    }
   }
 
   decrease(id: number): void {
-    this.prodottoService.decreaseQuantity(id);
+    const product = this.cartItems().find(item => item.id === id);
+
+    if (!product) return;
+
+    const quantitaAttuale = product.quantita || 1;
+
+    if (quantitaAttuale > 1) {
+      this.prodottoService.decreaseQuantity(id);
+    }
   }
 
   removeFromCart(id: number): void {
@@ -49,5 +66,9 @@ export class CartComponent {
 
   checkout(): void {
     alert('Procedi al checkout');
+  }
+
+  trackById(index: number, item: Prodotto): number {
+    return item.id;
   }
 }

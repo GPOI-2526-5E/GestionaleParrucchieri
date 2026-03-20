@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  ChangeDetectorRef,
+  ApplicationRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable, Subscription } from 'rxjs';
@@ -25,7 +32,6 @@ import { ProdottoService } from '../../../services/prodotto';
   styleUrls: ['./products-list.component.css']
 })
 export class ProductsListComponent implements OnInit, OnDestroy {
-
   productsMD!: Observable<Prodotto[]>;
 
   selectedCategory: string = 'all';
@@ -37,7 +43,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   cartAlertMessage: string = '';
 
   currentAlertProductId: number | null = null;
-  contProd: number = 1;
+  contProd: number = 0;
 
   private alertTimeout: ReturnType<typeof setTimeout> | null = null;
   private removeAlertTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -46,14 +52,16 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   constructor(
     private prodottiService: ProdottoService,
     private cdr: ChangeDetectorRef,
+    private appRef: ApplicationRef,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.productsMD = this.prodottiService.getProdotti();
 
     this.productsSub = this.productsMD.subscribe(products => {
       this.categories = [...new Set(products.map(p => p.categoria))];
+      this.forceUiUpdate();
     });
   }
 
@@ -71,17 +79,28 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     }
   }
 
+  private forceUiUpdate(): void {
+    this.cdr.detectChanges();
+    this.appRef.tick();
+
+    requestAnimationFrame(() => {
+      this.cdr.detectChanges();
+    });
+  }
+
   trackById(index: number, product: Prodotto): number {
     return product.id;
   }
 
   toggleCategoryDropdown(): void {
     this.isCategoryOpen = !this.isCategoryOpen;
+    this.forceUiUpdate();
   }
 
   selectCategory(category: string): void {
     this.selectedCategory = category;
     this.isCategoryOpen = false;
+    this.forceUiUpdate();
   }
 
   getSelectedCategoryLabel(): string {
@@ -91,31 +110,40 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   onAddToCart(product: Prodotto): void {
     this.prodottiService.addProductToCart(product);
 
-    if (this.showCartAlert && this.currentAlertProductId === product.id) {
-      this.contProd++;
+    const sameProductAlertVisible =
+      this.showCartAlert && this.currentAlertProductId === product.id;
+
+    this.showCartAlert = true;
+    this.isClosing = false;
+    this.currentAlertProductId = product.id;
+    this.cartAlertMessage = `${product.nome} aggiunto al carrello`;
+
+    if (sameProductAlertVisible) {
+      this.contProd += 1;
     } else {
       this.contProd = 1;
-      this.currentAlertProductId = product.id;
-      this.cartAlertMessage = `${product.nome} aggiunto al carrello`;
-      this.showCartAlert = true;
-      this.isClosing = false;
     }
 
-    this.cdr.detectChanges();
+    if (this.alertTimeout) {
+      clearTimeout(this.alertTimeout);
+    }
 
-    if (this.alertTimeout) clearTimeout(this.alertTimeout);
-    if (this.removeAlertTimeout) clearTimeout(this.removeAlertTimeout);
+    if (this.removeAlertTimeout) {
+      clearTimeout(this.removeAlertTimeout);
+    }
+
+    this.forceUiUpdate();
 
     this.alertTimeout = setTimeout(() => {
       this.isClosing = true;
-      this.cdr.detectChanges();
+      this.forceUiUpdate();
 
       this.removeAlertTimeout = setTimeout(() => {
         this.showCartAlert = false;
         this.isClosing = false;
-        this.contProd = 1;
-        this.currentAlertProductId = null; 
-        this.cdr.detectChanges();
+        this.contProd = 0;
+        this.currentAlertProductId = null;
+        this.forceUiUpdate();
       }, 320);
     }, 2000);
   }
@@ -130,6 +158,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
 
     if (!target.closest('.custom-dropdown')) {
       this.isCategoryOpen = false;
+      this.forceUiUpdate();
     }
   }
 }

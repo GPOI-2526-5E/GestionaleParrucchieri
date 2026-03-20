@@ -1,11 +1,9 @@
 <app-navbar></app-navbar>
 
 <div class="products-page">
-
   <div class="products-overlay"></div>
 
   <div class="products-section container">
-
     <div class="products-hero">
       <p class="products-eyebrow">I Parrucchieri</p>
       <h2 class="products-title">Catalogo Prodotti</h2>
@@ -18,101 +16,85 @@
 
     @if (productsMD | async; as products) {
 
-    @if(products.length == 0) {
-
-    <div class="products-empty">
-      <div class="products-empty-title">Nessun prodotto disponibile</div>
-      <div class="products-empty-text">
-        Torna tra poco per visualizzare il catalogo aggiornato.
-      </div>
-    </div>
-
-    }
-
-    @else {
-
-    <div class="products-topbar">
-
-      <div class="products-topbar-line"></div>
-
-      <div class="products-topbar-center">
-
-        <div class="products-count">
-          <span class="products-count-number">{{ products.length }}</span>
-          <span class="products-count-label">
-            {{ products.length == 1 ? 'Prodotto disponibile' : 'Prodotti disponibili' }}
-          </span>
+      @if (products.length == 0) {
+        <div class="products-empty">
+          <div class="products-empty-title">Nessun prodotto disponibile</div>
+          <div class="products-empty-text">
+            Torna tra poco per visualizzare il catalogo aggiornato.
+          </div>
         </div>
+      }
 
-        <div class="products-filter">
-          <div class="products-filter custom-dropdown" [class.open]="isCategoryOpen">
-            <button type="button" class="dropdown-trigger" (click)="isCategoryOpen = !isCategoryOpen">
-              <span>
-                {{ selectedCategory === 'all' ? 'Tutti' : selectedCategory }}
+      @else {
+        <div class="products-topbar">
+          <div class="products-topbar-line"></div>
+
+          <div class="products-topbar-center">
+            <div class="products-count">
+              <span class="products-count-number">{{ products.length }}</span>
+              <span class="products-count-label">
+                {{ products.length == 1 ? 'Prodotto disponibile' : 'Prodotti disponibili' }}
               </span>
-              <span class="chev"></span>
-            </button>
+            </div>
 
-            <div class="dropdown-panel" [class.open]="isCategoryOpen">
-              <div class="dropdown-panel-inner">
-                <ul class="dropdown-list">
-                  <li (click)="selectCategory('all')" [class.active]="selectedCategory === 'all'">
-                    Tutti
-                  </li>
+            <div class="products-filter custom-dropdown" [class.open]="isCategoryOpen">
+              <button type="button" class="dropdown-trigger" (click)="toggleCategoryDropdown()">
+                <span>{{ selectedCategory === 'all' ? 'Tutti' : selectedCategory }}</span>
+                <span class="chev"></span>
+              </button>
 
-                  @for(category of categories; track category) {
-                  <li (click)="selectCategory(category)" [class.active]="selectedCategory === category">
-                    {{ category }}
-                  </li>
-                  }
-                </ul>
+              <div class="dropdown-panel" [class.open]="isCategoryOpen">
+                <div class="dropdown-panel-inner">
+                  <ul class="dropdown-list">
+                    <li (click)="selectCategory('all')" [class.active]="selectedCategory === 'all'">
+                      Tutti
+                    </li>
+
+                    @for (category of categories; track category) {
+                      <li (click)="selectCategory(category)" [class.active]="selectedCategory === category">
+                        {{ category }}
+                      </li>
+                    }
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-      </div>
-
-    </div>
-
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 products-grid">
-
-      @for(product of products; track product.id) {
-      @if(selectedCategory == 'all' || product.categoria == selectedCategory) {
-      <div class="col">
-        <app-product-card [product]="product" (addProductToCart)="onAddToCart($event)">
-        </app-product-card>
-      </div>
-      }
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 products-grid">
+          @for (product of products; track product.id) {
+            @if (selectedCategory == 'all' || product.categoria == selectedCategory) {
+              <div class="col">
+                <app-product-card [product]="product" (addProductToCart)="onAddToCart($event)">
+                </app-product-card>
+              </div>
+            }
+          }
+        </div>
       }
 
-    </div>
-
+    } @else {
+      <div class="products-loading">
+        <div class="spinner-border text-light"></div>
+        <p>Caricamento prodotti...</p>
+      </div>
     }
-
-    }
-
-    @else {
-
-    <div class="products-loading">
-      <div class="spinner-border text-light"></div>
-      <p>Caricamento prodotti...</p>
-    </div>
-
-    }
-
   </div>
+</div>
 
-  <div class="cart-toast-container" *ngIf="showCartAlert">
+@if (showCartAlert) {
+  <div class="cart-toast-container">
     <div class="cart-toast" [class.closing]="isClosing" (click)="goToCart()" role="button" tabindex="0">
-      <span class="cart-toast-icon">🛍️</span>
+      <span class="cart-toast-icon">
+        <i class="bi bi-bag"></i>
+      </span>
       <span class="cart-toast-text">{{ cartAlertMessage }}</span>
       <span class="cart-toast-count" [class.d-none]="contProd == 1">
         X{{ contProd }}
       </span>
     </div>
   </div>
-
-</div>
+}
 
 <app-ai-chat-drawer></app-ai-chat-drawer>
