@@ -1,4 +1,10 @@
-import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  OnInit,
+  OnDestroy,
+  NgZone
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
@@ -12,65 +18,114 @@ import { ProdottoService, Prodotto } from '../../../services/prodotto';
   templateUrl: './product-details.component.html',
   styleUrls: ['./product-details.component.css']
 })
-export class ProductDetailsComponent implements OnInit {
-
+export class ProductDetailsComponent implements OnInit, OnDestroy {
   product: Prodotto | undefined;
-  showAlert = false;
-  isClosing = false;
 
-  contProd: number = 1;
+  showCartAlert: boolean = false;
+  isClosing: boolean = false;
+  cartAlertMessage: string = '';
+  contProd: number = 0;
+
+  private currentAlertProductId: number | null = null;
+  private alertTimeout: ReturnType<typeof setTimeout> | null = null;
+  private removeAlertTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private prodottoService: ProdottoService,
     private cdr: ChangeDetectorRef,
-    private router: Router
-  ) { }
+    private router: Router,
+    private ngZone: NgZone
+  ) {}
 
   ngOnInit(): void {
+    this.resetAlertState();
+
     const productId = Number(this.route.snapshot.paramMap.get('id'));
 
     if (!isNaN(productId)) {
       this.prodottoService.getProdottoById(productId).subscribe({
-        next: p => {
-          this.product = p;
-          this.cdr.detectChanges();
+        next: (p) => {
+          this.ngZone.run(() => {
+            this.product = p;
+            this.cdr.detectChanges();
+          });
         },
         error: () => {
-          this.product = undefined;
-          this.cdr.detectChanges();
+          this.ngZone.run(() => {
+            this.product = undefined;
+            this.cdr.detectChanges();
+          });
         }
       });
     } else {
       this.product = undefined;
+      this.cdr.detectChanges();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.clearAlertTimers();
+    this.resetAlertState();
+  }
+
+  private clearAlertTimers(): void {
+    if (this.alertTimeout) {
+      clearTimeout(this.alertTimeout);
+      this.alertTimeout = null;
+    }
+
+    if (this.removeAlertTimeout) {
+      clearTimeout(this.removeAlertTimeout);
+      this.removeAlertTimeout = null;
+    }
+  }
+
+  private resetAlertState(): void {
+    this.showCartAlert = false;
+    this.isClosing = false;
+    this.cartAlertMessage = '';
+    this.contProd = 0;
+    this.currentAlertProductId = null;
   }
 
   addToCart(): void {
     if (!this.product) return;
 
-    this.prodottoService.addProductToCart(this.product);
+    this.ngZone.run(() => {
+      this.prodottoService.addProductToCart(this.product!);
 
-    this.showAlert = true;
-    this.isClosing = false;
+      const sameProductAlertVisible =
+        this.showCartAlert && this.currentAlertProductId === this.product!.id;
 
-    // Se l'alert è già visibile, incremento il contatore
-    this.contProd = this.showAlert && this.contProd > 0 ? this.contProd + 1 : 1;
+      this.showCartAlert = true;
+      this.isClosing = false;
+      this.currentAlertProductId = this.product!.id;
+      this.cartAlertMessage = `${this.product!.nome} aggiunto al carrello`;
 
-    this.cdr.detectChanges();
+      if (sameProductAlertVisible) {
+        this.contProd += 1;
+      } else {
+        this.contProd = 1;
+      }
 
-    // Timer per chiudere alert
-    setTimeout(() => {
-      this.isClosing = true;
+      this.clearAlertTimers();
       this.cdr.detectChanges();
 
-      setTimeout(() => {
-        this.showAlert = false;
-        this.isClosing = false;
-        this.contProd = 0; // reset
-        this.cdr.detectChanges();
-      }, 350);
-    }, 2500);
+      this.alertTimeout = setTimeout(() => {
+        this.ngZone.run(() => {
+          this.isClosing = true;
+          this.cdr.detectChanges();
+
+          this.removeAlertTimeout = setTimeout(() => {
+            this.ngZone.run(() => {
+              this.resetAlertState();
+              this.cdr.detectChanges();
+            });
+          }, 320);
+        });
+      }, 2000);
+    });
   }
 
   goToCart(): void {

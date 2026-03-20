@@ -1,155 +1,182 @@
 <app-navbar></app-navbar>
 
 <div class="cart-page">
-    <section class="cart-section">
-        <div class="container">
+  <section class="cart-section">
+    <div class="container">
 
-            <div *ngIf="cartItems().length > 0; else emptyCart">
-                <div class="cart-hero">
-                    <p class="cart-eyebrow">I PARRUCCHIERI</p>
-                    <h1 class="cart-title">Carrello</h1>
-                    <p class="cart-subtitle">
-                        Verifica i prodotti selezionati e continua al checkout
-                        per scegliere consegna e completare il tuo ordine.
-                    </p>
-                </div>
+      <div *ngIf="cartItems().length > 0; else emptyCart">
+        <div class="cart-hero">
+          <p class="cart-eyebrow">I PARRUCCHIERI</p>
+          <h1 class="cart-title">Carrello</h1>
+          <p class="cart-subtitle">
+            Verifica i prodotti selezionati e continua al checkout
+            per scegliere consegna e completare il tuo ordine.
+          </p>
+        </div>
 
-                <div class="cart-layout">
-                    <div class="cart-main">
-                        <div class="cart-block-title">
-                            <span class="cart-block-title-dot"></span>
-                            I tuoi prodotti
-                        </div>
-
-                        <div class="cart-list">
-                            <div class="cart-item" *ngFor="let item of cartItems()">
-                                <div class="cart-item-left">
-                                    <div class="cart-item-image-wrap">
-                                        <img class="cart-item-img" [src]="item.foto" [alt]="item.nome" />
-                                    </div>
-
-                                    <div class="cart-item-info">
-                                        <h3 class="cart-item-title">
-                                            <a [routerLink]="['/product', item.id]">{{ item.nome }}</a>
-                                        </h3>
-
-                                        <div class="cart-item-bottom">
-                                            <span class="cart-item-desc" *ngIf="item.descrizione">
-                                                {{ item.descrizione }}
-                                            </span>
-
-                                            <span class="cart-item-category" *ngIf="item.categoria">
-                                                {{ item.categoria }}
-                                            </span>
-                                        </div>
-
-                                        <div class="cart-item-meta">
-                                            <span class="cart-item-unit-price">
-                                                {{ item.prezzo.toFixed(2) | currency:'EUR' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="cart-item-right">
-                                    <div class="cart-price">
-                                        {{ (item.prezzo * (item.quantita || 1)).toFixed(2) | currency:'EUR' }}
-                                    </div>
-
-                                    <div class="cart-quantity">
-                                        <button type="button" (click)="decrease(item.id)" aria-label="Riduci quantità">
-                                            −
-                                        </button>
-                                        <span>{{ item.quantita || 1 }}</span>
-                                        <button type="button" (click)="increase(item.id)" aria-label="Aumenta quantità">
-                                            +
-                                        </button>
-                                    </div>
-
-                                    <button class="cart-remove" type="button" (click)="removeFromCart(item.id)"
-                                        [attr.aria-label]="'Rimuovi ' + item.nome + ' dal carrello'"
-                                        title="Rimuovi prodotto">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <aside class="cart-summary-card">
-                        <div class="cart-summary-header">
-                            <p class="cart-summary-eyebrow">Riepilogo</p>
-                            <h2 class="cart-summary-title">Il tuo ordine</h2>
-                            <!-- <p class="cart-summary-subtitle">
-                                Controlla quantità e totale prima di procedere al checkout.
-                            </p> -->
-                        </div>
-
-                        <div class="cart-summary-main">
-                            <div class="cart-summary-lines compact">
-                                <div class="cart-summary-line">
-                                    <span>Prodotti diversi</span>
-                                    <strong>{{ differentProductsCount() }}</strong>
-                                </div>
-
-                                <div class="cart-summary-line">
-                                    <span>Quantità totale</span>
-                                    <strong>{{ totalQuantity() }}</strong>
-                                </div>
-                            </div>
-
-                            <div class="cart-summary-lines summary-bottom">
-                                <div class="cart-summary-line total">
-                                    <span>Totale</span>
-                                    <strong>{{ finalTotal().toFixed(2) | currency:'EUR' }}</strong>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="cart-summary-footer">
-                            <p class="cart-summary-note">
-                                Spedizione, consegna e pagamento verranno selezionati
-                                nel passaggio successivo.
-                            </p>
-
-                            <button class="cart-checkout" type="button" (click)="checkout()">
-                                <i class="bi bi-credit-card"></i>
-                                <span>Vai al checkout</span>
-                            </button>
-
-                            <a [routerLink]="['/products']" class="cart-continue-link">
-                                <i class="bi bi-arrow-left"></i>
-                                <span>Continua lo shopping</span>
-                            </a>
-                        </div>
-                    </aside>
-                </div>
+        <div class="cart-layout">
+          <div class="cart-main">
+            <div class="cart-block-title">
+              <span class="cart-block-title-dot"></span>
+              I tuoi prodotti
             </div>
 
-            <!-- EMPTY CART -->
-            <ng-template #emptyCart>
-                <div class="cart-empty">
-                    <div class="cart-empty-icons">
-                        <i class="bi bi-bag"></i>
+            <div class="cart-list">
+              <div
+                class="cart-item"
+                *ngFor="let item of cartItems(); trackBy: trackById"
+              >
+                <div class="cart-item-left">
+                  <div class="cart-item-image-wrap">
+                    <img
+                      class="cart-item-img"
+                      [src]="item.foto"
+                      [alt]="item.nome"
+                    />
+                  </div>
+
+                  <div class="cart-item-info">
+                    <h3 class="cart-item-title">
+                      <a [routerLink]="['/product', item.id]">
+                        {{ item.nome }}
+                      </a>
+                    </h3>
+
+                    <div class="cart-item-bottom">
+                      <span class="cart-item-desc" *ngIf="item.descrizione">
+                        {{ item.descrizione }}
+                      </span>
                     </div>
 
-                    <p class="cart-empty-eyebrow">Nessun articolo</p>
-                    <h1 class="cart-empty-title">Il tuo carrello è vuoto</h1>
+                    <!-- PREZZO UNITARIO + META -->
+                    <div class="cart-item-meta">
+                      <span class="cart-item-unit-price">
+                        {{ item.prezzo | currency:'EUR':'symbol':'1.2-2' }}
+                      </span>
 
-                    <p class="cart-empty-text">
-                        Non hai ancora aggiunto alcun prodotto al carrello.
-                        Esplora la collezione e trova quello giusto per te.
-                    </p>
+                      <span class="cart-item-category" *ngIf="item.categoria">
+                        {{ item.categoria }}
+                      </span>
 
-                    <a [routerLink]="['/products']" class="cart-empty-btn">
-                        <i class="bi bi-box-seam"></i>
-                        <span>Torna ai prodotti</span>
-                    </a>
+                      <span
+                        class="cart-item-stock"
+                        *ngIf="item.qta !== undefined"
+                      >
+                        Disponibili: {{ item.qta }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-            </ng-template>
 
+                <div class="cart-item-right">
+                  <div class="cart-price">
+                    {{ (item.prezzo * (item.quantita || 1)) | currency:'EUR':'symbol':'1.2-2' }}
+                  </div>
+
+                  <div class="cart-quantity">
+                    <button
+                      type="button"
+                      (click)="decrease(item.id)"
+                      aria-label="Riduci quantità"
+                      [disabled]="(item.quantita || 1) <= 1"
+                    >
+                      −
+                    </button>
+
+                    <span>{{ item.quantita || 1 }}</span>
+
+                    <button
+                      type="button"
+                      (click)="increase(item.id)"
+                      aria-label="Aumenta quantità"
+                      [disabled]="(item.quantita || 1) >= item.qta"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <button
+                    class="cart-remove"
+                    type="button"
+                    (click)="removeFromCart(item.id)"
+                    [attr.aria-label]="'Rimuovi ' + item.nome + ' dal carrello'"
+                    title="Rimuovi prodotto"
+                  >
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="cart-summary-card">
+            <div class="cart-summary-header">
+              <p class="cart-summary-eyebrow">Riepilogo</p>
+              <h2 class="cart-summary-title">Il tuo ordine</h2>
+              <p class="cart-summary-subtitle">
+                Controlla quantità e totale prima di procedere al checkout.
+              </p>
+            </div>
+
+            <div class="cart-summary-main">
+              <div class="cart-summary-lines compact">
+                <div class="cart-summary-line">
+                  <span>Quantità totale</span>
+                  <strong>{{ totalQuantity() }}</strong>
+                </div>
+              </div>
+
+              <div class="cart-summary-lines summary-bottom">
+                <div class="cart-summary-line total">
+                  <span>Totale</span>
+                  <strong>{{ finalTotal() | currency:'EUR':'symbol':'1.2-2' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="cart-summary-footer">
+              <p class="cart-summary-note">
+                Spedizione, consegna e pagamento verranno selezionati
+                nel passaggio successivo.
+              </p>
+
+              <button class="cart-checkout" type="button" (click)="checkout()">
+                <i class="bi bi-credit-card"></i>
+                <span>Vai al checkout</span>
+              </button>
+
+              <a [routerLink]="['/products']" class="cart-continue-link">
+                <i class="bi bi-arrow-left"></i>
+                <span>Continua lo shopping</span>
+              </a>
+            </div>
+          </aside>
         </div>
-    </section>
+      </div>
+
+      <ng-template #emptyCart>
+        <div class="cart-empty">
+          <div class="cart-empty-icons">
+            <i class="bi bi-bag"></i>
+          </div>
+
+          <p class="cart-empty-eyebrow">Nessun articolo</p>
+          <h1 class="cart-empty-title">Il tuo carrello è vuoto</h1>
+
+          <p class="cart-empty-text">
+            Non hai ancora aggiunto alcun prodotto al carrello.
+            Esplora la collezione e trova quello giusto per te.
+          </p>
+
+          <a [routerLink]="['/products']" class="cart-empty-btn">
+            <i class="bi bi-box-seam"></i>
+            <span>Torna ai prodotti</span>
+          </a>
+        </div>
+      </ng-template>
+
+    </div>
+  </section>
 </div>
 
 <app-ai-chat-drawer></app-ai-chat-drawer>

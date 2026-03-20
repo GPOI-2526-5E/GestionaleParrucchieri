@@ -426,7 +426,16 @@
   border-radius: 999px;
   background: rgba(212, 176, 106, 0.14);
   border: 1px solid rgba(212, 176, 106, 0.18);
-  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.cart-toast-icon i {
+  display: block;
+  color: #d4b06a;
+  font-size: 16px;
+  line-height: 1;
+  width: 16px;
+  height: 16px;
 }
 
 .cart-toast-text {

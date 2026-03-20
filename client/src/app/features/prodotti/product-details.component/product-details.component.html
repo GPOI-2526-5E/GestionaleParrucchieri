@@ -1,16 +1,7 @@
 <app-navbar></app-navbar>
 
-<div class="product-toast-container" *ngIf="showAlert">
-    <div class="product-toast" [class.closing]="isClosing" (click)="goToCart()" role="alert" tabindex="0">
-        <span class="product-toast-icon">🛍️</span>
-        <span class="product-toast-text">
-            <strong>{{ product?.nome }}</strong> aggiunto al carrello!
-        </span>
-        <span class="cart-toast-count" [class.d-none]="contProd < 2">X{{ contProd }}</span>
-    </div>
-</div>
-
 <div class="product-showcase">
+
     <div class="product-showcase-left">
         <p class="product-kicker">Prodotto esclusivo</p>
         <h1 class="product-showcase-title">{{ product?.nome }}</h1>
@@ -21,6 +12,7 @@
                 <i class="bi bi-tag me-2"></i>
                 Categoria: {{ product?.categoria }}
             </span>
+
             <span class="product-meta-pill">
                 <i class="bi bi-box-seam me-2"></i>
                 Disponibili: {{ product?.qta }}
@@ -30,14 +22,16 @@
 
     <div class="product-showcase-center">
         <div class="product-image-card">
-            <img [src]="product?.foto" alt="{{ product?.nome }}" />
+            <img [src]="product?.foto" [alt]="product?.nome" />
         </div>
     </div>
 
     <div class="product-showcase-right">
         <div class="product-price-card-top">
             <span class="product-price-label">Prezzo</span>
-            <div class="product-price">{{ product?.prezzo | currency:'EUR' }}</div>
+            <div class="product-price">
+                {{ product?.prezzo | currency:'EUR' }}
+            </div>
             <p class="product-price-note">Disponibile in stock limitato</p>
         </div>
 
@@ -48,6 +42,7 @@
                 <span>Quantità in magazzino</span>
                 <strong>{{ product?.qta }}</strong>
             </div>
+
             <div class="product-summary-row">
                 <span>Categoria</span>
                 <strong>{{ product?.categoria }}</strong>
@@ -59,10 +54,28 @@
             Aggiungi al carrello
         </button>
 
-        <button [routerLink]="['/products']" class="btn btn-back">
+        <button class="btn btn-back" [routerLink]="['/products']">
             <i class="bi bi-arrow-left me-2"></i>
             Torna al catalogo
         </button>
+    </div>
+</div>
+
+<div class="cart-toast-container" *ngIf="showCartAlert">
+    <div
+        class="cart-toast"
+        [class.closing]="isClosing"
+        (click)="goToCart()"
+        role="button"
+        tabindex="0"
+    >
+        <span class="cart-toast-icon">
+            <i class="bi bi-bag"></i>
+        </span>
+        <span class="cart-toast-text">{{ cartAlertMessage }}</span>
+        <span class="cart-toast-count" [class.d-none]="contProd === 1">
+            X{{ contProd }}
+        </span>
     </div>
 </div>
 
