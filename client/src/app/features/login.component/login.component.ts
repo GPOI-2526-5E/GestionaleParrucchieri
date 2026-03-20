@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login.component',
-  imports: [],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
   standalone: true
@@ -23,7 +25,7 @@ export class LoginComponent {
     .subscribe(//funzione che intercetta la risposta nel server
       res => {
         this.auth.saveToken(res.token);
-        this.route.navigate(['/']);
+        this.route.navigate(['/products']);
       }
     )
   }
