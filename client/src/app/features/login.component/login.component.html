@@ -1,39 +1,113 @@
-<div class="login-container">
-  <div class="login-image"></div>
+<div class="login-layout">
+  <!-- PANEL SINISTRO -->
+  <section class="login-visual">
+    <div class="login-visual-overlay"></div>
 
-  <div class="login-form-wrapper">
-    <div class="login-card">
-      <h3>Accedi</h3>
-      <form (submit)="login()">
-        <div class="mb-3">
+    <div class="login-visual-content">
+      <p class="login-visual-label">Luxury Beauty Experience</p>
+
+      <h1 class="login-visual-title">
+        Eleganza digitale
+        <span>per il tuo salone</span>
+      </h1>
+
+      <p class="login-visual-description">
+        Una piattaforma pensata per gestire servizi, prodotti e prenotazioni
+        con uno stile moderno, essenziale e professionale.
+      </p>
+    </div>
+  </section>
+
+  <!-- PANEL DESTRO -->
+  <section class="login-panel">
+    <div class="login-box">
+      <div class="login-header-top">
+        <button type="button" class="back-button" (click)="goBack()">
+          <span>←</span> Indietro
+        </button>
+      </div>
+
+      <div class="login-header">
+        <p class="login-eyebrow">Bentornato</p>
+        <h2 class="login-title">Accedi</h2>
+        <p class="login-subtitle">
+          Inserisci le tue credenziali per entrare nella tua area riservata
+        </p>
+      </div>
+
+      <form (ngSubmit)="login()" #loginForm="ngForm" novalidate class="login-form">
+        <div class="form-group">
           <label for="email" class="form-label">Email</label>
-          <input [(ngModel)]="email" type="email" class="form-control" id="email" placeholder="Inserisci la tua email"
-            name="email" required>
+          <input
+            [(ngModel)]="email"
+            type="email"
+            id="email"
+            name="email"
+            class="form-control clean-input"
+            placeholder="Inserisci la tua email"
+            required
+            email
+            #emailInput="ngModel"
+          />
+          <small class="input-error" *ngIf="emailInput.invalid && emailInput.touched">
+            Inserisci un indirizzo email valido.
+          </small>
         </div>
-        <div class="mb-3">
+
+        <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input [(ngModel)]="password" type="password" class="form-control" id="password"
-            placeholder="Inserisci la password" name="password" required>
+          <input
+            [(ngModel)]="password"
+            type="password"
+            id="password"
+            name="password"
+            class="form-control clean-input"
+            placeholder="Inserisci la password"
+            required
+            minlength="6"
+            #passwordInput="ngModel"
+          />
+          <small class="input-error" *ngIf="passwordInput.invalid && passwordInput.touched">
+            La password deve contenere almeno 6 caratteri.
+          </small>
         </div>
-        <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
-          <label class="form-check-label" for="rememberMe">Ricordami</label>
-        </div>
 
-        <button type="submit" class="btn btn-login w-100 mb-3">Login</button>
-
-        <div class="text-center">
-          <a href="#" class="login-link d-block mb-3">Hai dimenticato la password?</a>
-
-          <div class="text-center mt-3">
-            <p class="mb-2">Non hai un account?</p>
-
-            <a [routerLink]="['/register']" class="btn btn-outline-primary w-100">
-              Registrati ora
-            </a>
+        <div class="login-row">
+          <div class="form-check remember-check">
+            <input
+              [(ngModel)]="rememberMe"
+              type="checkbox"
+              class="form-check-input"
+              id="rememberMe"
+              name="rememberMe"
+            />
+            <label class="form-check-label" for="rememberMe">Ricordami</label>
           </div>
+
+          <a routerLink="/forgot-password" class="secondary-link">
+            Password dimenticata?
+          </a>
         </div>
+
+        <div class="login-server-error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <button
+          type="submit"
+          class="btn primary-login-btn"
+          [disabled]="loginForm.invalid || isLoading">
+          {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
+        </button>
+
+        <div class="login-divider">
+          <span>oppure</span>
+        </div>
+
+        <a [routerLink]="['/register']" class="btn secondary-login-btn">
+          Crea un nuovo account
+        </a>
       </form>
     </div>
-  </div>
+  </section>
 </div>
