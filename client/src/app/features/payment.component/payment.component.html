@@ -1,97 +1,97 @@
 <app-navbar></app-navbar>
 
 <div class="payment-page">
-  <div class="payment-container">
+    <div class="payment-section">
 
-    <div class="payment-header">
-      <p class="payment-eyebrow">Checkout sicuro</p>
-      <h2 class="payment-title">Completa il pagamento</h2>
-      <p class="payment-subtitle">
-        Inserisci i tuoi dati e finalizza l'acquisto in pochi secondi
-      </p>
+        <div class="payment-hero">
+            <p class="payment-eyebrow">Checkout sicuro</p>
+            <h1 class="payment-title">Completa il pagamento</h1>
+            <p class="payment-subtitle">
+                Inserisci i tuoi dati e finalizza l’ordine in modo rapido e sicuro.
+            </p>
+        </div>
+
+        <div class="payment-layout">
+
+            <!-- FORM -->
+            <div class="payment-form-card">
+                <h3 class="payment-section-title">Dati di pagamento</h3>
+
+                <form>
+                    <div class="form-group">
+                        <label>Nome sulla carta</label>
+                        <input type="text" placeholder="Mario Rossi" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Numero carta</label>
+                        <input type="text" placeholder="1234 5678 9012 3456" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Scadenza</label>
+                            <input type="text" placeholder="MM/AA" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" placeholder="123" />
+                        </div>
+                    </div>
+
+                    <h3 class="payment-section-title">Indirizzo</h3>
+
+                    <div class="form-group">
+                        <label>Indirizzo</label>
+                        <input type="text" placeholder="Via Roma 10" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Città</label>
+                            <input type="text" placeholder="Torino" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>CAP</label>
+                            <input type="text" placeholder="10100" />
+                        </div>
+                    </div>
+
+                    <button type="button" class="payment-submit">
+                        💳 Paga ora
+                    </button>
+                </form>
+            </div>
+
+            <!-- SUMMARY -->
+            <div class="payment-summary-card">
+                <h3 class="payment-section-title">Riepilogo ordine</h3>
+
+                <div class="summary-line">
+                    <span>Prodotti</span>
+                    <!-- <strong>{{ totalQuantity() }}</strong> -->
+                </div>
+
+                <div class="summary-line">
+                    <span>Totale prodotti</span>
+                    <!-- <strong>{{ finalTotal() | currency:'EUR' }}</strong> -->
+                </div>
+
+                <div class="summary-line">
+                    <span>Spedizione</span>
+                    <strong>Gratis</strong>
+                </div>
+
+                <div class="summary-line total">
+                    <span>Totale</span>
+                    <!-- <strong>{{ finalTotal() | currency:'EUR' }}</strong> -->
+                </div>
+            </div>
+
+        </div>
     </div>
-
-    <div class="payment-layout">
-
-      <!-- FORM -->
-      <div class="payment-form-card">
-        <h3 class="payment-section-title">Dati di pagamento</h3>
-
-        <form>
-          <div class="form-group">
-            <label>Nome sulla carta</label>
-            <input type="text" placeholder="Mario Rossi" />
-          </div>
-
-          <div class="form-group">
-            <label>Numero carta</label>
-            <input type="text" placeholder="1234 5678 9012 3456" />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Scadenza</label>
-              <input type="text" placeholder="MM/AA" />
-            </div>
-
-            <div class="form-group">
-              <label>CVV</label>
-              <input type="text" placeholder="123" />
-            </div>
-          </div>
-
-          <h3 class="payment-section-title">Indirizzo</h3>
-
-          <div class="form-group">
-            <label>Indirizzo</label>
-            <input type="text" placeholder="Via Roma 10" />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Città</label>
-              <input type="text" placeholder="Torino" />
-            </div>
-
-            <div class="form-group">
-              <label>CAP</label>
-              <input type="text" placeholder="10100" />
-            </div>
-          </div>
-
-          <button type="button" class="payment-submit">
-            💳 Paga ora
-          </button>
-        </form>
-      </div>
-
-      <!-- SUMMARY -->
-      <div class="payment-summary-card">
-        <h3 class="payment-section-title">Riepilogo ordine</h3>
-
-        <div class="summary-line">
-          <span>Prodotti</span>
-          <!-- <strong>{{ totalQuantity() }}</strong> -->
-        </div>
-
-        <div class="summary-line">
-          <span>Totale prodotti</span>
-          <!-- <strong>{{ finalTotal() | currency:'EUR' }}</strong> -->
-        </div>
-
-        <div class="summary-line">
-          <span>Spedizione</span>
-          <strong>Gratis</strong>
-        </div>
-
-        <div class="summary-line total">
-          <span>Totale</span>
-          <!-- <strong>{{ finalTotal() | currency:'EUR' }}</strong> -->
-        </div>
-      </div>
-
-    </div>
-  </div>
 </div>
 
 <app-ai-chat-drawer></app-ai-chat-drawer>
