@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
   private api = 'http://localhost:3000/api/auth';
-  private _token = signal<string | null> (localStorage.getItem("geophoto_token"));
+  private _token = signal<string | null> (localStorage.getItem("login_token"));
   isLoggedIn = computed(()=> !!this._token);
 
   constructor(private http: HttpClient, private router: Router){}
@@ -17,12 +17,12 @@ export class AuthService {
   }
 
   saveToken(token: string){
-    localStorage.setItem('geophoto_token', token);
+    localStorage.setItem('login_token', token);
     this._token.set(token);
   }
 
   logout(){
-    localStorage.removeItem('geophoto_token');
+    localStorage.removeItem('login_token');
     this._token.set(null);
     this.router.navigate(['/login']);
   }

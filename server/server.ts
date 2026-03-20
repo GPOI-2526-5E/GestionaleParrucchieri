@@ -7,16 +7,12 @@ import cloudinary, { UploadStream } from "cloudinary";
 import OpenAI from "openai";
 import mysql from "mysql2";
 import aiRoute from "./routes/api-ai";
+import loginRoute from "./routes/login";
+import {db} from "./db_parrucchieri";
 
 //Configurazione server express
 const app = express();
 const PORT = 3000;
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "db_parrucchieri"
-});
 
 //Carico le variabili di ambiente dal file .env
 dotenv.config({ path: ".env" });
@@ -88,40 +84,41 @@ app.get("/api/imgProdotti", async (req, res) => {
 });
 
 app.use("/api/chat", aiRoute);
+app.use("/api/auth", loginRoute);
 
 //Richieste DB
 
-//UTENTI
+// UTENTI
 app.get("/api/utenti", async (req, res) => {
-    db.query("SELECT * FROM utenti", (err, result) => {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.json(result);
-        }
-    });
+    try {
+        const [rows] = await db.query("SELECT * FROM utenti");
+        res.json(rows);
+    } catch (err) {
+        console.error("Errore recupero utenti:", err);
+        res.status(500).send(err);
+    }
 });
 
-//SERVIZI
+// SERVIZI
 app.get("/api/servizi", async (req, res) => {
-    db.query("SELECT * FROM servizi", (err, result) => {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.json(result);
-        }
-    });
+    try {
+        const [rows] = await db.query("SELECT * FROM servizi");
+        res.json(rows);
+    } catch (err) {
+        console.error("Errore recupero servizi:", err);
+        res.status(500).send(err);
+    }
 });
 
-//PRODOTTI
+// PRODOTTI
 app.get("/api/prodotti", async (req, res) => {
-    db.query("SELECT * FROM prodotti", (err, result) => {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            res.json(result);
-        }
-    });
+    try {
+        const [rows] = await db.query("SELECT * FROM prodotti");
+        res.json(rows);
+    } catch (err) {
+        console.error("Errore recupero prodotti:", err);
+        res.status(500).send(err);
+    }
 });
 
 app.listen(PORT, () => {

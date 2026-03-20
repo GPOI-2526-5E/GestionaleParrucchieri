@@ -1,32 +1,39 @@
-<<<<<<< HEAD
 <div class="login-container">
-  <!-- LATO SINISTRO: IMMAGINE -->
-  <div class="login-image">
-  </div>
+  <div class="login-image"></div>
 
-  <!-- LATO DESTRO: FORM -->
   <div class="login-form-wrapper">
     <div class="login-card">
       <h3>Accedi</h3>
-      <form>
+      <form (submit)="login()">
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" placeholder="Inserisci la tua email" required>
+          <input [(ngModel)]="email" type="email" class="form-control" id="email" placeholder="Inserisci la tua email"
+            name="email" required>
         </div>
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
-          <input type="password" class="form-control" id="password" placeholder="Inserisci la password" required>
+          <input [(ngModel)]="password" type="password" class="form-control" id="password"
+            placeholder="Inserisci la password" name="password" required>
         </div>
         <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="rememberMe">
+          <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
           <label class="form-check-label" for="rememberMe">Ricordami</label>
         </div>
-        <button type="submit" class="btn btn-login">Login</button>
-        <a href="#" class="login-link">Hai dimenticato la password?</a>
+
+        <button type="submit" class="btn btn-login w-100 mb-3">Login</button>
+
+        <div class="text-center">
+          <a href="#" class="login-link d-block mb-3">Hai dimenticato la password?</a>
+
+          <div class="text-center mt-3">
+            <p class="mb-2">Non hai un account?</p>
+
+            <a [routerLink]="['/register']" class="btn btn-outline-primary w-100">
+              Registrati ora
+            </a>
+          </div>
+        </div>
       </form>
     </div>
   </div>
 </div>
-=======
-<p>login.component works!</p>
->>>>>>> 80d773b46221a98ef22b47e1662417486c914d34
