@@ -1,6 +1,7 @@
 import { Component, Signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { NavbarComponent } from '../navbar.component/navbar.component';
 import { AiChatDrawerComponent } from '../ai-chat-drawer.component/ai-chat-drawer.component';
@@ -31,7 +32,7 @@ export class CartComponent {
     )
   );
 
-  constructor(private prodottoService: ProdottoService) {
+  constructor(private prodottoService: ProdottoService, private router: Router) {
     this.cartItems = this.prodottoService.cart;
   }
 
@@ -65,7 +66,19 @@ export class CartComponent {
   }
 
   checkout(): void {
-    alert('Procedi al checkout');
+    const cart = this.cartItems();
+
+    if (!cart || cart.length == 0) {
+      alert('Il carrello è vuoto');
+      return;
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem('cart_total', JSON.stringify(this.finalTotal()));
+    console.log(cart);
+
+    this.prodottoService.clearCart(); 
+
+    this.router.navigate(['/payment']);
   }
 
   trackById(index: number, item: Prodotto): number {

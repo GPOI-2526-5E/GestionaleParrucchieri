@@ -5,6 +5,7 @@ import { ProductDetailsComponent } from './features/prodotti/product-details.com
 import { ServicesListComponent } from './features/servizi/services-list.component/services-list.component';
 import { ServiceDetailsComponent } from './features/servizi/service-details.component/service-details.component';
 import { CartComponent } from './features/cart.component/cart.component';
+import { PaymentComponent } from './features/payment.component/payment.component';
 import { LoginComponent } from './features/login.component/login.component';
 import { RegisterComponent } from './features/register.component/register.component';
 
@@ -16,6 +17,7 @@ export const routes: Routes = [
     { path: 'services', component: ServicesListComponent },
     { path: 'service/:id', component: ServiceDetailsComponent },
     { path: 'cart', component: CartComponent },
+    { path: 'payment', component: PaymentComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: '**', redirectTo: '/home' }
