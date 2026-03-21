@@ -64,12 +64,8 @@
             class="form-control clean-input"
             placeholder="Inserisci la password"
             required
-            minlength="6"
             #passwordInput="ngModel"
           />
-          <small class="input-error" *ngIf="passwordInput.invalid && passwordInput.touched">
-            La password deve contenere almeno 6 caratteri.
-          </small>
         </div>
 
         <div class="login-row">
