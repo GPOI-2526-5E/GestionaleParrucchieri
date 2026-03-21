@@ -1,41 +1,57 @@
 <div class="login-layout">
-  <!-- PANEL SINISTRO -->
-  <section class="login-visual">
+  <!-- SFONDO / VISUAL -->
+  <section class="login-visual" aria-hidden="true">
     <div class="login-visual-overlay"></div>
+    <div class="login-visual-soft-light"></div>
 
-    <div class="login-visual-content">
-      <p class="login-visual-label">Luxury Beauty Experience</p>
+    <div class="login-visual-inner">
+      <div class="brand-mark">I Parrucchieri · Fossano</div>
 
-      <h1 class="login-visual-title">
-        Eleganza digitale
-        <span>per il tuo salone</span>
-      </h1>
+      <div class="login-visual-content">
+        <p class="login-visual-label">Benvenuti nel salone</p>
 
-      <p class="login-visual-description">
-        Una piattaforma pensata per gestire servizi, prodotti e prenotazioni
-        con uno stile moderno, essenziale e professionale.
-      </p>
+        <h1 class="login-visual-title">
+          Bellezza, stile
+          <span>e cura dei dettagli</span>
+        </h1>
+
+        <p class="login-visual-description">
+          Accedi alla tua area riservata per gestire prenotazioni, appuntamenti
+          e servizi in modo semplice, elegante e veloce.
+        </p>
+
+        <div class="login-visual-signature">
+          Un’esperienza professionale firmata I Parrucchieri
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- PANEL DESTRO -->
+  <!-- FORM -->
   <section class="login-panel">
     <div class="login-box">
       <div class="login-header-top">
         <button type="button" class="back-button" (click)="goBack()">
-          <span>←</span> Indietro
+          <span class="back-icon" aria-hidden="true">←</span>
+          <span>Torna indietro</span>
         </button>
       </div>
 
       <div class="login-header">
-        <p class="login-eyebrow">Bentornato</p>
+        <p class="login-eyebrow">Area clienti</p>
         <h2 class="login-title">Accedi</h2>
         <p class="login-subtitle">
-          Inserisci le tue credenziali per entrare nella tua area riservata
+          Inserisci le tue credenziali per entrare nella tua area personale.
         </p>
       </div>
 
-      <form (ngSubmit)="login()" #loginForm="ngForm" novalidate class="login-form">
+      <form
+        (ngSubmit)="login()"
+        #loginForm="ngForm"
+        novalidate
+        class="login-form"
+        autocomplete="on"
+      >
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
           <input
@@ -44,12 +60,19 @@
             id="email"
             name="email"
             class="form-control clean-input"
-            placeholder="Inserisci la tua email"
+            placeholder="nome@email.com"
             required
             email
+            autocomplete="email"
+            aria-describedby="emailError"
+            [attr.aria-invalid]="emailInput.invalid && emailInput.touched"
             #emailInput="ngModel"
           />
-          <small class="input-error" *ngIf="emailInput.invalid && emailInput.touched">
+          <small
+            id="emailError"
+            class="input-error"
+            *ngIf="emailInput.invalid && emailInput.touched"
+          >
             Inserisci un indirizzo email valido.
           </small>
         </div>
@@ -62,14 +85,24 @@
             id="password"
             name="password"
             class="form-control clean-input"
-            placeholder="Inserisci la password"
+            placeholder="Inserisci la tua password"
             required
+            autocomplete="current-password"
+            aria-describedby="passwordError"
+            [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched"
             #passwordInput="ngModel"
           />
+          <small
+            id="passwordError"
+            class="input-error"
+            *ngIf="passwordInput.invalid && passwordInput.touched"
+          >
+            Inserisci la password.
+          </small>
         </div>
 
         <div class="login-row">
-          <div class="form-check remember-check">
+          <label class="remember-check" for="rememberMe">
             <input
               [(ngModel)]="rememberMe"
               type="checkbox"
@@ -77,31 +110,37 @@
               id="rememberMe"
               name="rememberMe"
             />
-            <label class="form-check-label" for="rememberMe">Ricordami</label>
-          </div>
+            <span class="form-check-label">Ricordami</span>
+          </label>
 
           <a routerLink="/forgot-password" class="secondary-link">
-            Password dimenticata?
+            Hai dimenticato la password?
           </a>
         </div>
 
-        <div class="login-server-error" *ngIf="errorMessage">
+        <div
+          class="login-server-error"
+          *ngIf="errorMessage"
+          role="alert"
+          aria-live="polite"
+        >
           {{ errorMessage }}
         </div>
 
         <button
           type="submit"
           class="btn primary-login-btn"
-          [disabled]="loginForm.invalid || isLoading">
+          [disabled]="loginForm.invalid || isLoading"
+        >
           {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
         </button>
 
-        <div class="login-divider">
+        <div class="login-divider" aria-hidden="true">
           <span>oppure</span>
         </div>
 
         <a [routerLink]="['/register']" class="btn secondary-login-btn">
-          Crea un nuovo account
+          Crea il tuo account
         </a>
       </form>
     </div>
