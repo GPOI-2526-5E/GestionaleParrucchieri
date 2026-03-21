@@ -76,8 +76,6 @@ export class CartComponent {
     localStorage.setItem('cart_total', JSON.stringify(this.finalTotal()));
     console.log(cart);
 
-    this.prodottoService.clearCart(); 
-
     this.router.navigate(['/payment']);
   }
 

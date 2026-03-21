@@ -2,94 +2,104 @@
 
 <div class="payment-page">
     <div class="payment-section">
+        <div class="container">
 
-        <div class="payment-hero">
-            <p class="payment-eyebrow">Checkout sicuro</p>
-            <h1 class="payment-title">Completa il pagamento</h1>
-            <p class="payment-subtitle">
-                Inserisci i tuoi dati e finalizza l’ordine in modo rapido e sicuro.
-            </p>
-        </div>
-
-        <div class="payment-layout">
-
-            <!-- FORM -->
-            <div class="payment-form-card">
-                <h3 class="payment-section-title">Dati di pagamento</h3>
-
-                <form>
-                    <div class="form-group">
-                        <label>Nome sulla carta</label>
-                        <input type="text" placeholder="Mario Rossi" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Numero carta</label>
-                        <input type="text" placeholder="1234 5678 9012 3456" />
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Scadenza</label>
-                            <input type="text" placeholder="MM/AA" />
-                        </div>
-
-                        <div class="form-group">
-                            <label>CVV</label>
-                            <input type="text" placeholder="123" />
-                        </div>
-                    </div>
-
-                    <h3 class="payment-section-title">Indirizzo</h3>
-
-                    <div class="form-group">
-                        <label>Indirizzo</label>
-                        <input type="text" placeholder="Via Roma 10" />
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Città</label>
-                            <input type="text" placeholder="Torino" />
-                        </div>
-
-                        <div class="form-group">
-                            <label>CAP</label>
-                            <input type="text" placeholder="10100" />
-                        </div>
-                    </div>
-
-                    <button type="button" class="payment-submit">
-                        💳 Paga ora
-                    </button>
-                </form>
+            <div class="payment-hero">
+                <p class="payment-eyebrow">Checkout sicuro</p>
+                <h1 class="payment-title">Completa il pagamento</h1>
+                <p class="payment-subtitle">
+                    Inserisci i tuoi dati e finalizza l’ordine in modo rapido e sicuro.
+                </p>
             </div>
 
-            <!-- SUMMARY -->
-            <div class="payment-summary-card">
-                <h3 class="payment-section-title">Riepilogo ordine</h3>
+            <div class="payment-layout">
 
-                <div class="summary-line">
-                    <span>Prodotti</span>
-                    <!-- <strong>{{ totalQuantity() }}</strong> -->
+                <!-- FORM -->
+                <div class="payment-form-card">
+                    <h3 class="payment-section-title">Dati di pagamento</h3>
+
+                    <form>
+                        <div class="form-group">
+                            <label>Nome sulla carta</label>
+                            <input type="text" placeholder="Mario Rossi" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Numero carta</label>
+                            <input type="text" placeholder="1234 5678 9012 3456" />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Scadenza</label>
+                                <input type="text" placeholder="MM/AA" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="text" placeholder="123" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Indirizzo</label>
+                            <input type="text" placeholder="Via Roma 10" />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Città</label>
+                                <input type="text" placeholder="Torino" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>CAP</label>
+                                <input type="text" placeholder="10100" />
+                            </div>
+                        </div>
+
+                        <button type="button" class="payment-submit" (click)="pay()">
+                            💳 Paga ora
+                        </button>
+                    </form>
                 </div>
 
-                <div class="summary-line">
-                    <span>Totale prodotti</span>
-                    <!-- <strong>{{ finalTotal() | currency:'EUR' }}</strong> -->
+                <div class="payment-summary-card">
+                    <h3 class="payment-section-title">Riepilogo ordine</h3>
+
+                    <!-- 🛒 LISTA PRODOTTI -->
+                    <div class="summary-products-row">
+                        <div class="summary-product" *ngFor="let item of cartItems; trackBy: trackById">
+
+                            <div class="summary-product-img-wrapper">
+                                <img [src]="item.foto" />
+
+                                <!-- 🔥 BADGE QUANTITÀ -->
+                                <span class="summary-product-badge" *ngIf="(item.quantita || 1) > 1">
+                                    {{ item.quantita }}
+                                </span>
+                            </div>
+
+                            <a [routerLink]="['/product', item.id]" class="summary-product-name">
+                                {{ item.nome }}
+                            </a>
+
+                        </div>
+                    </div>
+
+                    <!-- 📊 DATI -->
+                    <div class="summary-line">
+                        <span>Quantità totale</span>
+                        <strong>{{ totalQuantity }}</strong>
+                    </div>
+
+                    <div class="summary-line total">
+                        <span>Totale</span>
+                        <strong>{{ finalTotal | currency:'EUR' }}</strong>
+                    </div>
                 </div>
 
-                <div class="summary-line">
-                    <span>Spedizione</span>
-                    <strong>Gratis</strong>
-                </div>
-
-                <div class="summary-line total">
-                    <span>Totale</span>
-                    <!-- <strong>{{ finalTotal() | currency:'EUR' }}</strong> -->
-                </div>
             </div>
-
         </div>
     </div>
 </div>
