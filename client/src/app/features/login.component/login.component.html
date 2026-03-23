@@ -131,6 +131,7 @@
           type="submit"
           class="btn primary-login-btn"
           [disabled]="loginForm.invalid || isLoading"
+          (ckick)="login()" 
         >
           {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
         </button>
