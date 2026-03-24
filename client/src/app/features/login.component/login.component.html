@@ -1,5 +1,4 @@
 <div class="login-layout">
-  <!-- SFONDO / VISUAL -->
   <section class="login-visual" aria-hidden="true">
     <div class="login-visual-overlay"></div>
     <div class="login-visual-soft-light"></div>
@@ -27,7 +26,6 @@
     </div>
   </section>
 
-  <!-- FORM -->
   <section class="login-panel">
     <div class="login-box">
       <div class="login-header-top">
@@ -45,6 +43,19 @@
         </p>
       </div>
 
+      <div
+        *ngIf="alertMessage"
+        class="custom-alert"
+        [ngClass]="alertType"
+        role="alert"
+        aria-live="polite"
+      >
+        <span class="alert-icon">
+          {{ alertType === 'success' ? '✓' : alertType === 'warning' ? '!' : '✕' }}
+        </span>
+        <span>{{ alertMessage }}</span>
+      </div>
+
       <form
         (ngSubmit)="login()"
         #loginForm="ngForm"
@@ -56,6 +67,7 @@
           <label for="email" class="form-label">Email</label>
           <input
             [(ngModel)]="email"
+            #emailInput="ngModel"
             type="email"
             id="email"
             name="email"
@@ -65,8 +77,7 @@
             email
             autocomplete="email"
             aria-describedby="emailError"
-            [attr.aria-invalid]="emailInput.invalid && emailInput.touched"
-            #emailInput="ngModel"
+            [attr.aria-invalid]="emailInput.invalid && emailInput.touched ? 'true' : 'false'"
           />
           <small
             id="emailError"
@@ -81,23 +92,24 @@
           <label for="password" class="form-label">Password</label>
           <input
             [(ngModel)]="password"
+            #passwordInput="ngModel"
             type="password"
             id="password"
             name="password"
             class="form-control clean-input"
             placeholder="Inserisci la tua password"
             required
+            minlength="4"
             autocomplete="current-password"
             aria-describedby="passwordError"
-            [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched"
-            #passwordInput="ngModel"
+            [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched ? 'true' : 'false'"
           />
           <small
             id="passwordError"
             class="input-error"
             *ngIf="passwordInput.invalid && passwordInput.touched"
           >
-            Inserisci la password.
+            Inserisci una password valida.
           </small>
         </div>
 
@@ -118,20 +130,10 @@
           </a>
         </div>
 
-        <div
-          class="login-server-error"
-          *ngIf="errorMessage"
-          role="alert"
-          aria-live="polite"
-        >
-          {{ errorMessage }}
-        </div>
-
         <button
           type="submit"
           class="btn primary-login-btn"
           [disabled]="loginForm.invalid || isLoading"
-          (ckick)="login()" 
         >
           {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
         </button>
@@ -140,7 +142,21 @@
           <span>oppure</span>
         </div>
 
-        <a [routerLink]="['/register']" class="btn secondary-login-btn">
+        <button
+          type="button"
+          class="btn google-login-btn"
+          (click)="loginWithGoogle()"
+          [disabled]="isLoading"
+        >
+          <img
+            src="https://developers.google.com/identity/images/g-logo.png"
+            alt="Google"
+            class="google-icon"
+          />
+          Continua con Google
+        </button>
+
+        <a routerLink="/register" class="btn secondary-login-btn">
           Crea il tuo account
         </a>
       </form>
