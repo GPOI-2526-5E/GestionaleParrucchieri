@@ -4,6 +4,7 @@
     <div class="payment-section">
         <div class="container">
 
+            <!-- HERO -->
             <div class="payment-hero">
                 <p class="payment-eyebrow">Checkout sicuro</p>
                 <h1 class="payment-title">Completa il pagamento</h1>
@@ -19,6 +20,8 @@
                     <h3 class="payment-section-title">Dati di pagamento</h3>
 
                     <form>
+
+                        <!-- INPUT -->
                         <div class="form-group">
                             <label>Nome sulla carta</label>
                             <input type="text" placeholder="Mario Rossi" />
@@ -41,40 +44,88 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Indirizzo</label>
-                            <input type="text" placeholder="Via Roma 10" />
-                        </div>
+                        <div class="shipping-section">
+                            <h3 class="payment-section-title">Consegna</h3>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Città</label>
-                                <input type="text" placeholder="Torino" />
+                            <div class="shipping-options">
+
+                                <!-- 1️⃣ RITIRO -->
+                                <label class="shipping-option">
+                                    <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
+                                        (change)="onShippingChange()" value="pickup" />
+
+                                    <div class="shipping-content">
+                                        <div class="shipping-top">
+                                            <span class="shipping-title">Ritiro in negozio</span>
+                                            <span class="shipping-price free">Gratis</span>
+                                        </div>
+                                        <p>Disponibile oggi</p>
+                                    </div>
+                                </label>
+
+                                <!-- 2️⃣ STANDARD -->
+                                <label class="shipping-option">
+                                    <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
+                                        (change)="onShippingChange()" value="standard" />
+
+                                    <div class="shipping-content">
+                                        <div class="shipping-top">
+                                            <span class="shipping-title">Standard</span>
+                                            <span class="shipping-price free">Gratis</span>
+                                        </div>
+                                        <p>5-7 giorni lavorativi</p>
+                                    </div>
+                                </label>
+
+                                <label class="shipping-option">
+                                    <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
+                                        (change)="onShippingChange()" value="express" />
+
+                                    <div class="shipping-content">
+                                        <div class="shipping-top">
+                                            <span class="shipping-title">Express</span>
+                                            <span class="shipping-price">9.99€</span>
+                                        </div>
+                                        <p>2-4 giorni lavorativi</p>
+                                    </div>
+                                </label>
+
+                                <label class="shipping-option">
+                                    <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
+                                        (change)="onShippingChange()" value="locker" />
+
+                                    <div class="shipping-content">
+                                        <div class="shipping-top">
+                                            <span class="shipping-title">Locker</span>
+                                            <span class="shipping-price free">Gratis</span>
+                                        </div>
+                                        <p>Seleziona punto sulla mappa</p>
+                                    </div>
+                                </label>
+
                             </div>
 
-                            <div class="form-group">
-                                <label>CAP</label>
-                                <input type="text" placeholder="10100" />
+                            <div class="locker-map" *ngIf="shippingMethod === 'locker'">
+                                <div #mapContainer class="real-map"></div>
+                                <div class="locker-info" *ngIf="selectedLocker">
+                                    <strong>{{ selectedLocker.name }}</strong>
+                                    <p>{{ selectedLocker.address }} - {{ selectedLocker.city }}</p>
+                                </div>
+
                             </div>
                         </div>
-
-                        <button type="button" class="payment-submit" (click)="pay()">
-                            💳 Paga ora
-                        </button>
                     </form>
                 </div>
 
                 <div class="payment-summary-card">
                     <h3 class="payment-section-title">Riepilogo ordine</h3>
 
-                    <!-- 🛒 LISTA PRODOTTI -->
                     <div class="summary-products-row">
                         <div class="summary-product" *ngFor="let item of cartItems; trackBy: trackById">
 
                             <div class="summary-product-img-wrapper">
                                 <img [src]="item.foto" />
 
-                                <!-- 🔥 BADGE QUANTITÀ -->
                                 <span class="summary-product-badge" *ngIf="(item.quantita || 1) > 1">
                                     {{ item.quantita }}
                                 </span>
@@ -83,20 +134,26 @@
                             <a [routerLink]="['/product', item.id]" class="summary-product-name">
                                 {{ item.nome }}
                             </a>
-
                         </div>
                     </div>
 
-                    <!-- 📊 DATI -->
                     <div class="summary-line">
                         <span>Quantità totale</span>
                         <strong>{{ totalQuantity }}</strong>
+                    </div>
+
+                    <div class="summary-line">
+                        <span>Spedizione</span>
+                        <strong>{{ shippingCost | currency:'EUR' }}</strong>
                     </div>
 
                     <div class="summary-line total">
                         <span>Totale</span>
                         <strong>{{ finalTotal | currency:'EUR' }}</strong>
                     </div>
+                    <button type="button" class="payment-submit" (click)="pay()">
+                        💳 Paga ora
+                    </button>
                 </div>
 
             </div>
