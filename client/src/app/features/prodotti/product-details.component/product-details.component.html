@@ -1,6 +1,13 @@
 <app-navbar></app-navbar>
 
 <div class="product-showcase">
+    <div class="card-alert error" [class.hide]="!showError" [class.shake]="shakeAnimation">
+
+        <div class="alert-icon">!</div>
+        <div class="alert-text">
+            {{ errorMessage }}
+        </div>
+    </div>
 
     <div class="product-showcase-left">
         <p class="product-kicker">Prodotto esclusivo</p>
@@ -62,13 +69,7 @@
 </div>
 
 <div class="cart-toast-container" *ngIf="showCartAlert">
-    <div
-        class="cart-toast"
-        [class.closing]="isClosing"
-        (click)="goToCart()"
-        role="button"
-        tabindex="0"
-    >
+    <div class="cart-toast" [class.closing]="isClosing" (click)="goToCart()" role="button" tabindex="0">
         <span class="cart-toast-icon">
             <i class="bi bi-bag"></i>
         </span>

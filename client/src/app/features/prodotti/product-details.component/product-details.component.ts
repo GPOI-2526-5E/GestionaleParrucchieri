@@ -21,14 +21,23 @@ import { ProdottoService, Prodotto } from '../../../services/prodotto';
 export class ProductDetailsComponent implements OnInit, OnDestroy {
   product: Prodotto | undefined;
 
-  showCartAlert: boolean = false;
-  isClosing: boolean = false;
-  cartAlertMessage: string = '';
-  contProd: number = 0;
+  // 🔴 ERROR ALERT
+  showError = false;
+  shakeAnimation = false;
+  errorMessage = '';
+  private errorTimeout: any;
+
+  // 🛒 CART TOAST
+  showCartAlert = false;
+  isClosing = false;
+  shakeCart = false;
+
+  cartAlertMessage = '';
+  contProd = 0;
 
   private currentAlertProductId: number | null = null;
-  private alertTimeout: ReturnType<typeof setTimeout> | null = null;
-  private removeAlertTimeout: ReturnType<typeof setTimeout> | null = null;
+  private alertTimeout: any;
+  private removeAlertTimeout: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -36,95 +45,104 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private router: Router,
     private ngZone: NgZone
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    this.resetAlertState();
-
     const productId = Number(this.route.snapshot.paramMap.get('id'));
 
     if (!isNaN(productId)) {
-      this.prodottoService.getProdottoById(productId).subscribe({
-        next: (p) => {
-          this.ngZone.run(() => {
-            this.product = p;
-            this.cdr.detectChanges();
-          });
-        },
-        error: () => {
-          this.ngZone.run(() => {
-            this.product = undefined;
-            this.cdr.detectChanges();
-          });
-        }
+      this.prodottoService.getProdottoById(productId).subscribe(p => {
+        this.product = p;
+        this.cdr.detectChanges();
       });
-    } else {
-      this.product = undefined;
-      this.cdr.detectChanges();
     }
   }
 
   ngOnDestroy(): void {
-    this.clearAlertTimers();
-    this.resetAlertState();
-  }
-
-  private clearAlertTimers(): void {
-    if (this.alertTimeout) {
-      clearTimeout(this.alertTimeout);
-      this.alertTimeout = null;
-    }
-
-    if (this.removeAlertTimeout) {
-      clearTimeout(this.removeAlertTimeout);
-      this.removeAlertTimeout = null;
-    }
-  }
-
-  private resetAlertState(): void {
-    this.showCartAlert = false;
-    this.isClosing = false;
-    this.cartAlertMessage = '';
-    this.contProd = 0;
-    this.currentAlertProductId = null;
+    clearTimeout(this.alertTimeout);
+    clearTimeout(this.removeAlertTimeout);
+    clearTimeout(this.errorTimeout);
   }
 
   addToCart(): void {
     if (!this.product) return;
 
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existing = cart.find((p: Prodotto) => p.id === this.product!.id);
+    const qty = existing ? (existing.quantita || 1) : 0;
+
+    if (qty >= this.product.qta) {
+      this.showErrorAlert(
+        `Limite massimo raggiunto (${this.product.qta})`
+      );
+      return;
+    }
+
+    // ✅ AGGIUNTA OK
+    this.prodottoService.addProductToCart(this.product);
+
+    const sameProduct =
+      this.showCartAlert &&
+      this.currentAlertProductId === this.product.id;
+
+    this.showCartAlert = true;
+    this.isClosing = false;
+    this.currentAlertProductId = this.product.id;
+    this.cartAlertMessage = `${this.product.nome} aggiunto`;
+
+    this.contProd = sameProduct ? this.contProd + 1 : 1;
+
+    // 🔥 SHAKE TOAST
+    this.shakeCart = false;
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.shakeCart = true;
+      this.cdr.detectChanges();
+    }, 10);
+
+    clearTimeout(this.alertTimeout);
+
+    this.alertTimeout = setTimeout(() => {
+      this.ngZone.run(() => {
+        this.isClosing = true;
+        this.cdr.detectChanges();
+
+        this.removeAlertTimeout = setTimeout(() => {
+          this.ngZone.run(() => {
+            this.showCartAlert = false;
+            this.contProd = 0;
+            this.cdr.detectChanges();
+          });
+        }, 300);
+      });
+    }, 2000);
+  }
+
+  showErrorAlert(msg: string) {
     this.ngZone.run(() => {
-      this.prodottoService.addProductToCart(this.product!);
+      this.errorMessage = msg;
+      this.showError = true;
 
-      const sameProductAlertVisible =
-        this.showCartAlert && this.currentAlertProductId === this.product!.id;
-
-      this.showCartAlert = true;
-      this.isClosing = false;
-      this.currentAlertProductId = this.product!.id;
-      this.cartAlertMessage = `${this.product!.nome} aggiunto al carrello`;
-
-      if (sameProductAlertVisible) {
-        this.contProd += 1;
-      } else {
-        this.contProd = 1;
-      }
-
-      this.clearAlertTimers();
+      // reset shake
+      this.shakeAnimation = false;
       this.cdr.detectChanges();
 
-      this.alertTimeout = setTimeout(() => {
+      setTimeout(() => {
         this.ngZone.run(() => {
-          this.isClosing = true;
+          this.shakeAnimation = true;
           this.cdr.detectChanges();
-
-          this.removeAlertTimeout = setTimeout(() => {
-            this.ngZone.run(() => {
-              this.resetAlertState();
-              this.cdr.detectChanges();
-            });
-          }, 320);
         });
-      }, 2000);
+      }, 10);
+
+      clearTimeout(this.errorTimeout);
+
+      this.errorTimeout = setTimeout(() => {
+        this.ngZone.run(() => {
+          this.showError = false;
+          this.cdr.detectChanges(); // 👈 QUESTO È IL FIX
+        });
+      }, 2500);
     });
   }
 

@@ -511,6 +511,199 @@
   }
 }
 
+/* ===== ALERT ERRORE (GLASS RED SOFT) ===== */
+.card-alert {
+  position: fixed;
+
+  top: 120px;
+
+  right: 24px;
+
+  max-width: 380px;
+  width: calc(100% - 40px);
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 14px;
+  border-radius: 16px;
+
+  background: rgba(180, 40, 40, 0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 120, 120, 0.25);
+
+  color: #fff;
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  z-index: 9999;
+
+  opacity: 1;
+  transform: translateY(0);
+
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+/* USCITA */
+.card-alert.hide {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* ICONA */
+.alert-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: bold;
+}
+
+/* TESTO */
+.alert-text {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ===== TOAST ===== */
+.cart-toast-container {
+  position: fixed;
+  top: 170px;
+  right: 24px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.cart-toast {
+  min-width: 240px;
+  max-width: 320px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 14px;
+  border-radius: 16px;
+
+  /* 🔥 GLASS STYLE COERENTE */
+  background: rgba(40, 40, 40, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(212, 176, 106, 0.25);
+
+  color: #f5f5f5;
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.35);
+
+  opacity: 1;
+  transform: translateX(0);
+
+  animation: toastEnter 0.3s ease;
+
+  transition:
+    opacity 0.32s ease,
+    transform 0.32s ease;
+
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* USCITA */
+.cart-toast.closing {
+  opacity: 0;
+  transform: translateX(40px);
+}
+
+/* ICONA */
+.cart-toast-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: rgba(212, 176, 106, 0.18);
+}
+
+/* TESTO */
+.cart-toast-text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* COUNT */
+.cart-toast-count {
+  font-weight: 700;
+  color: #f0d79e;
+  margin-left: 6px;
+}
+
+/* ===== ANIMAZIONI ===== */
+
+/* ENTRATA */
+@keyframes toastEnter {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* SHAKE UNIVERSALE */
+.card-alert.shake,
+.cart-toast.shake {
+  animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-5px);
+  }
+
+  40% {
+    transform: translateX(5px);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  80% {
+    transform: translateX(4px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
 /* ---------- SMALL MOBILE ---------- */
 @media (max-width: 480px) {
   .product-showcase {

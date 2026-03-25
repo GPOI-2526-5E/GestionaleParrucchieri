@@ -81,12 +81,22 @@
   z-index: 20;
 
   pointer-events: none;
+
+  /* 🔥 GLASS BASE */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-/* ROSSO */
+/* 🔴 VERSIONE SOFT (NON ROSSO PIENO) */
 .card-alert.error {
-  background: linear-gradient(135deg, #e53935, #b71c1c);
-  color: white;
+  background: rgba(200, 60, 60, 0.18);
+  /* rosso leggero */
+  border: 1px solid rgba(255, 120, 120, 0.25);
+  color: #ffecec;
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* ICONA */
@@ -94,11 +104,14 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
 
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* 🔥 ICONA SOFT */
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
 }
 
 /* USCITA */

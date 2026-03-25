@@ -34,6 +34,15 @@ export class PaymentComponent implements AfterViewChecked {
   shippingMethod: string = 'standard';
   shippingCost: number = 0;
 
+  cardName: string = '';
+  cardNumber: string = '';
+  expiry: string = '';
+  cvv: string = '';
+
+  address: string = '';
+  city: string = '';
+  zip: string = '';
+
   @ViewChild('mapContainer') mapContainer!: ElementRef;
   map!: L.Map;
   mapInitialized = false;
@@ -98,6 +107,75 @@ export class PaymentComponent implements AfterViewChecked {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(this.map);
+  }
+
+  isValidCardNumber(): boolean {
+    const clean = this.cardNumber.replace(/\s+/g, '');
+    return /^[0-9]{16}$/.test(clean);
+  }
+
+  isValidName(): boolean {
+    return this.cardName.trim().length >= 3;
+  }
+
+  isValidExpiry(): boolean {
+    return /^(0[1-9]|1[0-2])\/\d{2}$/.test(this.expiry);
+  }
+
+  isValidCVV(): boolean {
+    return /^[0-9]{3,4}$/.test(this.cvv);
+  }
+
+  isValidAddress(): boolean {
+    return this.address.trim() !== '' &&
+      this.city.trim() !== '' &&
+      /^[0-9]{5}$/.test(this.zip);
+  }
+
+  isPayDisabled(): boolean {
+
+    if (
+      !this.isValidName() ||
+      !this.isValidCardNumber() ||
+      !this.isValidExpiry() ||
+      !this.isValidCVV()
+    ) {
+      return true;
+    }
+
+    if (this.shippingMethod === 'locker' && !this.selectedLocker) {
+      return true;
+    }
+
+    if (
+      (this.shippingMethod === 'standard' || this.shippingMethod === 'express') &&
+      !this.isValidAddress()
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  getPayTooltip(): string {
+
+    if (!this.isValidName()) return 'Inserisci nome valido';
+    if (!this.isValidCardNumber()) return 'Numero carta non valido';
+    if (!this.isValidExpiry()) return 'Scadenza non valida (MM/AA)';
+    if (!this.isValidCVV()) return 'CVV non valido';
+
+    if (this.shippingMethod === 'locker' && !this.selectedLocker) {
+      return 'Seleziona un locker';
+    }
+
+    if (
+      (this.shippingMethod === 'standard' || this.shippingMethod === 'express') &&
+      !this.isValidAddress()
+    ) {
+      return 'Completa indirizzo (CAP valido)';
+    }
+
+    return '';
   }
 
   loadLockers() {
@@ -176,8 +254,7 @@ export class PaymentComponent implements AfterViewChecked {
   }
 
   pay(): void {
-    if (this.shippingMethod === 'locker' && !this.selectedLocker) {
-      alert('Seleziona un locker dalla mappa');
+    if (this.isPayDisabled()) {
       return;
     }
 
