@@ -10,10 +10,11 @@ interface UserProfile {
   nome: string;
   cognome: string;
   email: string;
-  telefono: string | null;
-  data_nascita: string | null;
+  telefono: string;
+  data_nascita: string;
   ruolo: string;
   hasPassword?: boolean;
+  photoURL?: string | null;
 }
 
 @Component({
@@ -43,9 +44,29 @@ export class InfoUtenteComponent implements OnInit {
   showCompletionWarning = false;
   disableCancelButton = false;
   completionMessage = '';
-
-  // resta true per tutto il flusso di completamento
   requirePasswordForCompletion = false;
+
+  showPassword = false;
+  showConfirmPassword = false;
+
+  showVerifyPasswordPanel = false;
+  showChangePasswordPanel = false;
+
+  verifyCurrentPassword = '';
+  showVerifyCurrentPassword = false;
+  isVerifyingPassword = false;
+  verifyPasswordMessage = '';
+  verifyPasswordError = '';
+
+  currentPasswordChange = '';
+  newPasswordChange = '';
+  confirmNewPasswordChange = '';
+  showCurrentPasswordChange = false;
+  showNewPasswordChange = false;
+  showConfirmNewPasswordChange = false;
+  isChangingPassword = false;
+  changePasswordMessage = '';
+  changePasswordError = '';
 
   constructor(
     private http: HttpClient,
@@ -85,14 +106,12 @@ export class InfoUtenteComponent implements OnInit {
       return;
     }
 
-    const nome = String(this.user.nome ?? '').trim();
-    const cognome = String(this.user.cognome ?? '').trim();
-    const telefono = String(this.user.telefono ?? '').trim();
-    const dataNascita = String(this.user.data_nascita ?? '').trim();
+    const nome = String(this.user.nome).trim();
+    const cognome = String(this.user.cognome).trim();
+    const telefono = String(this.user.telefono).trim();
+    const dataNascita = String(this.user.data_nascita).trim();
 
     this.missingRequiredFields = !nome || !cognome || !telefono || !dataNascita;
-
-    // La password resta richiesta per tutto il flusso di completamento
     this.passwordRequired = this.requirePasswordForCompletion;
 
     this.showCompletionWarning =
@@ -131,7 +150,7 @@ export class InfoUtenteComponent implements OnInit {
       return;
     }
 
-    this.http.get<UserProfile>(`${this.api}/me`, { headers }).subscribe({
+    this.http.get<any>(`${this.api}/me`, { headers }).subscribe({
       next: (res) => {
         if (!res) {
           this.errorMessage = 'Il server non ha restituito dati utente.';
@@ -146,18 +165,16 @@ export class InfoUtenteComponent implements OnInit {
           cognome: res.cognome ?? '',
           email: res.email ?? '',
           telefono: res.telefono != null ? String(res.telefono) : '',
-          data_nascita: res.data_nascita
-            ? String(res.data_nascita).substring(0, 10)
-            : '',
+          data_nascita: res.data_nascita ? String(res.data_nascita).substring(0, 10) : '',
           ruolo: res.ruolo ?? '',
-          hasPassword: res.hasPassword
+          hasPassword: res.hasPassword ?? false,
+          photoURL: res.photoURL ?? res.picture ?? res.avatar ?? null
         };
 
-        // Se i dati sono incompleti all'apertura, allora richiedi anche la password
-        const nome = String(this.user.nome ?? '').trim();
-        const cognome = String(this.user.cognome ?? '').trim();
-        const telefono = String(this.user.telefono ?? '').trim();
-        const dataNascita = String(this.user.data_nascita ?? '').trim();
+        const nome = String(this.user.nome).trim();
+        const cognome = String(this.user.cognome).trim();
+        const telefono = String(this.user.telefono).trim();
+        const dataNascita = String(this.user.data_nascita).trim();
 
         const hasIncompleteData = !nome || !cognome || !telefono || !dataNascita;
         this.requirePasswordForCompletion = hasIncompleteData;
@@ -197,6 +214,8 @@ export class InfoUtenteComponent implements OnInit {
     this.isEditMode = false;
     this.password = '';
     this.confirmPassword = '';
+    this.showPassword = false;
+    this.showConfirmPassword = false;
     this.cdr.detectChanges();
 
     this.loadUserData();
@@ -207,16 +226,178 @@ export class InfoUtenteComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  getUserInitials(): string {
+    if (!this.user) return 'U';
+
+    const nome = this.user.nome ? this.user.nome.charAt(0) : 'U';
+    const cognome = this.user.cognome ? this.user.cognome.charAt(0) : '';
+
+    return `${nome}${cognome}`.toUpperCase();
+  }
+
+  getFullName(): string {
+    if (!this.user) return 'Utente';
+
+    const fullName = `${this.user.nome || ''} ${this.user.cognome || ''}`.trim();
+    return fullName || 'Utente';
+  }
+
+  toggleVerifyPasswordPanel(): void {
+    this.showVerifyPasswordPanel = !this.showVerifyPasswordPanel;
+
+    if (this.showVerifyPasswordPanel) {
+      this.showChangePasswordPanel = false;
+      this.verifyPasswordMessage = '';
+      this.verifyPasswordError = '';
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  toggleChangePasswordPanel(): void {
+    this.showChangePasswordPanel = !this.showChangePasswordPanel;
+
+    if (this.showChangePasswordPanel) {
+      this.showVerifyPasswordPanel = false;
+      this.changePasswordMessage = '';
+      this.changePasswordError = '';
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  verifyCurrentPasswordAction(): void {
+    if (this.isVerifyingPassword) return;
+
+    this.verifyPasswordMessage = '';
+    this.verifyPasswordError = '';
+
+    if (!this.verifyCurrentPassword.trim()) {
+      this.verifyPasswordError = 'Inserisci la password attuale.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const headers = this.getAuthHeaders();
+
+    if (!headers) {
+      this.verifyPasswordError = 'Sessione non valida. Effettua di nuovo il login.';
+      this.cdr.detectChanges();
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.isVerifyingPassword = true;
+    this.cdr.detectChanges();
+
+    this.http.post(
+      `${this.api}/verify-password`,
+      { password: this.verifyCurrentPassword.trim() },
+      { headers }
+    ).subscribe({
+      next: () => {
+        this.isVerifyingPassword = false;
+        this.verifyPasswordMessage = 'Identità verificata correttamente.';
+        this.verifyCurrentPassword = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Errore verifica password:', err);
+        this.isVerifyingPassword = false;
+        this.verifyPasswordError =
+          err?.error?.message || 'Password non corretta.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  changePasswordAction(): void {
+    if (this.isChangingPassword) return;
+
+    this.changePasswordMessage = '';
+    this.changePasswordError = '';
+
+    if (!this.currentPasswordChange.trim()) {
+      this.changePasswordError = 'Inserisci la password attuale.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!this.newPasswordChange.trim()) {
+      this.changePasswordError = 'Inserisci una nuova password.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.newPasswordChange.trim().length < 6) {
+      this.changePasswordError = 'La nuova password deve contenere almeno 6 caratteri.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.newPasswordChange !== this.confirmNewPasswordChange) {
+      this.changePasswordError = 'Le nuove password non coincidono.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.currentPasswordChange === this.newPasswordChange) {
+      this.changePasswordError = 'La nuova password deve essere diversa da quella attuale.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const headers = this.getAuthHeaders();
+
+    if (!headers) {
+      this.changePasswordError = 'Sessione non valida. Effettua di nuovo il login.';
+      this.cdr.detectChanges();
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.isChangingPassword = true;
+    this.cdr.detectChanges();
+
+    this.http.put(
+      `${this.api}/change-password`,
+      {
+        currentPassword: this.currentPasswordChange.trim(),
+        newPassword: this.newPasswordChange.trim()
+      },
+      { headers }
+    ).subscribe({
+      next: () => {
+        this.isChangingPassword = false;
+        this.changePasswordMessage = 'Password aggiornata con successo.';
+        this.currentPasswordChange = '';
+        this.newPasswordChange = '';
+        this.confirmNewPasswordChange = '';
+        this.showCurrentPasswordChange = false;
+        this.showNewPasswordChange = false;
+        this.showConfirmNewPasswordChange = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Errore modifica password:', err);
+        this.isChangingPassword = false;
+        this.changePasswordError =
+          err?.error?.message || 'Impossibile aggiornare la password.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   saveUserData(): void {
     if (!this.user || this.isSaving) return;
 
     this.errorMessage = '';
     this.successMessage = '';
 
-    const nome = String(this.user.nome ?? '').trim();
-    const cognome = String(this.user.cognome ?? '').trim();
-    const telefono = String(this.user.telefono ?? '').trim();
-    const dataNascita = String(this.user.data_nascita ?? '').trim();
+    const nome = String(this.user.nome).trim();
+    const cognome = String(this.user.cognome).trim();
+    const telefono = String(this.user.telefono).trim();
+    const dataNascita = String(this.user.data_nascita).trim();
 
     if (!nome || !cognome || !telefono || !dataNascita) {
       this.errorMessage = 'Compila tutti i campi obbligatori.';
@@ -256,7 +437,13 @@ export class InfoUtenteComponent implements OnInit {
     this.isSaving = true;
     this.cdr.detectChanges();
 
-    const payload: any = {
+    const payload: {
+      nome: string;
+      cognome: string;
+      telefono: string;
+      data_nascita: string;
+      password?: string;
+    } = {
       nome,
       cognome,
       telefono,
@@ -272,14 +459,12 @@ export class InfoUtenteComponent implements OnInit {
         this.isSaving = false;
         this.successMessage = 'Dati aggiornati con successo.';
         this.isEditMode = false;
-
-        // reset del flusso completamento
         this.requirePasswordForCompletion = false;
-
         this.password = '';
         this.confirmPassword = '';
+        this.showPassword = false;
+        this.showConfirmPassword = false;
         this.cdr.detectChanges();
-
         this.loadUserData();
       },
       error: (err) => {

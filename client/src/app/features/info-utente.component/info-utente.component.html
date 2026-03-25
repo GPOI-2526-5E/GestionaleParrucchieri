@@ -1,139 +1,500 @@
 <div class="profile-page">
-  <div class="profile-card">
-    <div class="header">
-      <div>
-        <h1>Profilo utente</h1>
-        <p class="subtitle">Qui puoi vedere e completare i tuoi dati.</p>
-      </div>
+  <div class="profile-overlay"></div>
 
-      <button class="logout-btn" type="button" (click)="logout()">
-        Logout
-      </button>
-    </div>
-
-    <div *ngIf="isLoading" class="state-message">
-      Caricamento dati...
-    </div>
-
-    <ng-container *ngIf="!isLoading">
-      <div *ngIf="errorMessage" class="alert alert-error">
-        {{ errorMessage }}
-      </div>
-
-      <div *ngIf="successMessage" class="alert alert-success">
-        {{ successMessage }}
-      </div>
-
-      <div *ngIf="!user" class="state-message">
-        Nessun dato utente disponibile.
-      </div>
-
-      <ng-container *ngIf="user">
-        <div *ngIf="showCompletionWarning" class="alert alert-warning">
-          Completa i dati mancanti per terminare la registrazione.
+  <div class="profile-container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-header-left">
+          <p class="profile-eyebrow">Area personale</p>
+          <h1>Profilo utente</h1>
+          <p class="profile-subtitle">
+            Qui puoi vedere, completare e gestire in sicurezza i tuoi dati personali.
+          </p>
         </div>
 
-        <form *ngIf="isEditMode" class="profile-form" (ngSubmit)="saveUserData()">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="nome">Nome</label>
-              <input id="nome" type="text" name="nome" [(ngModel)]="user.nome" (ngModelChange)="onFieldChange()"
-                placeholder="Inserisci il nome" />
-            </div>
+        <button class="logout-btn" type="button" (click)="logout()">
+          Logout
+        </button>
+      </div>
 
-            <div class="form-group">
-              <label for="cognome">Cognome</label>
-              <input id="cognome" type="text" name="cognome" [(ngModel)]="user.cognome"
-                (ngModelChange)="onFieldChange()" placeholder="Inserisci il cognome" />
-            </div>
+      <div *ngIf="isLoading" class="state-message">
+        Caricamento dati...
+      </div>
 
-            <div class="form-group full-width">
-              <label for="email">Email</label>
-              <input id="email" type="email" name="email" [ngModel]="user.email" disabled />
-            </div>
-
-            <div class="form-group">
-              <label for="telefono">Telefono</label>
-              <input id="telefono" type="text" name="telefono" [(ngModel)]="user.telefono"
-                (ngModelChange)="onFieldChange()" placeholder="Inserisci il telefono" />
-            </div>
-
-            <div class="form-group">
-              <label for="data_nascita">Data di nascita</label>
-              <input id="data_nascita" type="date" name="data_nascita" [(ngModel)]="user.data_nascita"
-                (ngModelChange)="onFieldChange()" />
-            </div>
-            
-            <div class="form-group" *ngIf="passwordRequired">
-              <label for="password">Password</label>
-              <input id="password" type="password" name="password" [(ngModel)]="password"
-                placeholder="Inserisci una password" />
-            </div>
-
-            <div class="form-group" *ngIf="passwordRequired">
-              <label for="confirmPassword">Conferma password</label>
-              <input id="confirmPassword" type="password" name="confirmPassword" [(ngModel)]="confirmPassword"
-                placeholder="Conferma la password" />
-            </div>
-
-            <div class="form-group full-width">
-              <label for="ruolo">Ruolo</label>
-              <input id="ruolo" type="text" name="ruolo" [ngModel]="user.ruolo" disabled />
-            </div>
-
-          </div>
-
-          <div class="actions">
-            <button type="submit" class="save-btn" [disabled]="isSaving">
-              {{ isSaving ? 'Salvataggio...' : 'Salva dati' }}
-            </button>
-
-            <button type="button" class="cancel-btn" (click)="cancelEditMode()" [disabled]="disableCancelButton">
-              Annulla
-            </button>
-          </div>
-        </form>
-
-        <div *ngIf="!isEditMode" class="profile-view">
-          <div class="info-grid">
-            <div class="info-box">
-              <span class="label">Nome</span>
-              <span class="value">{{ user.nome || '-' }}</span>
-            </div>
-
-            <div class="info-box">
-              <span class="label">Cognome</span>
-              <span class="value">{{ user.cognome || '-' }}</span>
-            </div>
-
-            <div class="info-box">
-              <span class="label">Email</span>
-              <span class="value">{{ user.email || '-' }}</span>
-            </div>
-
-            <div class="info-box">
-              <span class="label">Telefono</span>
-              <span class="value">{{ user.telefono || '-' }}</span>
-            </div>
-
-            <div class="info-box">
-              <span class="label">Data di nascita</span>
-              <span class="value">{{ formatDate(user.data_nascita) }}</span>
-            </div>
-
-            <div class="info-box">
-              <span class="label">Ruolo</span>
-              <span class="value">{{ user.ruolo || '-' }}</span>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button type="button" class="edit-btn" (click)="enableEditMode()">
-              Modifica dati
-            </button>
-          </div>
+      <ng-container *ngIf="!isLoading">
+        <div *ngIf="errorMessage" class="custom-alert error">
+          <span class="alert-icon">!</span>
+          <span>{{ errorMessage }}</span>
         </div>
+
+        <div *ngIf="successMessage" class="custom-alert success">
+          <span class="alert-icon">✓</span>
+          <span>{{ successMessage }}</span>
+        </div>
+
+        <div *ngIf="!user" class="state-message">
+          Nessun dato utente disponibile.
+        </div>
+
+        <ng-container *ngIf="user">
+          <div *ngIf="showCompletionWarning" class="custom-alert warning">
+            <span class="alert-icon">!</span>
+            <span>
+              {{ completionMessage || 'Completa i dati mancanti per terminare la registrazione.' }}
+            </span>
+          </div>
+
+          <ng-container *ngIf="!isEditMode">
+            <div class="profile-top-summary">
+              <div class="profile-avatar-wrapper">
+                <img
+                  *ngIf="user.photoURL"
+                  [src]="user.photoURL"
+                  alt="Foto profilo"
+                  class="profile-avatar-img"
+                />
+
+                <div *ngIf="!user.photoURL" class="avatar-box">
+                  {{ getUserInitials() }}
+                </div>
+              </div>
+
+              <div class="summary-text">
+                <h2>{{ getFullName() }}</h2>
+                <p>{{ user.email || '-' }}</p>
+
+                <div class="summary-badges">
+                  <span class="role-badge">{{ user.ruolo || 'Utente' }}</span>
+                  <span class="status-badge" *ngIf="user.photoURL">
+                    Profilo Google collegato
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-sections">
+              <div class="profile-main-section">
+                <div class="section-title">
+                  <span class="section-dot"></span>
+                  Le tue informazioni
+                </div>
+
+                <div class="info-grid">
+                  <div class="info-box">
+                    <span class="label">Nome</span>
+                    <span class="value">{{ user.nome || '-' }}</span>
+                  </div>
+
+                  <div class="info-box">
+                    <span class="label">Cognome</span>
+                    <span class="value">{{ user.cognome || '-' }}</span>
+                  </div>
+
+                  <div class="info-box">
+                    <span class="label">Email</span>
+                    <span class="value">{{ user.email || '-' }}</span>
+                  </div>
+
+                  <div class="info-box">
+                    <span class="label">Telefono</span>
+                    <span class="value">{{ user.telefono || '-' }}</span>
+                  </div>
+
+                  <div class="info-box">
+                    <span class="label">Data di nascita</span>
+                    <span class="value">{{ formatDate(user.data_nascita) }}</span>
+                  </div>
+
+                  <div class="info-box">
+                    <span class="label">Ruolo</span>
+                    <span class="value">{{ user.ruolo || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-side-section">
+                <div class="section-title">
+                  <span class="section-dot"></span>
+                  Sicurezza account
+                </div>
+
+                <div class="security-card">
+                  <div class="security-block">
+                    <div class="security-head">
+                      <div>
+                        <span class="label">Password</span>
+
+                        <div class="security-value-row">
+                          <span class="masked-password">••••••••••••</span>
+                          <span class="security-pill">Protetta</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="security-actions">
+                      <button
+                        type="button"
+                        class="mini-btn"
+                        (click)="toggleVerifyPasswordPanel()"
+                      >
+                        {{ showVerifyPasswordPanel ? 'Chiudi verifica' : 'Verifica password' }}
+                      </button>
+
+                      <button
+                        type="button"
+                        class="mini-btn secondary"
+                        (click)="toggleChangePasswordPanel()"
+                      >
+                        {{ showChangePasswordPanel ? 'Chiudi modifica' : 'Modifica password' }}
+                      </button>
+                    </div>
+
+                    <p class="security-note">
+                      Per motivi di sicurezza la password non viene mai mostrata.
+                      Puoi verificare la tua identità oppure aggiornarla.
+                    </p>
+                  </div>
+
+                  <div *ngIf="showVerifyPasswordPanel" class="security-panel">
+                    <h3>Verifica identità</h3>
+                    <p>
+                      Inserisci la password attuale per confermare che sei tu.
+                    </p>
+
+                    <div *ngIf="verifyPasswordMessage" class="inline-status success-text">
+                      {{ verifyPasswordMessage }}
+                    </div>
+
+                    <div *ngIf="verifyPasswordError" class="inline-status error-text">
+                      {{ verifyPasswordError }}
+                    </div>
+
+                    <div class="form-group">
+                      <label for="verifyCurrentPassword">Password attuale</label>
+
+                      <div class="password-input-wrap">
+                        <input
+                          id="verifyCurrentPassword"
+                          [type]="showVerifyCurrentPassword ? 'text' : 'password'"
+                          name="verifyCurrentPassword"
+                          [(ngModel)]="verifyCurrentPassword"
+                          placeholder="Inserisci la password attuale"
+                        />
+
+                        <button
+                          type="button"
+                          class="toggle-password-btn"
+                          (click)="showVerifyCurrentPassword = !showVerifyCurrentPassword"
+                          [attr.aria-label]="showVerifyCurrentPassword ? 'Nascondi password' : 'Mostra password'"
+                          [attr.title]="showVerifyCurrentPassword ? 'Nascondi password' : 'Mostra password'"
+                        >
+                          <i
+                            class="bi"
+                            [ngClass]="showVerifyCurrentPassword ? 'bi-eye-slash' : 'bi-eye'"
+                          ></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="panel-actions">
+                      <button
+                        type="button"
+                        class="mini-btn"
+                        (click)="verifyCurrentPasswordAction()"
+                        [disabled]="isVerifyingPassword"
+                      >
+                        {{ isVerifyingPassword ? 'Verifica in corso...' : 'Conferma identità' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div *ngIf="showChangePasswordPanel" class="security-panel">
+                    <h3>Modifica password</h3>
+                    <p>
+                      Inserisci la password attuale e scegli una nuova password sicura.
+                    </p>
+
+                    <div *ngIf="changePasswordMessage" class="inline-status success-text">
+                      {{ changePasswordMessage }}
+                    </div>
+
+                    <div *ngIf="changePasswordError" class="inline-status error-text">
+                      {{ changePasswordError }}
+                    </div>
+
+                    <div class="form-group">
+                      <label for="currentPasswordChange">Password attuale</label>
+
+                      <div class="password-input-wrap">
+                        <input
+                          id="currentPasswordChange"
+                          [type]="showCurrentPasswordChange ? 'text' : 'password'"
+                          name="currentPasswordChange"
+                          [(ngModel)]="currentPasswordChange"
+                          placeholder="Inserisci la password attuale"
+                        />
+
+                        <button
+                          type="button"
+                          class="toggle-password-btn"
+                          (click)="showCurrentPasswordChange = !showCurrentPasswordChange"
+                          [attr.aria-label]="showCurrentPasswordChange ? 'Nascondi password' : 'Mostra password'"
+                          [attr.title]="showCurrentPasswordChange ? 'Nascondi password' : 'Mostra password'"
+                        >
+                          <i
+                            class="bi"
+                            [ngClass]="showCurrentPasswordChange ? 'bi-eye-slash' : 'bi-eye'"
+                          ></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="newPasswordChange">Nuova password</label>
+
+                      <div class="password-input-wrap">
+                        <input
+                          id="newPasswordChange"
+                          [type]="showNewPasswordChange ? 'text' : 'password'"
+                          name="newPasswordChange"
+                          [(ngModel)]="newPasswordChange"
+                          placeholder="Inserisci la nuova password"
+                        />
+
+                        <button
+                          type="button"
+                          class="toggle-password-btn"
+                          (click)="showNewPasswordChange = !showNewPasswordChange"
+                          [attr.aria-label]="showNewPasswordChange ? 'Nascondi password' : 'Mostra password'"
+                          [attr.title]="showNewPasswordChange ? 'Nascondi password' : 'Mostra password'"
+                        >
+                          <i
+                            class="bi"
+                            [ngClass]="showNewPasswordChange ? 'bi-eye-slash' : 'bi-eye'"
+                          ></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="confirmNewPasswordChange">Conferma nuova password</label>
+
+                      <div class="password-input-wrap">
+                        <input
+                          id="confirmNewPasswordChange"
+                          [type]="showConfirmNewPasswordChange ? 'text' : 'password'"
+                          name="confirmNewPasswordChange"
+                          [(ngModel)]="confirmNewPasswordChange"
+                          placeholder="Conferma la nuova password"
+                        />
+
+                        <button
+                          type="button"
+                          class="toggle-password-btn"
+                          (click)="showConfirmNewPasswordChange = !showConfirmNewPasswordChange"
+                          [attr.aria-label]="showConfirmNewPasswordChange ? 'Nascondi password' : 'Mostra password'"
+                          [attr.title]="showConfirmNewPasswordChange ? 'Nascondi password' : 'Mostra password'"
+                        >
+                          <i
+                            class="bi"
+                            [ngClass]="showConfirmNewPasswordChange ? 'bi-eye-slash' : 'bi-eye'"
+                          ></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="panel-actions">
+                      <button
+                        type="button"
+                        class="mini-btn"
+                        (click)="changePasswordAction()"
+                        [disabled]="isChangingPassword"
+                      >
+                        {{ isChangingPassword ? 'Aggiornamento...' : 'Aggiorna password' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="edit-btn" (click)="enableEditMode()">
+                Modifica dati
+              </button>
+            </div>
+          </ng-container>
+
+          <form *ngIf="isEditMode" class="profile-form" (ngSubmit)="saveUserData()">
+            <div class="section-title">
+              <span class="section-dot"></span>
+              Modifica informazioni
+            </div>
+
+            <div class="edit-profile-top">
+              <div class="profile-avatar-wrapper">
+                <img
+                  *ngIf="user.photoURL"
+                  [src]="user.photoURL"
+                  alt="Foto profilo"
+                  class="profile-avatar-img"
+                />
+
+                <div *ngIf="!user.photoURL" class="avatar-box">
+                  {{ getUserInitials() }}
+                </div>
+              </div>
+
+              <div class="edit-profile-top-text">
+                <h3>Informazioni personali</h3>
+                <p>
+                  Aggiorna i tuoi dati per mantenere il profilo completo e sempre allineato.
+                </p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="nome">Nome</label>
+                <input
+                  id="nome"
+                  type="text"
+                  name="nome"
+                  [(ngModel)]="user.nome"
+                  (ngModelChange)="onFieldChange()"
+                  placeholder="Inserisci il nome"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="cognome">Cognome</label>
+                <input
+                  id="cognome"
+                  type="text"
+                  name="cognome"
+                  [(ngModel)]="user.cognome"
+                  (ngModelChange)="onFieldChange()"
+                  placeholder="Inserisci il cognome"
+                />
+              </div>
+
+              <div class="form-group full-width">
+                <label for="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  [ngModel]="user.email"
+                  disabled
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="telefono">Telefono</label>
+                <input
+                  id="telefono"
+                  type="text"
+                  name="telefono"
+                  [(ngModel)]="user.telefono"
+                  (ngModelChange)="onFieldChange()"
+                  placeholder="Inserisci il telefono"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="data_nascita">Data di nascita</label>
+                <input
+                  id="data_nascita"
+                  type="date"
+                  name="data_nascita"
+                  [(ngModel)]="user.data_nascita"
+                  (ngModelChange)="onFieldChange()"
+                />
+              </div>
+
+              <div class="form-group" *ngIf="passwordRequired">
+                <label for="password">Password</label>
+
+                <div class="password-input-wrap">
+                  <input
+                    id="password"
+                    [type]="showPassword ? 'text' : 'password'"
+                    name="password"
+                    [(ngModel)]="password"
+                    placeholder="Inserisci una password"
+                  />
+
+                  <button
+                    type="button"
+                    class="toggle-password-btn"
+                    (click)="showPassword = !showPassword"
+                    [attr.aria-label]="showPassword ? 'Nascondi password' : 'Mostra password'"
+                    [attr.title]="showPassword ? 'Nascondi password' : 'Mostra password'"
+                  >
+                    <i
+                      class="bi"
+                      [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    ></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" *ngIf="passwordRequired">
+                <label for="confirmPassword">Conferma password</label>
+
+                <div class="password-input-wrap">
+                  <input
+                    id="confirmPassword"
+                    [type]="showConfirmPassword ? 'text' : 'password'"
+                    name="confirmPassword"
+                    [(ngModel)]="confirmPassword"
+                    placeholder="Conferma la password"
+                  />
+
+                  <button
+                    type="button"
+                    class="toggle-password-btn"
+                    (click)="showConfirmPassword = !showConfirmPassword"
+                    [attr.aria-label]="showConfirmPassword ? 'Nascondi password' : 'Mostra password'"
+                    [attr.title]="showConfirmPassword ? 'Nascondi password' : 'Mostra password'"
+                  >
+                    <i
+                      class="bi"
+                      [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    ></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="ruolo">Ruolo</label>
+                <input
+                  id="ruolo"
+                  type="text"
+                  name="ruolo"
+                  [ngModel]="user.ruolo"
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="save-btn" [disabled]="isSaving">
+                {{ isSaving ? 'Salvataggio...' : 'Salva dati' }}
+              </button>
+
+              <button
+                type="button"
+                class="cancel-btn"
+                (click)="cancelEditMode()"
+                [disabled]="disableCancelButton"
+              >
+                Annulla
+              </button>
+            </div>
+          </form>
+        </ng-container>
       </ng-container>
-    </ng-container>
+    </div>
   </div>
 </div>
