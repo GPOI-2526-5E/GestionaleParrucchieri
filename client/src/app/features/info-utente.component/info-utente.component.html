@@ -6,7 +6,7 @@
         <p class="subtitle">Qui puoi vedere e completare i tuoi dati.</p>
       </div>
 
-      <button class="logout-btn" (click)="logout()">
+      <button class="logout-btn" type="button" (click)="logout()">
         Logout
       </button>
     </div>
@@ -15,7 +15,7 @@
       Caricamento dati...
     </div>
 
-    <ng-container *ngIf="!isLoading && user">
+    <ng-container *ngIf="!isLoading">
       <div *ngIf="errorMessage" class="alert alert-error">
         {{ errorMessage }}
       </div>
@@ -24,159 +24,116 @@
         {{ successMessage }}
       </div>
 
-      <div *ngIf="hasMissingRequiredFields() || needsPassword()" class="alert alert-warning">
-        Completa i dati mancanti per terminare la registrazione.
+      <div *ngIf="!user" class="state-message">
+        Nessun dato utente disponibile.
       </div>
 
-      <form
-        *ngIf="isEditMode"
-        class="profile-form"
-        (ngSubmit)="saveUserData()"
-      >
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="nome">Nome</label>
-            <input
-              id="nome"
-              type="text"
-              name="nome"
-              [(ngModel)]="user.nome"
-              placeholder="Inserisci il nome"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="cognome">Cognome</label>
-            <input
-              id="cognome"
-              type="text"
-              name="cognome"
-              [(ngModel)]="user.cognome"
-              placeholder="Inserisci il cognome"
-            />
-          </div>
-
-          <div class="form-group full-width">
-            <label for="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              [ngModel]="user.email"
-              disabled
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="telefono">Telefono</label>
-            <input
-              id="telefono"
-              type="text"
-              name="telefono"
-              [(ngModel)]="user.telefono"
-              placeholder="Inserisci il telefono"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="data_nascita">Data di nascita</label>
-            <input
-              id="data_nascita"
-              type="date"
-              name="data_nascita"
-              [(ngModel)]="user.data_nascita"
-            />
-          </div>
-
-          <div class="form-group full-width">
-            <label for="ruolo">Ruolo</label>
-            <input
-              id="ruolo"
-              type="text"
-              name="ruolo"
-              [ngModel]="user.ruolo"
-              disabled
-            />
-          </div>
-
-          <div class="form-group" *ngIf="needsPassword()">
-            <label for="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              [(ngModel)]="password"
-              placeholder="Inserisci una password"
-            />
-          </div>
-
-          <div class="form-group" *ngIf="needsPassword()">
-            <label for="confirmPassword">Conferma password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              name="confirmPassword"
-              [(ngModel)]="confirmPassword"
-              placeholder="Conferma la password"
-            />
-          </div>
+      <ng-container *ngIf="user">
+        <div *ngIf="showCompletionWarning" class="alert alert-warning">
+          Completa i dati mancanti per terminare la registrazione.
         </div>
 
-        <div class="actions">
-          <button type="submit" class="save-btn" [disabled]="isSaving">
-            {{ isSaving ? 'Salvataggio...' : 'Salva dati' }}
-          </button>
+        <form *ngIf="isEditMode" class="profile-form" (ngSubmit)="saveUserData()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="nome">Nome</label>
+              <input id="nome" type="text" name="nome" [(ngModel)]="user.nome" (ngModelChange)="onFieldChange()"
+                placeholder="Inserisci il nome" />
+            </div>
 
-          <button
-            type="button"
-            class="cancel-btn"
-            (click)="cancelEditMode()"
-            [disabled]="hasMissingRequiredFields() || needsPassword()"
-          >
-            Annulla
-          </button>
+            <div class="form-group">
+              <label for="cognome">Cognome</label>
+              <input id="cognome" type="text" name="cognome" [(ngModel)]="user.cognome"
+                (ngModelChange)="onFieldChange()" placeholder="Inserisci il cognome" />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="email">Email</label>
+              <input id="email" type="email" name="email" [ngModel]="user.email" disabled />
+            </div>
+
+            <div class="form-group">
+              <label for="telefono">Telefono</label>
+              <input id="telefono" type="text" name="telefono" [(ngModel)]="user.telefono"
+                (ngModelChange)="onFieldChange()" placeholder="Inserisci il telefono" />
+            </div>
+
+            <div class="form-group">
+              <label for="data_nascita">Data di nascita</label>
+              <input id="data_nascita" type="date" name="data_nascita" [(ngModel)]="user.data_nascita"
+                (ngModelChange)="onFieldChange()" />
+            </div>
+            
+            <div class="form-group" *ngIf="passwordRequired">
+              <label for="password">Password</label>
+              <input id="password" type="password" name="password" [(ngModel)]="password"
+                placeholder="Inserisci una password" />
+            </div>
+
+            <div class="form-group" *ngIf="passwordRequired">
+              <label for="confirmPassword">Conferma password</label>
+              <input id="confirmPassword" type="password" name="confirmPassword" [(ngModel)]="confirmPassword"
+                placeholder="Conferma la password" />
+            </div>
+
+            <div class="form-group full-width">
+              <label for="ruolo">Ruolo</label>
+              <input id="ruolo" type="text" name="ruolo" [ngModel]="user.ruolo" disabled />
+            </div>
+
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="save-btn" [disabled]="isSaving">
+              {{ isSaving ? 'Salvataggio...' : 'Salva dati' }}
+            </button>
+
+            <button type="button" class="cancel-btn" (click)="cancelEditMode()" [disabled]="disableCancelButton">
+              Annulla
+            </button>
+          </div>
+        </form>
+
+        <div *ngIf="!isEditMode" class="profile-view">
+          <div class="info-grid">
+            <div class="info-box">
+              <span class="label">Nome</span>
+              <span class="value">{{ user.nome || '-' }}</span>
+            </div>
+
+            <div class="info-box">
+              <span class="label">Cognome</span>
+              <span class="value">{{ user.cognome || '-' }}</span>
+            </div>
+
+            <div class="info-box">
+              <span class="label">Email</span>
+              <span class="value">{{ user.email || '-' }}</span>
+            </div>
+
+            <div class="info-box">
+              <span class="label">Telefono</span>
+              <span class="value">{{ user.telefono || '-' }}</span>
+            </div>
+
+            <div class="info-box">
+              <span class="label">Data di nascita</span>
+              <span class="value">{{ formatDate(user.data_nascita) }}</span>
+            </div>
+
+            <div class="info-box">
+              <span class="label">Ruolo</span>
+              <span class="value">{{ user.ruolo || '-' }}</span>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="edit-btn" (click)="enableEditMode()">
+              Modifica dati
+            </button>
+          </div>
         </div>
-      </form>
-
-      <div *ngIf="!isEditMode" class="profile-view">
-        <div class="info-grid">
-          <div class="info-box">
-            <span class="label">Nome</span>
-            <span class="value">{{ user.nome || '-' }}</span>
-          </div>
-
-          <div class="info-box">
-            <span class="label">Cognome</span>
-            <span class="value">{{ user.cognome || '-' }}</span>
-          </div>
-
-          <div class="info-box">
-            <span class="label">Email</span>
-            <span class="value">{{ user.email || '-' }}</span>
-          </div>
-
-          <div class="info-box">
-            <span class="label">Telefono</span>
-            <span class="value">{{ user.telefono || '-' }}</span>
-          </div>
-
-          <div class="info-box">
-            <span class="label">Data di nascita</span>
-            <span class="value">{{ formatDate(user.data_nascita) }}</span>
-          </div>
-
-          <div class="info-box">
-            <span class="label">Ruolo</span>
-            <span class="value">{{ user.ruolo || '-' }}</span>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="edit-btn" (click)="enableEditMode()">
-            Modifica dati
-          </button>
-        </div>
-      </div>
+      </ng-container>
     </ng-container>
   </div>
 </div>

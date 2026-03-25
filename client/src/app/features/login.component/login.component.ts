@@ -1,13 +1,5 @@
 import { CommonModule } from '@angular/common';
-<<<<<<< HEAD
-<<<<<<< HEAD
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-=======
-import { Component, OnInit } from '@angular/core';
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
-import { Component, OnInit } from '@angular/core';
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
 import { AuthService } from '../../services/auth';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -34,11 +26,9 @@ export class LoginComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private router: Router,
-<<<<<<< HEAD
-<<<<<<< HEAD
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     if (this.auth.isLoggedIn()) {
@@ -46,22 +36,12 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-=======
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-    private route: ActivatedRoute
-  ) { }
-
-  ngOnInit(): void {
-<<<<<<< HEAD
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
     const savedEmail = localStorage.getItem('rememberedEmail');
 
     if (savedEmail) {
       this.email = savedEmail;
       this.rememberMe = true;
+      this.cdr.detectChanges();
     }
 
     this.route.queryParams.subscribe(params => {
@@ -80,15 +60,7 @@ export class LoginComponent implements OnInit {
         });
 
         setTimeout(() => {
-<<<<<<< HEAD
-<<<<<<< HEAD
-          this.router.navigate(['/info-utente']);
-=======
-          this.router.navigate(['/products']);
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
-          this.router.navigate(['/products']);
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
+          this.redirectAfterLogin();
         }, 800);
       }
 
@@ -101,15 +73,13 @@ export class LoginComponent implements OnInit {
           queryParams: {},
           replaceUrl: true
         });
+
+        this.cdr.detectChanges();
       }
     });
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   showAlert(message: string, type: AlertType = 'error'): void {
-    console.log('showAlert chiamato:', message, type);
-
     this.alertMessage = message;
     this.alertType = type;
     this.cdr.detectChanges();
@@ -123,35 +93,25 @@ export class LoginComponent implements OnInit {
   redirectAfterLogin(): void {
     const returnUrl = localStorage.getItem('returnUrl');
 
-    if (returnUrl && returnUrl !== '/login') {
-      localStorage.removeItem('returnUrl');
+    localStorage.removeItem('returnUrl');
+
+    if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
       this.router.navigateByUrl(returnUrl);
     } else {
-      localStorage.removeItem('returnUrl');
-      this.router.navigateByUrl('/');
+      this.router.navigate(['/home']);
     }
   }
 
-=======
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
   goBack(): void {
-    window.history.back();
+    const returnUrl = localStorage.getItem('returnUrl');
+
+    if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
+      this.router.navigateByUrl(returnUrl);
+    } else {
+      this.router.navigate(['/home']);
+    }
   }
 
-  showAlert(message: string, type: AlertType = 'error'): void {
-    this.alertMessage = message;
-    this.alertType = type;
-
-    setTimeout(() => {
-      this.alertMessage = '';
-    }, 4000);
-  }
-
-<<<<<<< HEAD
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
   login(): void {
     if (!this.email.trim() || !this.password.trim()) {
       this.showAlert('Inserisci email e password.', 'warning');
@@ -160,13 +120,7 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
     this.alertMessage = '';
-<<<<<<< HEAD
-<<<<<<< HEAD
     this.cdr.detectChanges();
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
 
     this.auth.login(this.email, this.password).subscribe({
       next: (res) => {
@@ -180,8 +134,6 @@ export class LoginComponent implements OnInit {
           localStorage.removeItem('rememberedEmail');
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         this.isLoading = false;
         this.showAlert('Accesso effettuato con successo!', 'success');
         this.cdr.detectChanges();
@@ -191,27 +143,9 @@ export class LoginComponent implements OnInit {
         }, 800);
       },
       error: (err) => {
-        console.log('SONO NEL BLOCCO ERROR');
         console.error('Errore login:', err);
-
         this.isLoading = false;
 
-=======
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-        this.showAlert('Accesso effettuato con successo!', 'success');
-
-        setTimeout(() => {
-          this.router.navigate(['/products']);
-        }, 800);
-      },
-      error: (err) => {
-        console.error('Errore login:', err);
-
-<<<<<<< HEAD
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
         if (err.status === 404) {
           this.showAlert('Utente non trovato.', 'error');
         } else if (err.status === 401) {
@@ -224,51 +158,26 @@ export class LoginComponent implements OnInit {
           this.showAlert('Errore durante il login.', 'error');
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         this.cdr.detectChanges();
-=======
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-        this.isLoading = false;
       },
       complete: () => {
         this.isLoading = false;
-<<<<<<< HEAD
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
+        this.cdr.detectChanges();
       }
     });
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  goBack(): void {
-    window.history.back();
-  }
-
   loginWithGoogle(): void {
     this.alertMessage = '';
     this.isLoading = true;
 
-    const currentUrl = document.referrer && !document.referrer.includes('/login')
-      ? new URL(document.referrer).pathname
-      : '/';
+    const savedReturnUrl = localStorage.getItem('returnUrl');
 
-    localStorage.setItem('returnUrl', currentUrl);
+    if (!savedReturnUrl || savedReturnUrl === '/login' || savedReturnUrl === '/') {
+      localStorage.setItem('returnUrl', '/home');
+    }
 
     this.cdr.detectChanges();
-=======
-  loginWithGoogle(): void {
-    this.alertMessage = '';
-    this.isLoading = true;
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
-  loginWithGoogle(): void {
-    this.alertMessage = '';
-    this.isLoading = true;
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
     this.auth.loginWithGoogle();
   }
 }

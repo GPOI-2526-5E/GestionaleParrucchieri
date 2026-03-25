@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -13,7 +13,7 @@ interface UserProfile {
   telefono: string | null;
   data_nascita: string | null;
   ruolo: string;
-  hasPassword: boolean;
+  hasPassword?: boolean;
 }
 
 @Component({
@@ -38,10 +38,20 @@ export class InfoUtenteComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
+  missingRequiredFields = false;
+  passwordRequired = false;
+  showCompletionWarning = false;
+  disableCancelButton = false;
+  completionMessage = '';
+
+  // resta true per tutto il flusso di completamento
+  requirePasswordForCompletion = false;
+
   constructor(
     private http: HttpClient,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -53,135 +63,238 @@ export class InfoUtenteComponent implements OnInit {
     this.loadUserData();
   }
 
-  private getAuthHeaders(): HttpHeaders {
+  private getAuthHeaders(): HttpHeaders | null {
     const token = this.auth.getToken();
+
+    if (!token) {
+      return null;
+    }
 
     return new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
   }
 
+  private updateDerivedState(): void {
+    if (!this.user) {
+      this.missingRequiredFields = false;
+      this.passwordRequired = false;
+      this.showCompletionWarning = false;
+      this.disableCancelButton = false;
+      this.completionMessage = '';
+      return;
+    }
+
+    const nome = String(this.user.nome ?? '').trim();
+    const cognome = String(this.user.cognome ?? '').trim();
+    const telefono = String(this.user.telefono ?? '').trim();
+    const dataNascita = String(this.user.data_nascita ?? '').trim();
+
+    this.missingRequiredFields = !nome || !cognome || !telefono || !dataNascita;
+
+    // La password resta richiesta per tutto il flusso di completamento
+    this.passwordRequired = this.requirePasswordForCompletion;
+
+    this.showCompletionWarning =
+      this.missingRequiredFields || this.requirePasswordForCompletion;
+
+    this.disableCancelButton =
+      this.missingRequiredFields || this.requirePasswordForCompletion;
+
+    if (this.missingRequiredFields && this.requirePasswordForCompletion) {
+      this.completionMessage =
+        'Completa i dati mancanti e imposta una password per terminare la registrazione.';
+    } else if (this.missingRequiredFields) {
+      this.completionMessage =
+        'Completa i dati mancanti per terminare la registrazione.';
+    } else if (this.requirePasswordForCompletion) {
+      this.completionMessage =
+        'Imposta una password per terminare la registrazione.';
+    } else {
+      this.completionMessage = '';
+    }
+  }
+
   loadUserData(): void {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.cdr.detectChanges();
 
-    this.http.get<UserProfile>(`${this.api}/me`, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
+    const headers = this.getAuthHeaders();
+
+    if (!headers) {
+      this.isLoading = false;
+      this.errorMessage = 'Sessione non valida. Effettua di nuovo il login.';
+      this.cdr.detectChanges();
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.http.get<UserProfile>(`${this.api}/me`, { headers }).subscribe({
       next: (res) => {
-        this.user = res;
-        this.isLoading = false;
-
-        if (this.hasMissingRequiredFields() || this.needsPassword()) {
-          this.isEditMode = true;
+        if (!res) {
+          this.errorMessage = 'Il server non ha restituito dati utente.';
+          this.isLoading = false;
+          this.cdr.detectChanges();
+          return;
         }
+
+        this.user = {
+          idUtente: res.idUtente,
+          nome: res.nome ?? '',
+          cognome: res.cognome ?? '',
+          email: res.email ?? '',
+          telefono: res.telefono != null ? String(res.telefono) : '',
+          data_nascita: res.data_nascita
+            ? String(res.data_nascita).substring(0, 10)
+            : '',
+          ruolo: res.ruolo ?? '',
+          hasPassword: res.hasPassword
+        };
+
+        // Se i dati sono incompleti all'apertura, allora richiedi anche la password
+        const nome = String(this.user.nome ?? '').trim();
+        const cognome = String(this.user.cognome ?? '').trim();
+        const telefono = String(this.user.telefono ?? '').trim();
+        const dataNascita = String(this.user.data_nascita ?? '').trim();
+
+        const hasIncompleteData = !nome || !cognome || !telefono || !dataNascita;
+        this.requirePasswordForCompletion = hasIncompleteData;
+
+        this.updateDerivedState();
+
+        this.isEditMode = this.showCompletionWarning;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Errore recupero profilo:', err);
-        this.errorMessage = 'Impossibile recuperare i dati utente.';
+        this.errorMessage =
+          err?.error?.message || 'Impossibile recuperare i dati utente.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
-  }
-
-  hasMissingRequiredFields(): boolean {
-    if (!this.user) return false;
-
-    return (
-      !this.user.nome?.trim() ||
-      !this.user.cognome?.trim() ||
-      !this.user.telefono?.trim() ||
-      !this.user.data_nascita
-    );
-  }
-
-  needsPassword(): boolean {
-    return !!this.user && !this.user.hasPassword;
   }
 
   enableEditMode(): void {
     this.isEditMode = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.cdr.detectChanges();
   }
 
   cancelEditMode(): void {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (this.hasMissingRequiredFields() || this.needsPassword()) {
+    if (this.disableCancelButton) {
+      this.cdr.detectChanges();
       return;
     }
 
     this.isEditMode = false;
     this.password = '';
     this.confirmPassword = '';
+    this.cdr.detectChanges();
+
     this.loadUserData();
   }
 
+  onFieldChange(): void {
+    this.updateDerivedState();
+    this.cdr.detectChanges();
+  }
+
   saveUserData(): void {
-    if (!this.user) return;
+    if (!this.user || this.isSaving) return;
 
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (
-      !this.user.nome?.trim() ||
-      !this.user.cognome?.trim() ||
-      !this.user.telefono?.trim() ||
-      !this.user.data_nascita
-    ) {
+    const nome = String(this.user.nome ?? '').trim();
+    const cognome = String(this.user.cognome ?? '').trim();
+    const telefono = String(this.user.telefono ?? '').trim();
+    const dataNascita = String(this.user.data_nascita ?? '').trim();
+
+    if (!nome || !cognome || !telefono || !dataNascita) {
       this.errorMessage = 'Compila tutti i campi obbligatori.';
+      this.cdr.detectChanges();
       return;
     }
 
-    if (this.needsPassword()) {
+    if (this.passwordRequired) {
       if (!this.password.trim()) {
         this.errorMessage = 'Inserisci una password.';
+        this.cdr.detectChanges();
         return;
       }
 
       if (this.password.trim().length < 6) {
         this.errorMessage = 'La password deve contenere almeno 6 caratteri.';
+        this.cdr.detectChanges();
         return;
       }
 
       if (this.password !== this.confirmPassword) {
         this.errorMessage = 'Le password non coincidono.';
+        this.cdr.detectChanges();
         return;
       }
     }
 
-    this.isSaving = true;
+    const headers = this.getAuthHeaders();
 
-    this.http.put(`${this.api}/me`, {
-      nome: this.user.nome.trim(),
-      cognome: this.user.cognome.trim(),
-      telefono: this.user.telefono.trim(),
-      data_nascita: this.user.data_nascita,
-      password: this.needsPassword() ? this.password : undefined
-    }, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
+    if (!headers) {
+      this.errorMessage = 'Sessione non valida. Effettua di nuovo il login.';
+      this.cdr.detectChanges();
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.isSaving = true;
+    this.cdr.detectChanges();
+
+    const payload: any = {
+      nome,
+      cognome,
+      telefono,
+      data_nascita: dataNascita
+    };
+
+    if (this.passwordRequired) {
+      payload.password = this.password.trim();
+    }
+
+    this.http.put(`${this.api}/me`, payload, { headers }).subscribe({
       next: () => {
         this.isSaving = false;
         this.successMessage = 'Dati aggiornati con successo.';
         this.isEditMode = false;
+
+        // reset del flusso completamento
+        this.requirePasswordForCompletion = false;
+
         this.password = '';
         this.confirmPassword = '';
+        this.cdr.detectChanges();
+
         this.loadUserData();
       },
       error: (err) => {
         console.error('Errore aggiornamento profilo:', err);
         this.isSaving = false;
-        this.errorMessage = err.error?.message || 'Errore durante il salvataggio dei dati.';
+        this.errorMessage =
+          err?.error?.message || 'Errore durante il salvataggio dei dati.';
+        this.cdr.detectChanges();
       }
     });
   }
 
   logout(): void {
     this.auth.logout();
+    this.router.navigate(['/login']);
   }
 
   formatDate(date: string | null): string {

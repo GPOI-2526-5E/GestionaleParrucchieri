@@ -4,8 +4,6 @@ import passport from "../config/passport";
 
 const router = express.Router();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 interface JwtUser {
   id: number;
   nome: string;
@@ -15,12 +13,6 @@ interface JwtUser {
 }
 
 function generateToken(user: JwtUser) {
-=======
-function generateToken(user: { id: number; email: string; ruolo: string }) {
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
-function generateToken(user: { id: number; email: string; ruolo: string }) {
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
   const jwtSecret = process.env.JWT_SECRET;
 
   if (!jwtSecret) {
@@ -30,14 +22,8 @@ function generateToken(user: { id: number; email: string; ruolo: string }) {
   return jwt.sign(
     {
       userId: user.id,
-<<<<<<< HEAD
-<<<<<<< HEAD
       nome: user.nome,
       cognome: user.cognome,
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
       email: user.email,
       ruolo: user.ruolo,
     },
@@ -59,15 +45,7 @@ router.get(
   }),
   async (req: Request, res: Response) => {
     try {
-<<<<<<< HEAD
-<<<<<<< HEAD
       const user = req.user as JwtUser;
-=======
-      const user = req.user as { id: number; email: string; ruolo: string };
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
-=======
-      const user = req.user as { id: number; email: string; ruolo: string };
->>>>>>> e6353e48f1bb52feb6a3fc2ca92746bc7c46862b
 
       if (!user) {
         return res.redirect("http://localhost:4200/login?googleError=true");
