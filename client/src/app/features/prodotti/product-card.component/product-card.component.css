@@ -1,7 +1,12 @@
+/* =========================
+   PRODUCT CARD
+========================= */
 .product-card {
-  background: linear-gradient(180deg, rgba(58,58,58,0.78), rgba(42,42,42,0.82));
+  position: relative;
+
+  background: linear-gradient(180deg, rgba(58, 58, 58, 0.78), rgba(42, 42, 42, 0.82));
   border-radius: 18px;
-  border: 1px solid rgba(212,176,106,0.22);
+  border: 1px solid rgba(212, 176, 106, 0.22);
   overflow: hidden;
 
   display: flex;
@@ -9,27 +14,29 @@
   height: 100%;
 
   box-shadow:
-    0 10px 24px rgba(0,0,0,0.28),
-    0 2px 8px rgba(0,0,0,0.18);
+    0 10px 24px rgba(0, 0, 0, 0.28),
+    0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
-/* IMMAGINE PRODOTTO */
-
+/* =========================
+   IMAGE
+========================= */
 .product-image {
   width: 100%;
   height: 220px;
 
-  object-fit: contain;      /* mantiene proporzioni corrette */
-  object-position: center;  /* centra sempre l'immagine */
+  object-fit: contain;
+  object-position: center;
 
   background: #1b1b1b;
   padding: 16px;
 
-  border-bottom: 1px solid rgba(212,176,106,0.18);
+  border-bottom: 1px solid rgba(212, 176, 106, 0.18);
 }
 
-/* BODY */
-
+/* =========================
+   BODY
+========================= */
 .product-card-body {
   display: flex;
   flex-direction: column;
@@ -37,8 +44,120 @@
   flex-grow: 1;
 }
 
-/* HEADER */
+.product-card {
+  position: relative;
 
+  background: linear-gradient(180deg, rgba(58, 58, 58, 0.78), rgba(42, 42, 42, 0.82));
+  border-radius: 18px;
+  border: 1px solid rgba(212, 176, 106, 0.22);
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ALERT */
+.card-alert {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  font-size: 12px;
+
+  opacity: 1;
+  transform: translateY(0);
+
+  transition: all 0.35s ease;
+
+  z-index: 20;
+
+  pointer-events: none;
+}
+
+/* ROSSO */
+.card-alert.error {
+  background: linear-gradient(135deg, #e53935, #b71c1c);
+  color: white;
+}
+
+/* ICONA */
+.alert-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* USCITA */
+.card-alert.hide {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ENTRATA */
+.card-alert:not(.hide) {
+  animation: fadeSlideIn 0.25s ease;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* SHAKE */
+.card-alert.shake {
+  animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px);
+  }
+
+  40% {
+    transform: translateX(4px);
+  }
+
+  60% {
+    transform: translateX(-3px);
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* =========================
+   HEADER
+========================= */
 .product-header {
   margin-bottom: 12px;
 }
@@ -59,8 +178,9 @@
   color: #e8c982;
 }
 
-/* DESCRIZIONE */
-
+/* =========================
+   DESCRIPTION
+========================= */
 .product-description {
   color: #dddddd;
   font-size: 14px;
@@ -68,8 +188,9 @@
   margin-bottom: 18px;
 }
 
-/* INFO PILLS */
-
+/* =========================
+   INFO PILLS
+========================= */
 .product-info-row {
   display: flex;
   flex-wrap: wrap;
@@ -80,14 +201,15 @@
 .product-info-pill {
   padding: 7px 11px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(212,176,106,0.16);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 176, 106, 0.16);
   color: #dddddd;
   font-size: 12px;
 }
 
-/* FOOTER */
-
+/* =========================
+   FOOTER
+========================= */
 .product-footer {
   margin-top: auto;
 
@@ -98,8 +220,9 @@
   gap: 16px;
 }
 
-/* PREZZO */
-
+/* =========================
+   PRICE
+========================= */
 .product-price-box {
   display: flex;
   flex-direction: column;
@@ -110,9 +233,8 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: rgba(255,255,255,0.48);
-
-  white-space: nowrap; /* evita andare a capo */
+  color: rgba(255, 255, 255, 0.48);
+  white-space: nowrap;
 }
 
 .product-price {
@@ -122,11 +244,12 @@
   line-height: 1;
 }
 
-/* BOTTONE */
-
+/* =========================
+   BUTTON
+========================= */
 .btn-product {
-  background: linear-gradient(180deg,#5a4a28,#45371e);
-  border: 1px solid rgba(212,176,106,0.62);
+  background: linear-gradient(180deg, #5a4a28, #45371e);
+  border: 1px solid rgba(212, 176, 106, 0.62);
 
   padding: 11px 18px;
   font-size: 13px;
@@ -143,9 +266,5 @@
 }
 
 .btn-product:hover {
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-}
-
-.product-card {
-  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }

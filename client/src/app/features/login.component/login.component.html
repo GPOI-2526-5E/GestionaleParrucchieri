@@ -43,85 +43,40 @@
         </p>
       </div>
 
-      <div
-        *ngIf="alertMessage"
-        class="custom-alert"
-        [ngClass]="alertType"
-        role="alert"
-        aria-live="polite"
-      >
+      <div *ngIf="alertMessage" class="custom-alert" [ngClass]="alertType" role="alert" aria-live="polite">
         <span class="alert-icon">
           {{ alertType === 'success' ? '✓' : alertType === 'warning' ? '!' : '✕' }}
         </span>
         <span>{{ alertMessage }}</span>
       </div>
 
-      <form
-        (ngSubmit)="login()"
-        #loginForm="ngForm"
-        novalidate
-        class="login-form"
-        autocomplete="on"
-      >
+      <form (ngSubmit)="login()" #loginForm="ngForm" novalidate class="login-form" autocomplete="on">
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
-          <input
-            [(ngModel)]="email"
-            #emailInput="ngModel"
-            type="email"
-            id="email"
-            name="email"
-            class="form-control clean-input"
-            placeholder="nome@email.com"
-            required
-            email
-            autocomplete="email"
+          <input [(ngModel)]="email" #emailInput="ngModel" type="email" id="email" name="email"
+            class="form-control clean-input" placeholder="nome@email.com" required email autocomplete="email"
             aria-describedby="emailError"
-            [attr.aria-invalid]="emailInput.invalid && emailInput.touched ? 'true' : 'false'"
-          />
-          <small
-            id="emailError"
-            class="input-error"
-            *ngIf="emailInput.invalid && emailInput.touched"
-          >
+            [attr.aria-invalid]="emailInput.invalid && emailInput.touched ? 'true' : 'false'" />
+          <small id="emailError" class="input-error" *ngIf="emailInput.invalid && emailInput.touched">
             Inserisci un indirizzo email valido.
           </small>
         </div>
 
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input
-            [(ngModel)]="password"
-            #passwordInput="ngModel"
-            type="password"
-            id="password"
-            name="password"
-            class="form-control clean-input"
-            placeholder="Inserisci la tua password"
-            required
-            minlength="4"
-            autocomplete="current-password"
-            aria-describedby="passwordError"
-            [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched ? 'true' : 'false'"
-          />
-          <small
-            id="passwordError"
-            class="input-error"
-            *ngIf="passwordInput.invalid && passwordInput.touched"
-          >
+          <input [(ngModel)]="password" #passwordInput="ngModel" type="password" id="password" name="password"
+            class="form-control clean-input" placeholder="Inserisci la tua password" required minlength="4"
+            autocomplete="current-password" aria-describedby="passwordError"
+            [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched ? 'true' : 'false'" />
+          <small id="passwordError" class="input-error" *ngIf="passwordInput.invalid && passwordInput.touched">
             Inserisci una password valida.
           </small>
         </div>
 
         <div class="login-row">
           <label class="remember-check" for="rememberMe">
-            <input
-              [(ngModel)]="rememberMe"
-              type="checkbox"
-              class="form-check-input"
-              id="rememberMe"
-              name="rememberMe"
-            />
+            <input [(ngModel)]="rememberMe" type="checkbox" class="form-check-input" id="rememberMe"
+              name="rememberMe" />
             <span class="form-check-label">Ricordami</span>
           </label>
 
@@ -130,11 +85,7 @@
           </a>
         </div>
 
-        <button
-          type="submit"
-          class="btn primary-login-btn"
-          [disabled]="loginForm.invalid || isLoading"
-        >
+        <button type="submit" class="btn primary-login-btn" [disabled]="loginForm.invalid || isLoading">
           {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
         </button>
 
@@ -142,17 +93,8 @@
           <span>oppure</span>
         </div>
 
-        <button
-          type="button"
-          class="btn google-login-btn"
-          (click)="loginWithGoogle()"
-          [disabled]="isLoading"
-        >
-          <img
-            src="https://developers.google.com/identity/images/g-logo.png"
-            alt="Google"
-            class="google-icon"
-          />
+        <button type="button" class="btn google-login-btn" (click)="loginWithGoogle()" [disabled]="isLoading">
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" class="google-icon" />
           Continua con Google
         </button>
 
