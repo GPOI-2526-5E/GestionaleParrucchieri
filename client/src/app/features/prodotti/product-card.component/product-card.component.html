@@ -1,19 +1,24 @@
 <div class="product-card">
 
+    <div class="card-alert error" [class.hide]="!showError" [class.shake]="shakeAnimation">
+
+        <div class="alert-icon">!</div>
+
+        <div class="alert-text">
+            {{ errorMessage }}
+        </div>
+    </div>
+
     <img class="product-image" [src]="product.foto" [alt]="product.nome">
 
     <div class="product-card-body">
 
         <div class="product-header">
-
-            <div class="product-title-wrap">
-                <h5 class="product-title">
-                    <a [routerLink]="['/product', product.id]" class="product-link">
-                        {{ product.nome }}
-                    </a>
-                </h5>
-            </div>
-
+            <h5 class="product-title">
+                <a [routerLink]="['/product', product.id]" class="product-link">
+                    {{ product.nome }}
+                </a>
+            </h5>
         </div>
 
         <p class="product-description">
@@ -21,7 +26,6 @@
         </p>
 
         <div class="product-info-row">
-
             <span class="product-info-pill">
                 {{ product.qta }} disponibili
             </span>
@@ -29,11 +33,9 @@
             <span class="product-info-pill">
                 {{ product.categoria }}
             </span>
-
         </div>
 
         <div class="product-footer">
-
             <div class="product-price-box">
                 <span class="product-price-label">Prezzo</span>
                 <span class="product-price">
@@ -41,12 +43,10 @@
                 </span>
             </div>
 
-            <button class="btn-product bi bi-scissors" (click)="addToCart()">
+            <button class="btn-product" (click)="addToCart()">
                 Aggiungi
             </button>
-
         </div>
 
     </div>
-
 </div>

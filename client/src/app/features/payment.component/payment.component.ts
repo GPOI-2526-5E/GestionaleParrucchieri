@@ -148,6 +148,9 @@ export class PaymentComponent implements AfterViewChecked {
       case 'express':
         this.shippingCost = 9.99;
         break;
+      case 'standard':
+        this.shippingCost = 4.99;
+        break;
       default:
         this.shippingCost = 0;
     }
