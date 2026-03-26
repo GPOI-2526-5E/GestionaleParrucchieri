@@ -6,9 +6,11 @@ import { ServicesListComponent } from './features/servizi/services-list.componen
 import { ServiceDetailsComponent } from './features/servizi/service-details.component/service-details.component';
 import { CartComponent } from './features/cart.component/cart.component';
 import { PaymentComponent } from './features/payment.component/payment.component';
+import { PaymentSuccessComponent } from './features/payment-success.component/payment-success.component';
 import { LoginComponent } from './features/login.component/login.component';
 import { RegisterComponent } from './features/register.component/register.component';
 import { InfoUtenteComponent } from './features/info-utente.component/info-utente.component';
+import { AppuntamentiComponent } from './features/appuntamenti.component/appuntamenti.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -19,8 +21,10 @@ export const routes: Routes = [
     { path: 'service/:id', component: ServiceDetailsComponent },
     { path: 'cart', component: CartComponent },
     { path: 'payment', component: PaymentComponent },
+    { path: 'payment-success', component: PaymentSuccessComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'info-utente', component: InfoUtenteComponent },
+    { path: 'appointments', component: AppuntamentiComponent },
     { path: '**', redirectTo: '/home' }
 ];

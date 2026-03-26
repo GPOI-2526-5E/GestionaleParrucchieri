@@ -128,4 +128,8 @@ export class ProdottoService {
       0
     );
   }
+
+  updateStock(cartItems: Prodotto[]) {
+    return this.http.post('http://localhost:3000/api/products/update-stock', cartItems);
+  }
 }
