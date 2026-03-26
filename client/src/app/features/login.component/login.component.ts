@@ -18,6 +18,8 @@ export class LoginComponent implements OnInit {
   password: string = '';
   rememberMe: boolean = false;
 
+  showPassword: boolean = false;
+
   isLoading: boolean = false;
 
   alertMessage: string = '';

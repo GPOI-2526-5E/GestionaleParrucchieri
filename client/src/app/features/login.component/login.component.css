@@ -590,6 +590,57 @@ body {
   font-size: 11px;
 }
 
+/* ===== PASSWORD INPUT ===== */
+
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 54px;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--gold);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.toggle-password-btn:hover {
+  background: rgba(212, 176, 106, 0.08);
+  color: var(--gold-soft);
+}
+
+.toggle-password-btn:active {
+  transform: scale(0.96);
+}
+
+.toggle-password-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.toggle-password-btn i {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
 /* ===== ANIMATION ===== */
 
 @keyframes fadeSlideIn {
@@ -655,9 +706,7 @@ body {
   }
 
   .login-visual-content {
-    margin-top: auto;
-    margin-bottom: 210px;
-    max-width: 100%;
+    display: none;
   }
 
   .login-visual-title {

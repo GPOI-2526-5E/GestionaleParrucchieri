@@ -64,10 +64,20 @@
 
         <div class="form-group">
           <label for="password" class="form-label">Password</label>
-          <input [(ngModel)]="password" #passwordInput="ngModel" type="password" id="password" name="password"
-            class="form-control clean-input" placeholder="Inserisci la tua password" required minlength="4"
-            autocomplete="current-password" aria-describedby="passwordError"
-            [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched ? 'true' : 'false'" />
+
+          <div class="password-input-wrap">
+            <input [(ngModel)]="password" #passwordInput="ngModel" [type]="showPassword ? 'text' : 'password'"
+              id="password" name="password" class="form-control clean-input" placeholder="Inserisci la tua password"
+              required minlength="4" autocomplete="current-password" aria-describedby="passwordError"
+              [attr.aria-invalid]="passwordInput.invalid && passwordInput.touched ? 'true' : 'false'" />
+
+            <button type="button" class="toggle-password-btn" (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Nascondi password' : 'Mostra password'"
+              [attr.title]="showPassword ? 'Nascondi password' : 'Mostra password'">
+              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+            </button>
+          </div>
+
           <small id="passwordError" class="input-error" *ngIf="passwordInput.invalid && passwordInput.touched">
             Inserisci una password valida.
           </small>
