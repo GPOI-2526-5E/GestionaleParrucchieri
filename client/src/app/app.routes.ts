@@ -10,6 +10,7 @@ import { PaymentSuccessComponent } from './features/payment-success.component/pa
 import { LoginComponent } from './features/login.component/login.component';
 import { RegisterComponent } from './features/register.component/register.component';
 import { InfoUtenteComponent } from './features/info-utente.component/info-utente.component';
+import { AppuntamentiComponent } from './features/appuntamenti.component/appuntamenti.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -24,5 +25,6 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'info-utente', component: InfoUtenteComponent },
+    { path: 'appointments', component: AppuntamentiComponent },
     { path: '**', redirectTo: '/home' }
 ];
