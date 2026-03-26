@@ -66,7 +66,7 @@
 
                             <div class="form-group">
                                 <label>CVV</label>
-                                <input type="number" [(ngModel)]="cvv" name="cvv" placeholder="123" />
+                                <input type="text" inputmode="numeric" [(ngModel)]="cvv" name="cvv" placeholder="123" />
                             </div>
                         </div>
 
@@ -229,14 +229,6 @@
                             : 'Paga ora'
                             }}
                         </button>
-                        <div style="color:red; font-size:12px">
-                            Pay Disabled: {{ isPayDisabled() }} <br>
-                            Selected Locker: {{ selectedLocker | json }} <br>
-                            Shipping Method: {{ shippingMethod }} <br>
-                            CardNumber: "{{ cardNumber }}" Valid: {{ isValidCardNumber() }} <br>
-                            CVV: "{{ cvv }}" Valid: {{ isValidCVV() }} <br>
-                            Expiry: "{{ expiry }}" Valid: {{ isValidExpiry() }} <br>
-                        </div>
                         <!-- ALERT -->
                         <div class="payment-success" *ngIf="paymentSuccess">
                             <div class="success-icon">✔</div>

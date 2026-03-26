@@ -142,30 +142,41 @@ export class PaymentComponent implements AfterViewChecked {
     const clean = this.cardNumber.replace(/\s+/g, '');
     return /^[0-9]{16}$/.test(clean);
   }
-
+  
   isValidExpiry(): boolean {
-    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(this.expiry)) {
-      return false;
-    }
+    if (!this.expiry) return false;
 
-    const [monthStr, yearStr] = this.expiry.split('/');
-    const month = parseInt(monthStr, 10);
-    const year = 2000 + parseInt(yearStr, 10);
+    // Rimuove spazi all’inizio/fine
+    const clean = this.expiry.trim();
+
+    // Accetta sia M/AA che MM/AA
+    const match = clean.match(/^(\d{1,2})\/(\d{2})$/);
+    if (!match) return false;
+
+    let month = parseInt(match[1], 10);
+    const year = 2000 + parseInt(match[2], 10);
+
+    // Controlla mese valido
+    if (month < 1 || month > 12) return false;
 
     const now = new Date();
-    const currentMonth = now.getMonth() + 1;
+    const currentMonth = now.getMonth() + 1; // Gennaio = 0
     const currentYear = now.getFullYear();
 
+    // Carta già scaduta
     if (year < currentYear) return false;
-
     if (year === currentYear && month < currentMonth) return false;
 
     return true;
   }
 
   isValidCVV(): boolean {
-    const clean = this.cvv.replace(/\D/g, '');
-    return clean.length >= 3 && clean.length <= 4;
+    if (!this.cvv) return false;
+
+    const clean = this.cvv.replace(/\D/g, ''); // solo numeri
+
+    // CVV standard 3 o 4 cifre
+    return clean.length === 3 || clean.length === 4;
   }
 
   isValidAddress(): boolean {
