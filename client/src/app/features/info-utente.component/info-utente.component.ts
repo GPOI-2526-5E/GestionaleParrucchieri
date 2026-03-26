@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { NavbarComponent } from '../navbar.component/navbar.component';
 
 interface UserProfile {
   idUtente: number;
@@ -20,7 +21,7 @@ interface UserProfile {
 @Component({
   selector: 'app-info-utente',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './info-utente.component.html',
   styleUrls: ['./info-utente.component.css']
 })
@@ -49,21 +50,16 @@ export class InfoUtenteComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
 
-  showVerifyPasswordPanel = false;
   showChangePasswordPanel = false;
-
-  verifyCurrentPassword = '';
-  showVerifyCurrentPassword = false;
-  isVerifyingPassword = false;
-  verifyPasswordMessage = '';
-  verifyPasswordError = '';
 
   currentPasswordChange = '';
   newPasswordChange = '';
   confirmNewPasswordChange = '';
+
   showCurrentPasswordChange = false;
   showNewPasswordChange = false;
   showConfirmNewPasswordChange = false;
+
   isChangingPassword = false;
   changePasswordMessage = '';
   changePasswordError = '';
@@ -96,7 +92,24 @@ export class InfoUtenteComponent implements OnInit {
     });
   }
 
-  private updateDerivedState(): void {
+  private resetCompletionPasswordFields(): void {
+    this.password = '';
+    this.confirmPassword = '';
+    this.showPassword = false;
+    this.showConfirmPassword = false;
+  }
+
+  private resetChangePasswordFields(): void {
+    this.currentPasswordChange = '';
+    this.newPasswordChange = '';
+    this.confirmNewPasswordChange = '';
+
+    this.showCurrentPasswordChange = false;
+    this.showNewPasswordChange = false;
+    this.showConfirmNewPasswordChange = false;
+  }
+
+  private computeProfileCompletionState(): void {
     if (!this.user) {
       this.missingRequiredFields = false;
       this.passwordRequired = false;
@@ -106,12 +119,16 @@ export class InfoUtenteComponent implements OnInit {
       return;
     }
 
-    const nome = String(this.user.nome).trim();
-    const cognome = String(this.user.cognome).trim();
-    const telefono = String(this.user.telefono).trim();
-    const dataNascita = String(this.user.data_nascita).trim();
+    const nome = String(this.user.nome ?? '').trim();
+    const cognome = String(this.user.cognome ?? '').trim();
+    const telefono = String(this.user.telefono ?? '').trim();
+    const dataNascita = String(this.user.data_nascita ?? '').trim();
+    const hasPassword = !!this.user.hasPassword;
 
     this.missingRequiredFields = !nome || !cognome || !telefono || !dataNascita;
+
+    // La password è richiesta solo se ci sono dati mancanti E l'utente non ha ancora una password
+    this.requirePasswordForCompletion = this.missingRequiredFields && !hasPassword;
     this.passwordRequired = this.requirePasswordForCompletion;
 
     this.showCompletionWarning =
@@ -167,21 +184,15 @@ export class InfoUtenteComponent implements OnInit {
           telefono: res.telefono != null ? String(res.telefono) : '',
           data_nascita: res.data_nascita ? String(res.data_nascita).substring(0, 10) : '',
           ruolo: res.ruolo ?? '',
-          hasPassword: res.hasPassword ?? false,
+          hasPassword: !!res.hasPassword,
           photoURL: res.photoURL ?? res.picture ?? res.avatar ?? null
         };
 
-        const nome = String(this.user.nome).trim();
-        const cognome = String(this.user.cognome).trim();
-        const telefono = String(this.user.telefono).trim();
-        const dataNascita = String(this.user.data_nascita).trim();
+        this.computeProfileCompletionState();
 
-        const hasIncompleteData = !nome || !cognome || !telefono || !dataNascita;
-        this.requirePasswordForCompletion = hasIncompleteData;
-
-        this.updateDerivedState();
-
+        // Se mancano dati obbligatori, resta in edit mode
         this.isEditMode = this.showCompletionWarning;
+
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -212,17 +223,14 @@ export class InfoUtenteComponent implements OnInit {
     }
 
     this.isEditMode = false;
-    this.password = '';
-    this.confirmPassword = '';
-    this.showPassword = false;
-    this.showConfirmPassword = false;
+    this.resetCompletionPasswordFields();
     this.cdr.detectChanges();
 
     this.loadUserData();
   }
 
   onFieldChange(): void {
-    this.updateDerivedState();
+    this.computeProfileCompletionState();
     this.cdr.detectChanges();
   }
 
@@ -242,73 +250,19 @@ export class InfoUtenteComponent implements OnInit {
     return fullName || 'Utente';
   }
 
-  toggleVerifyPasswordPanel(): void {
-    this.showVerifyPasswordPanel = !this.showVerifyPasswordPanel;
-
-    if (this.showVerifyPasswordPanel) {
-      this.showChangePasswordPanel = false;
-      this.verifyPasswordMessage = '';
-      this.verifyPasswordError = '';
-    }
-
-    this.cdr.detectChanges();
-  }
-
   toggleChangePasswordPanel(): void {
     this.showChangePasswordPanel = !this.showChangePasswordPanel;
 
     if (this.showChangePasswordPanel) {
-      this.showVerifyPasswordPanel = false;
+      this.changePasswordMessage = '';
+      this.changePasswordError = '';
+    } else {
+      this.resetChangePasswordFields();
       this.changePasswordMessage = '';
       this.changePasswordError = '';
     }
 
     this.cdr.detectChanges();
-  }
-
-  verifyCurrentPasswordAction(): void {
-    if (this.isVerifyingPassword) return;
-
-    this.verifyPasswordMessage = '';
-    this.verifyPasswordError = '';
-
-    if (!this.verifyCurrentPassword.trim()) {
-      this.verifyPasswordError = 'Inserisci la password attuale.';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    const headers = this.getAuthHeaders();
-
-    if (!headers) {
-      this.verifyPasswordError = 'Sessione non valida. Effettua di nuovo il login.';
-      this.cdr.detectChanges();
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    this.isVerifyingPassword = true;
-    this.cdr.detectChanges();
-
-    this.http.post(
-      `${this.api}/verify-password`,
-      { password: this.verifyCurrentPassword.trim() },
-      { headers }
-    ).subscribe({
-      next: () => {
-        this.isVerifyingPassword = false;
-        this.verifyPasswordMessage = 'Identità verificata correttamente.';
-        this.verifyCurrentPassword = '';
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Errore verifica password:', err);
-        this.isVerifyingPassword = false;
-        this.verifyPasswordError =
-          err?.error?.message || 'Password non corretta.';
-        this.cdr.detectChanges();
-      }
-    });
   }
 
   changePasswordAction(): void {
@@ -331,6 +285,12 @@ export class InfoUtenteComponent implements OnInit {
 
     if (this.newPasswordChange.trim().length < 6) {
       this.changePasswordError = 'La nuova password deve contenere almeno 6 caratteri.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!this.confirmNewPasswordChange.trim()) {
+      this.changePasswordError = 'Conferma la nuova password.';
       this.cdr.detectChanges();
       return;
     }
@@ -359,28 +319,39 @@ export class InfoUtenteComponent implements OnInit {
     this.isChangingPassword = true;
     this.cdr.detectChanges();
 
-    this.http.put(
+    this.http.post(
       `${this.api}/change-password`,
       {
         currentPassword: this.currentPasswordChange.trim(),
-        newPassword: this.newPasswordChange.trim()
+        newPassword: this.newPasswordChange.trim(),
+        confirmNewPassword: this.confirmNewPasswordChange.trim()
       },
       { headers }
     ).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.isChangingPassword = false;
-        this.changePasswordMessage = 'Password aggiornata con successo.';
-        this.currentPasswordChange = '';
-        this.newPasswordChange = '';
-        this.confirmNewPasswordChange = '';
-        this.showCurrentPasswordChange = false;
-        this.showNewPasswordChange = false;
-        this.showConfirmNewPasswordChange = false;
+        this.changePasswordMessage =
+          res?.message || 'Password aggiornata con successo.';
+        this.changePasswordError = '';
+
+        this.resetChangePasswordFields();
+        this.showChangePasswordPanel = false;
+
+        // Aggiorno subito lo stato locale
+        if (this.user) {
+          this.user.hasPassword = true;
+        }
+
+        this.computeProfileCompletionState();
         this.cdr.detectChanges();
+
+        // Ricarico dal backend per avere lo stato reale sincronizzato
+        this.loadUserData();
       },
       error: (err) => {
         console.error('Errore modifica password:', err);
         this.isChangingPassword = false;
+        this.changePasswordMessage = '';
         this.changePasswordError =
           err?.error?.message || 'Impossibile aggiornare la password.';
         this.cdr.detectChanges();
@@ -455,16 +426,22 @@ export class InfoUtenteComponent implements OnInit {
     }
 
     this.http.put(`${this.api}/me`, payload, { headers }).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.isSaving = false;
-        this.successMessage = 'Dati aggiornati con successo.';
+        this.successMessage = res?.message || 'Dati aggiornati con successo.';
+        this.errorMessage = '';
         this.isEditMode = false;
-        this.requirePasswordForCompletion = false;
-        this.password = '';
-        this.confirmPassword = '';
-        this.showPassword = false;
-        this.showConfirmPassword = false;
+
+        // Se ho impostato la password durante il completamento profilo,
+        // aggiorno subito anche lo stato locale
+        if (this.passwordRequired && this.user) {
+          this.user.hasPassword = true;
+        }
+
+        this.resetCompletionPasswordFields();
+        this.computeProfileCompletionState();
         this.cdr.detectChanges();
+
         this.loadUserData();
       },
       error: (err) => {

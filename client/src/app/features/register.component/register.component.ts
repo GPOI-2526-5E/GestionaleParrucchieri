@@ -23,12 +23,19 @@ export class RegisterComponent {
     ruolo: 'cliente' // Valore predefinito dell'ENUM
   };
 
-  constructor(public auth: AuthService, private router: Router) {}
+  constructor(public auth: AuthService, private router: Router) { }
 
   register() {
-    console.log('Dati inviati:', this.userData);
-    
-    // Qui chiamerai il metodo del service (che dovrai creare)
-    // this.auth.register(this.userData).subscribe(...)
-  }
+  console.log('Dati inviati:', this.userData);
+
+  this.auth.register(this.userData).subscribe({
+    next: (res) => {
+      console.log('Registrazione riuscita', res);
+      this.router.navigate(['/home']);
+    },
+    error: (err) => {
+      console.error('Errore registrazione', err);
+    }
+  });
+}
 }

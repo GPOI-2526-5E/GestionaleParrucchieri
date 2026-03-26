@@ -1,3 +1,5 @@
+<app-navbar></app-navbar>
+
 <div class="profile-page">
   <div class="profile-overlay"></div>
 
@@ -5,10 +7,11 @@
     <div class="profile-card">
       <div class="profile-header">
         <div class="profile-header-left">
-          <p class="profile-eyebrow">Area personale</p>
-          <h1>Profilo utente</h1>
+          <p class="profile-eyebrow">Area riservata</p>
+          <h1>Il tuo profilo beauty</h1>
           <p class="profile-subtitle">
-            Qui puoi vedere, completare e gestire in sicurezza i tuoi dati personali.
+            Gestisci i tuoi dati personali e mantieni il tuo profilo sempre aggiornato
+            per vivere un’esperienza ancora più curata nel salone.
           </p>
         </div>
 
@@ -18,7 +21,7 @@
       </div>
 
       <div *ngIf="isLoading" class="state-message">
-        Caricamento dati...
+        Caricamento dati in corso...
       </div>
 
       <ng-container *ngIf="!isLoading">
@@ -33,17 +36,21 @@
         </div>
 
         <div *ngIf="!user" class="state-message">
-          Nessun dato utente disponibile.
+          Nessun dato disponibile per questo profilo.
         </div>
 
         <ng-container *ngIf="user">
           <div *ngIf="showCompletionWarning" class="custom-alert warning">
             <span class="alert-icon">!</span>
             <span>
-              {{ completionMessage || 'Completa i dati mancanti per terminare la registrazione.' }}
+              {{
+                completionMessage ||
+                  'Completa i dati mancanti per terminare la registrazione e rendere il profilo completo.'
+              }}
             </span>
           </div>
 
+          <!-- VIEW MODE -->
           <ng-container *ngIf="!isEditMode">
             <div class="profile-top-summary">
               <div class="profile-avatar-wrapper">
@@ -64,7 +71,8 @@
                 <p>{{ user.email || '-' }}</p>
 
                 <div class="summary-badges">
-                  <span class="role-badge">{{ user.ruolo || 'Utente' }}</span>
+                  <span class="role-badge">{{ user.ruolo || 'Cliente' }}</span>
+
                   <span class="status-badge" *ngIf="user.photoURL">
                     Profilo Google collegato
                   </span>
@@ -73,10 +81,11 @@
             </div>
 
             <div class="profile-sections">
+              <!-- DATI PERSONALI -->
               <div class="profile-main-section">
                 <div class="section-title">
                   <span class="section-dot"></span>
-                  Le tue informazioni
+                  I tuoi dati
                 </div>
 
                 <div class="info-grid">
@@ -112,10 +121,11 @@
                 </div>
               </div>
 
+              <!-- SICUREZZA -->
               <div class="profile-side-section">
                 <div class="section-title">
                   <span class="section-dot"></span>
-                  Sicurezza account
+                  Accesso e sicurezza
                 </div>
 
                 <div class="security-card">
@@ -134,80 +144,24 @@
                     <div class="security-actions">
                       <button
                         type="button"
-                        class="mini-btn"
-                        (click)="toggleVerifyPasswordPanel()"
-                      >
-                        {{ showVerifyPasswordPanel ? 'Chiudi verifica' : 'Verifica password' }}
-                      </button>
-
-                      <button
-                        type="button"
                         class="mini-btn secondary"
                         (click)="toggleChangePasswordPanel()"
                       >
-                        {{ showChangePasswordPanel ? 'Chiudi modifica' : 'Modifica password' }}
+                        {{
+                          showChangePasswordPanel
+                            ? 'Chiudi modifica'
+                            : 'Modifica password'
+                        }}
                       </button>
                     </div>
 
                     <p class="security-note">
                       Per motivi di sicurezza la password non viene mai mostrata.
-                      Puoi verificare la tua identità oppure aggiornarla.
+                      Puoi aggiornarla in qualsiasi momento inserendo quella attuale e scegliendone una nuova.
                     </p>
                   </div>
 
-                  <div *ngIf="showVerifyPasswordPanel" class="security-panel">
-                    <h3>Verifica identità</h3>
-                    <p>
-                      Inserisci la password attuale per confermare che sei tu.
-                    </p>
-
-                    <div *ngIf="verifyPasswordMessage" class="inline-status success-text">
-                      {{ verifyPasswordMessage }}
-                    </div>
-
-                    <div *ngIf="verifyPasswordError" class="inline-status error-text">
-                      {{ verifyPasswordError }}
-                    </div>
-
-                    <div class="form-group">
-                      <label for="verifyCurrentPassword">Password attuale</label>
-
-                      <div class="password-input-wrap">
-                        <input
-                          id="verifyCurrentPassword"
-                          [type]="showVerifyCurrentPassword ? 'text' : 'password'"
-                          name="verifyCurrentPassword"
-                          [(ngModel)]="verifyCurrentPassword"
-                          placeholder="Inserisci la password attuale"
-                        />
-
-                        <button
-                          type="button"
-                          class="toggle-password-btn"
-                          (click)="showVerifyCurrentPassword = !showVerifyCurrentPassword"
-                          [attr.aria-label]="showVerifyCurrentPassword ? 'Nascondi password' : 'Mostra password'"
-                          [attr.title]="showVerifyCurrentPassword ? 'Nascondi password' : 'Mostra password'"
-                        >
-                          <i
-                            class="bi"
-                            [ngClass]="showVerifyCurrentPassword ? 'bi-eye-slash' : 'bi-eye'"
-                          ></i>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class="panel-actions">
-                      <button
-                        type="button"
-                        class="mini-btn"
-                        (click)="verifyCurrentPasswordAction()"
-                        [disabled]="isVerifyingPassword"
-                      >
-                        {{ isVerifyingPassword ? 'Verifica in corso...' : 'Conferma identità' }}
-                      </button>
-                    </div>
-                  </div>
-
+                  <!-- CAMBIO PASSWORD -->
                   <div *ngIf="showChangePasswordPanel" class="security-panel">
                     <h3>Modifica password</h3>
                     <p>
@@ -310,7 +264,11 @@
                         (click)="changePasswordAction()"
                         [disabled]="isChangingPassword"
                       >
-                        {{ isChangingPassword ? 'Aggiornamento...' : 'Aggiorna password' }}
+                        {{
+                          isChangingPassword
+                            ? 'Aggiornamento in corso...'
+                            : 'Aggiorna password'
+                        }}
                       </button>
                     </div>
                   </div>
@@ -320,15 +278,16 @@
 
             <div class="actions">
               <button type="button" class="edit-btn" (click)="enableEditMode()">
-                Modifica dati
+                Aggiorna profilo
               </button>
             </div>
           </ng-container>
 
+          <!-- EDIT MODE -->
           <form *ngIf="isEditMode" class="profile-form" (ngSubmit)="saveUserData()">
             <div class="section-title">
               <span class="section-dot"></span>
-              Modifica informazioni
+              Modifica profilo
             </div>
 
             <div class="edit-profile-top">
@@ -348,7 +307,8 @@
               <div class="edit-profile-top-text">
                 <h3>Informazioni personali</h3>
                 <p>
-                  Aggiorna i tuoi dati per mantenere il profilo completo e sempre allineato.
+                  Aggiorna i tuoi dati per mantenere il profilo completo, ordinato
+                  e sempre allineato.
                 </p>
               </div>
             </div>
@@ -480,7 +440,7 @@
 
             <div class="actions">
               <button type="submit" class="save-btn" [disabled]="isSaving">
-                {{ isSaving ? 'Salvataggio...' : 'Salva dati' }}
+                {{ isSaving ? 'Salvataggio in corso...' : 'Salva modifiche' }}
               </button>
 
               <button

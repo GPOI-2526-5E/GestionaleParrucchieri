@@ -87,4 +87,23 @@ export class AuthService {
   get token(): string | null {
     return this._token();
   }
+
+  register(user: {
+    nome: string,
+    cognome: string,
+    email: string,
+    password: string,
+    telefono: string,
+    data_nascita: string,
+    ruolo: string
+  }){
+    return this.http.post<LoginResponse>(`${this.api}/register`, user)
+    .pipe(
+      tap((response) => {
+        if (response?.token) {
+          this.saveToken(response.token);
+        }
+      })
+    );
+  }
 }
