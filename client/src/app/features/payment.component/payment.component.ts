@@ -8,6 +8,7 @@ import { AiChatDrawerComponent } from '../ai-chat-drawer.component/ai-chat-drawe
 import { Prodotto } from '../../services/prodotto';
 import { ProdottoService } from '../../services/prodotto';
 import { LockerService, LockerOption } from '../../services/locker';
+import { ChangeDetectorRef } from '@angular/core';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
@@ -34,6 +35,10 @@ export class PaymentComponent implements AfterViewChecked {
   shippingMethod: string = 'standard';
   shippingCost: number = 0;
 
+  name: string = '';
+  surname: string = '';
+  email: string = '';
+  phone: string = '';
   cardName: string = '';
   cardNumber: string = '';
   expiry: string = '';
@@ -42,6 +47,9 @@ export class PaymentComponent implements AfterViewChecked {
   address: string = '';
   city: string = '';
   zip: string = '';
+
+  isProcessing: boolean = false;
+  paymentSuccess: boolean = false;
 
   @ViewChild('mapContainer') mapContainer!: ElementRef;
   map!: L.Map;
@@ -52,7 +60,8 @@ export class PaymentComponent implements AfterViewChecked {
 
   constructor(
     private prodottoService: ProdottoService,
-    private lockerService: LockerService
+    private lockerService: LockerService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -109,21 +118,54 @@ export class PaymentComponent implements AfterViewChecked {
     }).addTo(this.map);
   }
 
+  isValidName(): boolean {
+    return /^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s]{2,}$/.test(this.name.trim());
+  }
+
+  isValidSurname(): boolean {
+    return /^[a-zA-ZàèéìòùÀÈÉÌÒÙ\s]{2,}$/.test(this.surname.trim());
+  }
+
+  isValidEmail(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
+  }
+
+  isValidPhone(): boolean {
+    return /^[0-9+\s]{8,15}$/.test(this.phone);
+  }
+
+  isValidCardName(): boolean {
+    return this.cardName.trim().length >= 3;
+  }
+
   isValidCardNumber(): boolean {
     const clean = this.cardNumber.replace(/\s+/g, '');
     return /^[0-9]{16}$/.test(clean);
   }
 
-  isValidName(): boolean {
-    return this.cardName.trim().length >= 3;
-  }
-
   isValidExpiry(): boolean {
-    return /^(0[1-9]|1[0-2])\/\d{2}$/.test(this.expiry);
+    if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(this.expiry)) {
+      return false;
+    }
+
+    const [monthStr, yearStr] = this.expiry.split('/');
+    const month = parseInt(monthStr, 10);
+    const year = 2000 + parseInt(yearStr, 10);
+
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    if (year < currentYear) return false;
+
+    if (year === currentYear && month < currentMonth) return false;
+
+    return true;
   }
 
   isValidCVV(): boolean {
-    return /^[0-9]{3,4}$/.test(this.cvv);
+    const clean = this.cvv.replace(/\D/g, '');
+    return clean.length >= 3 && clean.length <= 4;
   }
 
   isValidAddress(): boolean {
@@ -136,6 +178,10 @@ export class PaymentComponent implements AfterViewChecked {
 
     if (
       !this.isValidName() ||
+      !this.isValidSurname() ||
+      !this.isValidEmail() ||
+      !this.isValidPhone() ||
+      !this.isValidCardName() ||
       !this.isValidCardNumber() ||
       !this.isValidExpiry() ||
       !this.isValidCVV()
@@ -159,7 +205,11 @@ export class PaymentComponent implements AfterViewChecked {
 
   getPayTooltip(): string {
 
-    if (!this.isValidName()) return 'Inserisci nome valido';
+    if (!this.isValidName()) return 'Nome non valido';
+    if (!this.isValidSurname()) return 'Cognome non valido';
+    if (!this.isValidEmail()) return 'Email non valida';
+    if (!this.isValidPhone()) return 'Telefono non valido';
+    if (!this.isValidCardName()) return 'Nome sulla carta non valido';
     if (!this.isValidCardNumber()) return 'Numero carta non valido';
     if (!this.isValidExpiry()) return 'Scadenza non valida (MM/AA)';
     if (!this.isValidCVV()) return 'CVV non valido';
@@ -185,6 +235,7 @@ export class PaymentComponent implements AfterViewChecked {
       const locker = this.lockers.find(l => l.id === lockerId);
       if (locker) {
         this.selectedLocker = locker;
+        this.cdr.detectChanges();
       }
     };
 
@@ -254,13 +305,45 @@ export class PaymentComponent implements AfterViewChecked {
   }
 
   pay(): void {
-    if (this.isPayDisabled()) {
-      return;
-    }
 
-    alert('Pagamento completato');
+    if (this.isPayDisabled() || this.isProcessing) return;
 
-    localStorage.removeItem('cart');
-    localStorage.removeItem('cart_total');
+    this.isProcessing = true;
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+
+      this.prodottoService.updateStock(this.cartItems).subscribe({
+
+        next: () => {
+
+          this.paymentSuccess = true;
+          this.isProcessing = false;
+
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+
+            localStorage.removeItem('cart');
+            localStorage.removeItem('cart_total');
+
+            this.cartItems = [];
+            this.totalQuantity = 0;
+            this.finalTotal = 0;
+
+            window.location.href = '/payment-success';
+
+          }, 3000);
+        },
+
+        error: () => {
+          this.isProcessing = false;
+          this.cdr.detectChanges();
+          alert('Errore durante il pagamento');
+        }
+
+      });
+
+    }, 2500);
   }
 }

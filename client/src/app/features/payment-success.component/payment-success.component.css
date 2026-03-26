@@ -1,0 +1,69 @@
+.success-page {
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background-image:
+        url("https://res.cloudinary.com/duimlq34k/image/upload/v1774519040/pexels-hook-tell-1947041-4449790_bk4g41.jpg");
+
+    background-size: cover;
+    background-position: center;
+}
+
+.success-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* BOX */
+.success-box {
+    position: relative;
+    z-index: 2;
+
+    max-width: 400px;
+    width: 100%;
+
+    padding: 28px;
+
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(212, 176, 106, 0.2);
+
+    text-align: center;
+
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.35);
+}
+
+.success-icon {
+    font-size: 52px;
+    color: #7CFC9A;
+    /* verde più elegante */
+    margin-bottom: 14px;
+
+    filter: drop-shadow(0 4px 12px rgba(40, 180, 90, 0.25));
+}
+
+/* TESTO */
+.success-box h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #fff;
+}
+
+.success-box p {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.6;
+}
