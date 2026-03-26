@@ -131,6 +131,64 @@ app.get("/api/prodotti", async (req, res) => {
   }
 });
 
+// AGGIORNA STOCK PRODOTTI DOPO PAGAMENTO
+app.post("/api/products/update-stock", async (req, res) => {
+  const cartItems = req.body;
+
+  if (!Array.isArray(cartItems) || cartItems.length === 0) {
+    return res.status(400).json({ message: "Carrello non valido" });
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    for (const item of cartItems) {
+      const quantitaAcquistata = item.quantita || 1;
+
+      const [rows]: any = await connection.query(
+        "SELECT quantitaMagazzino FROM prodotti WHERE idProdotto = ?",
+        [item.id]
+      );
+
+      if (rows.length === 0) {
+        throw new Error(`Prodotto con id ${item.id} non trovato`);
+      }
+
+      const stockAttuale = rows[0].quantitaMagazzino;
+
+      if (stockAttuale < quantitaAcquistata) {
+        throw new Error(
+          `Stock insufficiente per prodotto ${item.id}`
+        );
+      }
+
+      await connection.query(
+        "UPDATE prodotti SET quantitaMagazzino = quantitaMagazzino - ? WHERE idProdotto = ?",
+        [quantitaAcquistata, item.id]
+      );
+    }
+
+    await connection.commit();
+
+    res.json({ message: "Stock aggiornato correttamente" });
+
+  } catch (err: any) {
+    await connection.rollback();
+
+    console.error("Errore aggiornamento stock:", err.message);
+
+    res.status(500).json({
+      message: "Errore aggiornamento stock",
+      error: err.message
+    });
+
+  } finally {
+    connection.release();
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server in ascolto su http://localhost:${PORT}`);
 });

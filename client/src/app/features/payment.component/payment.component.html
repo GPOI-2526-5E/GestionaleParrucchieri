@@ -4,7 +4,6 @@
     <div class="payment-section">
         <div class="container">
 
-            <!-- HERO -->
             <div class="payment-hero">
                 <p class="payment-eyebrow">Checkout sicuro</p>
                 <h1 class="payment-title">Completa il pagamento</h1>
@@ -15,13 +14,39 @@
 
             <div class="payment-layout">
 
-                <!-- FORM -->
                 <div class="payment-form-card">
-                    <h3 class="payment-section-title">Dati di pagamento</h3>
-
                     <form>
+                        <h3 class="payment-section-title">Dati utente</h3>
 
-                        <!-- 💳 PAGAMENTO -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome</label>
+                                <input type="text" [(ngModel)]="name" name="name" placeholder="Mario" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Cognome</label>
+                                <input type="text" [(ngModel)]="surname" name="surname" placeholder="Rossi" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="text" [(ngModel)]="email" name="email"
+                                    placeholder="mario.rossi@email.com" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Telefono</label>
+                                <input type="number" [(ngModel)]="phone" name="phone" placeholder="+39 333 1234567" />
+                            </div>
+                        </div>
+
+                        <div class="form-divider"></div>
+
+                        <h3 class="payment-section-title">Dati di pagamento</h3>
+
                         <div class="form-group">
                             <label>Nome sulla carta</label>
                             <input type="text" [(ngModel)]="cardName" name="cardName" placeholder="Mario Rossi" />
@@ -29,29 +54,27 @@
 
                         <div class="form-group">
                             <label>Numero carta</label>
-                            <input type="text" [(ngModel)]="cardNumber" name="cardNumber"
+                            <input type="text" inputmode="numeric" [(ngModel)]="cardNumber" name="cardNumber"
                                 placeholder="1234 5678 9012 3456" />
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Scadenza</label>
-                                <input type="text" [(ngModel)]="expiry" name="expiry" placeholder="MM/AA" />
+                                <input type="text" [(ngModel)]="expiry" name="expiry" placeholder="MM / AA" />
                             </div>
 
                             <div class="form-group">
                                 <label>CVV</label>
-                                <input type="text" [(ngModel)]="cvv" name="cvv" placeholder="123" />
+                                <input type="number" [(ngModel)]="cvv" name="cvv" placeholder="123" />
                             </div>
                         </div>
 
-                        <!-- 🚚 SHIPPING -->
                         <div class="shipping-section">
                             <h3 class="payment-section-title">Consegna</h3>
 
                             <div class="shipping-options">
 
-                                <!-- PICKUP -->
                                 <label class="shipping-option">
                                     <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
                                         (change)="onShippingChange()" value="pickup" />
@@ -65,7 +88,6 @@
                                     </div>
                                 </label>
 
-                                <!-- STANDARD -->
                                 <label class="shipping-option">
                                     <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
                                         (change)="onShippingChange()" value="standard" />
@@ -77,21 +99,21 @@
                                         </div>
                                         <p>5-7 giorni lavorativi</p>
 
-                                        <!-- ✅ FORM SOTTO -->
                                         <div class="shipping-form" *ngIf="shippingMethod === 'standard'">
                                             <div class="form-group">
-                                                <input type="text" [(ngModel)]="address" name="address"
-                                                    placeholder="Indirizzo" />
+                                                <label>Indirizzo</label>
+                                                <input type="text" [(ngModel)]="address" name="address" />
                                             </div>
 
                                             <div class="form-row">
                                                 <div class="form-group">
-                                                    <input type="text" [(ngModel)]="city" name="city"
-                                                        placeholder="Città" />
+                                                    <label>Città</label>
+                                                    <input type="text" [(ngModel)]="city" name="city" />
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <input type="text" [(ngModel)]="zip" name="zip" placeholder="CAP" />
+                                                    <label>CAP</label>
+                                                    <input type="number" [(ngModel)]="zip" name="zip" />
                                                 </div>
                                             </div>
                                         </div>
@@ -99,33 +121,32 @@
                                     </div>
                                 </label>
 
-                                <!-- EXPRESS -->
                                 <label class="shipping-option">
                                     <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
                                         (change)="onShippingChange()" value="express" />
 
                                     <div class="shipping-content">
                                         <div class="shipping-top">
-                                            <span class="shipping-title">⚡ Express</span>
+                                            <span class="shipping-title">⚡️ Express</span>
                                             <span class="shipping-price">9.99€</span>
                                         </div>
                                         <p>2-4 giorni lavorativi</p>
 
-                                        <!-- ✅ FORM SOTTO -->
                                         <div class="shipping-form" *ngIf="shippingMethod === 'express'">
                                             <div class="form-group">
-                                                <input type="text" [(ngModel)]="address" name="address"
-                                                    placeholder="Indirizzo" />
+                                                <label>Indirizzo</label>
+                                                <input type="text" [(ngModel)]="address" name="address" />
                                             </div>
 
                                             <div class="form-row">
                                                 <div class="form-group">
-                                                    <input type="text" [(ngModel)]="city" name="city"
-                                                        placeholder="Città" />
+                                                    <label>Città</label>
+                                                    <input type="text" [(ngModel)]="city" name="city" />
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <input type="text" [(ngModel)]="zip" name="zip" placeholder="CAP" />
+                                                    <label>CAP</label>
+                                                    <input type="number" [(ngModel)]="zip" name="zip" />
                                                 </div>
                                             </div>
                                         </div>
@@ -133,7 +154,6 @@
                                     </div>
                                 </label>
 
-                                <!-- LOCKER -->
                                 <label class="shipping-option">
                                     <input type="radio" name="shipping" [(ngModel)]="shippingMethod"
                                         (change)="onShippingChange()" value="locker" />
@@ -149,7 +169,6 @@
 
                             </div>
 
-                            <!-- 📦 MAPPA -->
                             <div class="locker-map" *ngIf="shippingMethod === 'locker'">
                                 <div #mapContainer class="real-map"></div>
 
@@ -163,7 +182,6 @@
                     </form>
                 </div>
 
-                <!-- 🧾 SUMMARY -->
                 <div class="payment-summary-card">
                     <h3 class="payment-section-title">Riepilogo ordine</h3>
 
@@ -199,12 +217,36 @@
                         <strong>{{ finalTotal | currency:'EUR' }}</strong>
                     </div>
 
-                    <!-- 💳 BUTTON -->
-                    <button type="button" class="payment-submit" (click)="pay()" [disabled]="isPayDisabled()"
-                        [attr.title]="getPayTooltip()">
-                        <i class="bi bi-credit-card"></i>
-                        <span> Paga ora</span>
-                    </button>
+                    <div class="payment-actions">
+
+                        <button class="pay-btn" [disabled]="isPayDisabled() || isProcessing || paymentSuccess"
+                            (click)="pay()">
+                            {{
+                            paymentSuccess
+                            ? 'Pagato'
+                            : isProcessing
+                            ? 'Pagamento in corso...'
+                            : 'Paga ora'
+                            }}
+                        </button>
+                        <div style="color:red; font-size:12px">
+                            Pay Disabled: {{ isPayDisabled() }} <br>
+                            Selected Locker: {{ selectedLocker | json }} <br>
+                            Shipping Method: {{ shippingMethod }} <br>
+                            CardNumber: "{{ cardNumber }}" Valid: {{ isValidCardNumber() }} <br>
+                            CVV: "{{ cvv }}" Valid: {{ isValidCVV() }} <br>
+                            Expiry: "{{ expiry }}" Valid: {{ isValidExpiry() }} <br>
+                        </div>
+                        <!-- ALERT -->
+                        <div class="payment-success" *ngIf="paymentSuccess">
+                            <div class="success-icon">✔</div>
+                            <div>
+                                <strong>Pagamento completato</strong><br>
+                                Ordine confermato con successo
+                            </div>
+                        </div>
+
+                    </div>
 
                 </div>
 
