@@ -1,4 +1,21 @@
 <app-navbar></app-navbar>
-<div class="calendar-container">
-  <full-calendar [options]="calendarOptions"></full-calendar>
+
+<div class="appointments-page">
+  <div class="appointments-overlay"></div>
+
+  <div class="appointments-section">
+    <div class="appointments-hero">
+      <p class="appointments-eyebrow">Prenota Ora</p>
+      <h1 class="appointments-title">Appuntamenti</h1>
+      <p class="appointments-subtitle">
+        Seleziona la fascia oraria desiderata per prenotare il tuo appuntamento nel salone.
+      </p>
+    </div>
+
+    <div class="calendar-wrapper">
+      <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+    </div>
+  </div>
 </div>
+
+<app-ai-chat-drawer></app-ai-chat-drawer>

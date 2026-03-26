@@ -142,7 +142,7 @@ export class PaymentComponent implements AfterViewChecked {
     const clean = this.cardNumber.replace(/\s+/g, '');
     return /^[0-9]{16}$/.test(clean);
   }
-  
+
   isValidExpiry(): boolean {
     if (!this.expiry) return false;
 
