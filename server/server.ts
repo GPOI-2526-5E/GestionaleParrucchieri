@@ -13,6 +13,7 @@ import loginRoute from "./routes/login";
 import googleAuthRoute from "./routes/google-auth";
 import { db } from "./db_parrucchieri";
 import passport from "./config/passport";
+import bcrypt from "bcrypt";
 
 //Configurazione server express
 const app = express();
@@ -128,6 +129,39 @@ app.get("/api/prodotti", async (req, res) => {
   } catch (err) {
     console.error("Errore recupero prodotti:", err);
     res.status(500).send(err);
+  }
+});
+
+import { RowDataPacket } from "mysql2";
+
+app.post("/api/register", async (req, res) => {
+    try {
+    const { nome, cognome, email, password, telefono, data_nascita, ruolo } = req.body;
+
+    // Recupero utenti esistenti
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT * FROM utenti WHERE email = ?",
+      [email]
+    );
+
+    if ((rows as RowDataPacket[]).length > 0) {
+      return res.status(400).json({ message: "Email già registrata" });
+    }
+
+    // Hash della password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Inserimento utente
+    await db.query(
+      `INSERT INTO utenti (nome, cognome, email, password, telefono, data_nascita, ruolo)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [nome, cognome, email, hashedPassword, telefono, data_nascita, ruolo]
+    );
+
+    res.status(201).json({ message: "Account creato con successo!" });
+  } catch (err) {
+    console.error("Errore registrazione:", err);
+    res.status(500).json({ message: "Errore del server" });
   }
 });
 

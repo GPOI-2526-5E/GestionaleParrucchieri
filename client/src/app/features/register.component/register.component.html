@@ -1,68 +1,143 @@
-<div class="register-container">
-    <div class="register-image"></div>
+<div class="login-layout">
+    <section class="login-visual" aria-hidden="true">
+        <div class="login-visual-overlay"></div>
+        <div class="login-visual-soft-light"></div>
 
-    <div class="register-form-wrapper">
-        <div class="register-card shadow-lg">
-            <h3>Crea Account</h3>
+        <div class="login-visual-inner">
+            <div class="brand-mark"><a href="/home">I Parrucchieri · Fossano</a></div>
 
-            <form (submit)="register()">
+            <div class="login-visual-content">
+                <p class="login-visual-label">Unisciti al club</p>
+
+                <h1 class="login-visual-title">
+                    Il tuo stile,
+                    <span>la nostra passione</span>
+                </h1>
+
+                <p class="login-visual-description">
+                    Crea il tuo profilo per prenotare i tuoi trattamenti preferiti,
+                    ricevere promozioni esclusive e gestire i tuoi appuntamenti.
+                </p>
+
+                <div class="login-visual-signature">
+                    Un’esperienza professionale firmata I Parrucchieri
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="login-panel">
+        <div class="login-box">
+            <div class="login-header-top">
+                <button type="button" class="back-button" (click)="goBack()">
+                    <span class="back-icon" aria-hidden="true">←</span>
+                    <span>Torna al login</span>
+                </button>
+            </div>
+
+            <div class="login-header">
+                <p class="login-eyebrow">Nuovo utente</p>
+                <h2 class="login-title">Registrati</h2>
+                <p class="login-subtitle">
+                    Compila i campi per creare il tuo account personale.
+                </p>
+            </div>
+
+            <div *ngIf="alertMessage" class="custom-alert" [ngClass]="alertType" role="alert" aria-live="polite">
+                <span class="alert-icon">
+                    {{ alertType === 'success' ? '✓' : alertType === 'warning' ? '!' : '✕' }}
+                </span>
+                <span>{{ alertMessage }}</span>
+            </div>
+
+            <form (ngSubmit)="register()" #registerForm="ngForm" class="login-form">
+
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="nome" class="form-label">Nome</label>
-                        <input type="text" id="nome" name="nome" [(ngModel)]="userData.nome" class="form-control"
-                            placeholder="Es: Mario" required>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Nome</label>
+                        <input [(ngModel)]="userData.nome" name="nome" type="text" class="clean-input"
+                            placeholder="Mario" required />
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="cognome" class="form-label">Cognome</label>
-                        <input type="text" id="cognome" name="cognome" [(ngModel)]="userData.cognome"
-                            class="form-control" placeholder="Es: Rossi" required>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Cognome</label>
+                        <input [(ngModel)]="userData.cognome" name="cognome" type="text" class="clean-input"
+                            placeholder="Rossi" required />
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" [(ngModel)]="userData.email" class="form-control"
-                        placeholder="mario.rossi@esempio.com" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" [(ngModel)]="userData.password"
-                        class="form-control" placeholder="Scegli una password sicura" required>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input [(ngModel)]="userData.email" name="email" type="email" class="clean-input"
+                        placeholder="mario.rossi@mail.com" required />
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="telefono" class="form-label">Telefono</label>
-                        <input type="tel" id="telefono" name="telefono" [(ngModel)]="userData.telefono"
-                            class="form-control" placeholder="333 1234567">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Password</label>
+                        <div class="password-input-wrap">
+                            <input [(ngModel)]="userData.password" name="password"
+                                [type]="showPassword ? 'text' : 'password'" class="clean-input"
+                                placeholder="Crea una password" required />
+                            <button type="button" class="toggle-password-btn" (click)="showPassword = !showPassword">
+                                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="data_nascita" class="form-label">Data di Nascita</label>
-                        <input type="date" id="data_nascita" name="data_nascita" [(ngModel)]="userData.data_nascita"
-                            class="form-control">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Conferma</label>
+                        <input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" class="clean-input"
+                            placeholder="Conferma password" required />
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label for="ruolo" class="form-label">Tipo di Utente</label>
-                    <select id="ruolo" name="ruolo" [(ngModel)]="userData.ruolo" class="form-select">
+                <div *ngIf="userData.password || confirmPassword" class="password-alert"
+                    [ngClass]="isPasswordValid() ? 'all-valid' : ''">
+                    <div *ngFor="let item of getPasswordChecklist()" [ngClass]="item.valid ? 'valid' : 'invalid'">
+                        {{ item.label }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Telefono</label>
+                        <input [(ngModel)]="userData.telefono" name="telefono" type="tel" class="clean-input"
+                            placeholder="333 123 4567" />
+                    </div>
+
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Data Nascita</label>
+
+                        <div class="date-input-wrap">
+                            <input [(ngModel)]="userData.data_nascita" name="data_nascita" type="date"
+                                class="clean-input" />
+                            <i class="bi bi-calendar date-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3" *ngIf="auth.isAdmin()">
+                    <label class="form-label">Ruolo</label>
+                    <select [(ngModel)]="userData.ruolo" name="ruolo" class="clean-input"
+                        style="background-color: var(--input-bg);">
                         <option value="cliente">Cliente</option>
-
-                        @if (auth.isAdmin()) {
                         <option value="operatore">Operatore</option>
-                        <option value="admin">Amministratore</option>
-                        }
                     </select>
                 </div>
 
-                <button type="submit" class="btn-register">REGISTRATI</button>
+                <button type="submit" class="btn primary-login-btn"
+                    [disabled]="!isFormValid() || isLoading || isSuccess">
+                    {{ isLoading ? 'Creazione...' : isSuccess ? 'Account creato con successo' : 'Crea account' }}
+                </button>
 
-                <div class="footer-text mt-4">
-                    Hai già un account?
-                    <a routerLink="/login" class="login-link">Accedi subito</a>
+                <a routerLink="/login" class="btn secondary-login-btn mt-2">
+                    Hai già un account? Accedi
+                </a>
+
+                <div *ngIf="isSuccess" class="custom-alert success" role="alert" aria-live="polite">
+                    <span class="alert-icon">✓</span>
+                    <span>Registrazione avvenuta con successo! Stai per essere reindirizzato alla pagina di login...</span>
                 </div>
             </form>
         </div>
-    </div>
+    </section>
 </div>
