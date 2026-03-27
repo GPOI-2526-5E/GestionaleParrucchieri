@@ -252,9 +252,6 @@
   border-width: 2px !important;
 }
 
-/* ==============================
-   RESPONSIVE
-   ============================== */
 @media (max-width: 768px) {
   :host ::ng-deep .fc .fc-toolbar {
     flex-direction: column;
@@ -271,3 +268,85 @@
   background: rgba(212, 176, 106, 0.4); 
   border-radius: 10px; 
 }
+
+
+   .appointments-select-wrapper {
+    margin: 35px auto 45px;
+    max-width: 340px;
+    width: 100%;
+    text-align: left;
+    padding: 18px 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 176, 106, 0.18);
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.28);
+  }
+  
+  .appointments-select-wrapper label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #d4b06a;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+  
+  .appointments-select-wrapper select {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 176, 106, 0.35);
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    transition: all 0.35s ease;
+    appearance: none;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+  
+  .appointments-select-wrapper select:hover {
+    border-color: #d4b06a;
+    background: rgba(212, 176, 106, 0.10);
+    box-shadow: 0 6px 18px rgba(212, 176, 106, 0.18);
+  }
+  
+  .appointments-select-wrapper select:focus {
+    background: rgba(212, 176, 106, 0.22);
+    border-color: #d4b06a;
+    box-shadow: 0 0 0 2px rgba(212, 176, 106, 0.35);
+    color: #000;
+  }
+  
+  .appointments-select-wrapper {
+    position: relative;
+  }
+  
+  .appointments-select-wrapper::after {
+    content: "▼";
+    position: absolute;
+    right: 26px;
+    top: 56%;
+    transform: translateY(-50%);
+    color: #d4b06a;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  
+  @media (max-width: 768px) {
+    .appointments-select-wrapper {
+      max-width: 100%;
+      padding: 14px 16px;
+    }
+    
+    .appointments-select-wrapper select {
+      font-size: 14px;
+      padding: 10px 12px;
+    }
+  }

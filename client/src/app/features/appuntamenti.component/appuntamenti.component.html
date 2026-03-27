@@ -12,6 +12,15 @@
       </p>
     </div>
 
+    <div class="appointments-select-wrapper">
+      <label for="operator-select">Seleziona Operatore</label>
+      <select [(ngModel)]="selectedOperator" (change)="onOperatorChange($event)">
+        <option *ngFor="let o of operatori" [value]="o.idUtente">
+          {{ o.nome }} {{ o.cognome }}
+        </option>
+      </select>
+    </div>
+
     <div class="calendar-wrapper">
       <full-calendar #calendar [options]="calendarOptions"></full-calendar>
     </div>

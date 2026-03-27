@@ -11,6 +11,8 @@ import mysql from "mysql2";
 import aiRoute from "./routes/api-ai";
 import loginRoute from "./routes/login";
 import googleAuthRoute from "./routes/google-auth";
+import utentiRoute from "./routes/utenti";
+import appuntamentiRoute from "./routes/appuntamenti"
 import { db } from "./db_parrucchieri";
 import passport from "./config/passport";
 
@@ -95,6 +97,8 @@ app.get("/api/imgProdotti", async (req, res) => {
 app.use("/api/chat", aiRoute);
 app.use("/api/auth", loginRoute);
 app.use("/api/auth", googleAuthRoute);
+app.use("/api/utenti", utentiRoute);
+app.use("/api/appuntamenti", appuntamentiRoute);
 
 //Richieste DB
 
