@@ -54,7 +54,7 @@
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
           <input [(ngModel)]="email" #emailInput="ngModel" type="email" id="email" name="email"
-            class="form-control clean-input" placeholder="nome@email.com" required email autocomplete="email"
+            class="form-control clean-input" placeholder="mario.rossi@mail.com" required email autocomplete="email"
             aria-describedby="emailError"
             [attr.aria-invalid]="emailInput.invalid && emailInput.touched ? 'true' : 'false'" />
           <small id="emailError" class="input-error" *ngIf="emailInput.invalid && emailInput.touched">

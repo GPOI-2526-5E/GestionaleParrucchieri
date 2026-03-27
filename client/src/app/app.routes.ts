@@ -26,7 +26,7 @@ export const routes: Routes = [
     { path: 'payment-success', component: PaymentSuccessComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'info-utente', component: InfoUtenteComponent },
+    { path: 'account', component: InfoUtenteComponent },
     { path: 'appointments', component: AppuntamentiComponent },
     { path: 'forgot-password', component: PasswordDimenticataComponent },
     { path: 'reset-password', component: ResetPasswordComponent },

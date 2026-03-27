@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit {
     }
 
     if (this.auth.isLoggedIn()) {
-      this.router.navigate(['/info-utente']);
+      this.router.navigate(['/account']);
       return;
     }
 

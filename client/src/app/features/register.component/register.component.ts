@@ -120,27 +120,36 @@ export class RegisterComponent {
 
     this.isLoading = true;
     this.isSuccess = false; // reset alert verde
+    this.alertMessage = '';  // reset alert
+    this.alertType = 'success';
 
     this.http.post<any>('http://localhost:3000/api/register', this.userData).subscribe({
       next: () => {
         this.isLoading = false;
         this.isSuccess = true;
+        this.alertMessage = 'Registrazione avvenuta con successo! Stai per essere reindirizzato alla home...';
+        this.alertType = 'success';
 
-        // forza l'aggiornamento della view
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // forza aggiornamento della view
 
         // dopo 5 secondi porta alla home
         setTimeout(() => {
-          this.router.navigate(['/login']);
+          this.router.navigate(['/home']);
         }, 5000);
       },
       error: (err) => {
         this.isLoading = false;
+        this.isSuccess = false;
         this.alertMessage = err.error?.message || 'Errore nella registrazione';
         this.alertType = 'error';
 
-        // forza aggiornamento alert error
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // forza aggiornamento alert
+
+        // nascondi alert dopo 5 secondi
+        setTimeout(() => {
+          this.alertMessage = null;
+          this.cdr.detectChanges();
+        }, 5000);
       }
     });
   }
