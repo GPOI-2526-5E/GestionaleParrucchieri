@@ -11,6 +11,8 @@ import { LoginComponent } from './features/login.component/login.component';
 import { RegisterComponent } from './features/register.component/register.component';
 import { InfoUtenteComponent } from './features/info-utente.component/info-utente.component';
 import { AppuntamentiComponent } from './features/appuntamenti.component/appuntamenti.component';
+import { PasswordDimenticataComponent } from './features/password-dimenticata.component/password-dimenticata.component';
+import { ResetPasswordComponent } from './features/reset-password.component/reset-password.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -26,5 +28,7 @@ export const routes: Routes = [
     { path: 'register', component: RegisterComponent },
     { path: 'info-utente', component: InfoUtenteComponent },
     { path: 'appointments', component: AppuntamentiComponent },
+    { path: 'forgot-password', component: PasswordDimenticataComponent },
+    { path: 'reset-password', component: ResetPasswordComponent },
     { path: '**', redirectTo: '/home' }
 ];

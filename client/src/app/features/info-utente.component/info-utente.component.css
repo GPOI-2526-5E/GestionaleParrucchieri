@@ -498,6 +498,43 @@
   margin: 18px 0 14px;
 }
 
+.forgot-password-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 2px;
+  color: var(--gold-soft);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.forgot-password-link:hover {
+  color: #fff1c9;
+  border-bottom-color: rgba(212, 176, 106, 0.55);
+  transform: translateY(-1px);
+  cursor: pointer;
+}
+
+.forgot-password-link:focus-visible {
+  outline: none;
+  border-radius: 8px;
+  box-shadow: var(--focus-ring);
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.forgot-password-link:active {
+  transform: translateY(0);
+}
+
 .security-note {
   margin: 0;
   color: rgba(248, 245, 239, 0.72);
