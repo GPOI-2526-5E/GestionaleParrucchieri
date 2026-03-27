@@ -424,7 +424,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
     const user = rows[0];
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000);
+    const resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     await db.query(
       `UPDATE utenti
@@ -471,7 +471,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
           </div>
 
           <p style="font-size:14px;line-height:1.6;color:#d9cfb2;">
-            Il link sarà valido per 1 ora.
+            Il link sarà valido per 10 minuti.
           </p>
 
           <p style="font-size:14px;line-height:1.6;color:#d9cfb2;">
