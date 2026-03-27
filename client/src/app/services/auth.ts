@@ -14,6 +14,12 @@ interface LoginResponse {
   };
 }
 
+<<<<<<< HEAD
+=======
+interface GenericResponse {
+  message: string;
+}
+>>>>>>> f9b6391a5fca4d5463acd03497eec787b97217f6
 
 @Injectable({
   providedIn: 'root',
@@ -97,16 +103,37 @@ export class AuthService {
     telefono: string,
     data_nascita: string,
     ruolo: string
-  }){
+  }) {
     return this.http.post<LoginResponse>(`${this.api}/register`, user)
-    .pipe(
-      tap((response) => {
-        if (response?.token) {
-          this.saveToken(response.token);
-        }
-      })
-    );
+      .pipe(
+        tap((response) => {
+          if (response?.token) {
+            this.saveToken(response.token);
+          }
+        })
+      );
   }
 
+<<<<<<< HEAD
   
 }
+=======
+  forgotPassword(email: string): Observable<GenericResponse> {
+    return this.http.post<GenericResponse>(`${this.api}/forgot-password`, {
+      email
+    });
+  }
+
+  resetPassword(
+    token: string,
+    newPassword: string,
+    confirmPassword: string
+  ): Observable<GenericResponse> {
+    return this.http.post<GenericResponse>(`${this.api}/reset-password`, {
+      token,
+      newPassword,
+      confirmPassword
+    });
+  }
+}
+>>>>>>> f9b6391a5fca4d5463acd03497eec787b97217f6

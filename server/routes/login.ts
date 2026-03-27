@@ -2,6 +2,8 @@ import express, { Request, Response } from "express";
 import { db } from "../db_parrucchieri";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 import { verifyToken } from "../middleware/authMiddleware";
 
 const router = express.Router();
@@ -175,14 +177,12 @@ router.post("/register", async (req: Request, res: Response) => {
     const data_nascita = req.body.data_nascita;
     const ruolo = req.body.ruolo;
 
-    // 🔹 Controllo minimo
     if (!nome || !cognome || !email || !password) {
       return res.status(400).json({
         message: "Campi obbligatori mancanti"
       });
     }
 
-    // 🔹 Email già esistente
     const [existing]: any = await db.query(
       "SELECT idUtente FROM utenti WHERE email = ? LIMIT 1",
       [email]
@@ -194,10 +194,8 @@ router.post("/register", async (req: Request, res: Response) => {
       });
     }
 
-    // 🔹 Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🔹 Inserimento (ruolo = cliente di default)
     const [result]: any = await db.query(
       `INSERT INTO utenti 
        (nome, cognome, email, password, telefono, data_nascita, ruolo)
@@ -209,7 +207,7 @@ router.post("/register", async (req: Request, res: Response) => {
         hashedPassword,
         telefono || null,
         data_nascita || null,
-        ruolo // ⚠️ deve essere uno degli ENUM
+        ruolo
       ]
     );
 
@@ -234,7 +232,6 @@ router.post("/register", async (req: Request, res: Response) => {
       { expiresIn: "1d" }
     );
 
-    // 🔹 Risposta
     return res.status(201).json({
       message: "Registrazione completata",
       token,
@@ -394,6 +391,208 @@ router.post("/change-password", verifyToken, async (req: any, res: Response) => 
     console.error("Errore POST /change-password:", error);
     return res.status(500).json({
       message: "Errore server"
+    });
+  }
+});
+
+router.post("/forgot-password", async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || String(email).trim() === "") {
+      return res.status(400).json({
+        message: "L'email è obbligatoria"
+      });
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    const [rows]: any = await db.query(
+      `SELECT idUtente, email
+       FROM utenti
+       WHERE email = ?
+       LIMIT 1`,
+      [cleanEmail]
+    );
+
+    if (!rows || rows.length === 0) {
+      return res.status(200).json({
+        message: "Se l’email esiste, riceverai un link per reimpostare la password"
+      });
+    }
+
+    const user = rows[0];
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+    await db.query(
+      `UPDATE utenti
+       SET resetPasswordToken = ?, resetPasswordExpires = ?
+       WHERE idUtente = ?`,
+      [resetToken, resetPasswordExpires, user.idUtente]
+    );
+
+    const resetLink = `http://localhost:4200/reset-password?token=${resetToken}`;
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"I Parrucchieri" <${process.env.SMTP_FROM}>`,
+      to: cleanEmail,
+      subject: "Reimposta la tua password",
+      html: `
+        <div style="max-width:600px;margin:0 auto;padding:32px;background:#111111;border-radius:16px;font-family:Arial,sans-serif;color:#f5f1e8;">
+          <h2 style="margin-top:0;color:#d4af37;">Reset della password</h2>
+
+          <p style="font-size:15px;line-height:1.6;">
+            Abbiamo ricevuto una richiesta di reimpostazione della password per il tuo account.
+          </p>
+
+          <p style="font-size:15px;line-height:1.6;">
+            Clicca sul pulsante qui sotto per scegliere una nuova password:
+          </p>
+
+          <div style="margin:28px 0;">
+            <a
+              href="${resetLink}"
+              style="display:inline-block;padding:14px 24px;background:#d4af37;color:#111111;text-decoration:none;border-radius:10px;font-weight:700;"
+            >
+              Reimposta password
+            </a>
+          </div>
+
+          <p style="font-size:14px;line-height:1.6;color:#d9cfb2;">
+            Il link sarà valido per 10 minuti.
+          </p>
+
+          <p style="font-size:14px;line-height:1.6;color:#d9cfb2;">
+            Se non hai richiesto tu questa operazione, puoi ignorare questa email.
+          </p>
+
+          <hr style="border:none;border-top:1px solid rgba(212,175,55,0.25);margin:24px 0;" />
+
+          <p style="font-size:12px;color:#a89a73;word-break:break-all;">
+            Se il pulsante non funziona, copia e incolla questo link nel browser:<br />
+            ${resetLink}
+          </p>
+        </div>
+      `
+    });
+
+    return res.status(200).json({
+      message: "Se l’email esiste, riceverai un link per reimpostare la password"
+    });
+  } catch (error: any) {
+    console.error("Errore POST /forgot-password:", error);
+    return res.status(500).json({
+      message: "Errore server durante il recupero password"
+    });
+  }
+});
+
+router.post("/reset-password", async (req: Request, res: Response) => {
+  try {
+    const { token, newPassword, confirmPassword } = req.body;
+
+    if (!token || String(token).trim() === "") {
+      return res.status(400).json({
+        message: "Token mancante"
+      });
+    }
+
+    if (!newPassword || String(newPassword).trim() === "") {
+      return res.status(400).json({
+        message: "La nuova password è obbligatoria"
+      });
+    }
+
+    if (String(newPassword).trim().length < 6) {
+      return res.status(400).json({
+        message: "La nuova password deve contenere almeno 6 caratteri"
+      });
+    }
+
+    if (!confirmPassword || String(confirmPassword).trim() === "") {
+      return res.status(400).json({
+        message: "La conferma della password è obbligatoria"
+      });
+    }
+
+    if (String(newPassword).trim() !== String(confirmPassword).trim()) {
+      return res.status(400).json({
+        message: "Le password non coincidono"
+      });
+    }
+
+    const cleanToken = String(token).trim();
+    const cleanPassword = String(newPassword).trim();
+
+    const [rows]: any = await db.query(
+      `SELECT idUtente, password, resetPasswordExpires
+       FROM utenti
+       WHERE resetPasswordToken = ?
+       LIMIT 1`,
+      [cleanToken]
+    );
+
+    const user = rows[0];
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Il link di reset non è valido"
+      });
+    }
+
+    if (!user.resetPasswordExpires) {
+      return res.status(400).json({
+        message: "Il link di reset non è valido o è scaduto"
+      });
+    }
+
+    const expiresAt = new Date(user.resetPasswordExpires);
+    const now = new Date();
+
+    if (expiresAt.getTime() < now.getTime()) {
+      return res.status(400).json({
+        message: "Il link di reset è scaduto. Richiedine uno nuovo"
+      });
+    }
+
+    if (user.password && user.password.trim() !== "") {
+      const isSamePassword = await bcrypt.compare(cleanPassword, user.password);
+
+      if (isSamePassword) {
+        return res.status(400).json({
+          message: "La nuova password deve essere diversa da quella attuale"
+        });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(cleanPassword, 10);
+
+    await db.query(
+      `UPDATE utenti
+       SET password = ?, resetPasswordToken = NULL, resetPasswordExpires = NULL
+       WHERE idUtente = ?`,
+      [hashedPassword, user.idUtente]
+    );
+
+    return res.status(200).json({
+      message: "Password aggiornata con successo"
+    });
+  } catch (error: any) {
+    console.error("Errore POST /reset-password:", error);
+    return res.status(500).json({
+      message: "Errore server durante il reset della password"
     });
   }
 });

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { NavbarComponent } from '../navbar.component/navbar.component';
 
@@ -21,7 +21,7 @@ interface UserProfile {
 @Component({
   selector: 'app-info-utente',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, RouterLink],
   templateUrl: './info-utente.component.html',
   styleUrls: ['./info-utente.component.css']
 })

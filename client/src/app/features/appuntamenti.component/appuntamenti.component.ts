@@ -47,8 +47,13 @@ export class AppuntamentiComponent {
     slotMinTime: '08:00:00',
     slotMaxTime: '22:00:00',
     slotDuration: '00:30:00',
+<<<<<<< HEAD
     slotLabelInterval: '01:00',
 
+=======
+    slotLabelInterval: '00:30',
+    
+>>>>>>> f9b6391a5fca4d5463acd03497eec787b97217f6
     // FIX VISIVI
     expandRows: true,
     height: 'auto',

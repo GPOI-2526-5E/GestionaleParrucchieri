@@ -30,11 +30,24 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+
+    const resetSuccess = this.route.snapshot.queryParamMap.get('resetSuccess');
+
+    if (resetSuccess === '1') {
+      this.showAlert('Password aggiornata con successo. Ora puoi accedere.', 'success');
+
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+    }
+
     if (this.auth.isLoggedIn()) {
-      this.router.navigate(['/info-utente']);
+      this.router.navigate(['/account']);
       return;
     }
 

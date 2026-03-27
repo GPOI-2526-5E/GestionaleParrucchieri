@@ -44,4 +44,8 @@ export class NavbarComponent {
       });
     }
   }
+
+  isUserPage(): boolean {
+    return this.router.url === '/login' || this.router.url === '/account';
+  }
 }
