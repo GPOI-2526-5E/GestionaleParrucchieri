@@ -14,12 +14,9 @@ interface LoginResponse {
   };
 }
 
-<<<<<<< HEAD
-=======
 interface GenericResponse {
   message: string;
 }
->>>>>>> f9b6391a5fca4d5463acd03497eec787b97217f6
 
 @Injectable({
   providedIn: 'root',
@@ -114,10 +111,6 @@ export class AuthService {
       );
   }
 
-<<<<<<< HEAD
-  
-}
-=======
   forgotPassword(email: string): Observable<GenericResponse> {
     return this.http.post<GenericResponse>(`${this.api}/forgot-password`, {
       email
@@ -136,4 +129,3 @@ export class AuthService {
     });
   }
 }
->>>>>>> f9b6391a5fca4d5463acd03497eec787b97217f6
