@@ -287,10 +287,17 @@
                 <input id="email" type="email" name="email" [ngModel]="user.email" disabled />
               </div>
 
-              <div class="form-group">
+              <div class="form-group phone-group">
                 <label for="telefono">Telefono</label>
-                <input id="telefono" type="text" name="telefono" [(ngModel)]="user.telefono"
-                  (ngModelChange)="onFieldChange()" placeholder="Inserisci il telefono" />
+
+                <intl-tel-input name="telefono" [initialValue]="user.telefono || ''" [initOptions]="initTelOptions"
+                  [inputProps]="{
+      id: 'telefono',
+      class: 'phone-input',
+      placeholder: 'Inserisci il numero di telefono'
+    }" (numberChange)="onPhoneNumberChange($event)" (validityChange)="onPhoneValidityChange($event)"
+                  (countryChange)="onCountryChange($event)">
+                </intl-tel-input>
               </div>
 
               <div class="form-group">
@@ -333,6 +340,10 @@
                 <label for="ruolo">Ruolo</label>
                 <input id="ruolo" type="text" name="ruolo" [ngModel]="user.ruolo" disabled />
               </div>
+            </div>
+
+            <div *ngIf="!isPhoneValid" class="inline-status error-text">
+              Inserisci un numero di telefono valido.
             </div>
 
             <div class="actions">

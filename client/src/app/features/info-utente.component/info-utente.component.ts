@@ -1,8 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+
+import { IntlTelInputComponent } from 'intl-tel-input/angularWithUtils';
+import 'intl-tel-input/styles';
+
 import { AuthService } from '../../services/auth';
 import { NavbarComponent } from '../navbar.component/navbar.component';
 
@@ -21,7 +29,13 @@ interface UserProfile {
 @Component({
   selector: 'app-info-utente',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, RouterLink],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NavbarComponent,
+    RouterLink,
+    IntlTelInputComponent
+  ],
   templateUrl: './info-utente.component.html',
   styleUrls: ['./info-utente.component.css']
 })
@@ -63,6 +77,36 @@ export class InfoUtenteComponent implements OnInit {
   isChangingPassword = false;
   changePasswordMessage = '';
   changePasswordError = '';
+
+  isPhoneValid = true;
+  selectedCountryIso2 = 'it';
+
+  preferredCountries = ['it', 'gb', 'fr', 'de', 'es', 'us'];
+
+  initTelOptions = {
+    initialCountry: 'auto' as const,
+    geoIpLookup: (
+      success: (iso2: any) => void,
+      failure: () => void
+    ) => {
+      fetch('https://ipapi.co/json/')
+        .then((res) => res.json())
+        .then((data) => {
+          const code = String(data?.country_code || 'it').toLowerCase();
+          success(code as any);
+        })
+        .catch(() => {
+          success('it' as any);
+          failure();
+        });
+    },
+    preferredCountries: ['it', 'gb', 'fr', 'de', 'es', 'us'],
+    separateDialCode: true,
+    nationalMode: false,
+    strictMode: true,
+    formatOnDisplay: true,
+    autoPlaceholder: 'polite' as const
+  };
 
   constructor(
     private http: HttpClient,
@@ -127,7 +171,6 @@ export class InfoUtenteComponent implements OnInit {
 
     this.missingRequiredFields = !nome || !cognome || !telefono || !dataNascita;
 
-    // La password è richiesta solo se ci sono dati mancanti E l'utente non ha ancora una password
     this.requirePasswordForCompletion = this.missingRequiredFields && !hasPassword;
     this.passwordRequired = this.requirePasswordForCompletion;
 
@@ -182,17 +225,16 @@ export class InfoUtenteComponent implements OnInit {
           cognome: res.cognome ?? '',
           email: res.email ?? '',
           telefono: res.telefono != null ? String(res.telefono) : '',
-          data_nascita: res.data_nascita ? String(res.data_nascita).substring(0, 10) : '',
+          data_nascita: res.data_nascita
+            ? String(res.data_nascita).substring(0, 10)
+            : '',
           ruolo: res.ruolo ?? '',
           hasPassword: !!res.hasPassword,
           photoURL: res.photoURL ?? res.picture ?? res.avatar ?? null
         };
 
         this.computeProfileCompletionState();
-
-        // Se mancano dati obbligatori, resta in edit mode
         this.isEditMode = this.showCompletionWarning;
-
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -234,8 +276,29 @@ export class InfoUtenteComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  onPhoneNumberChange(phoneNumber: string): void {
+    if (!this.user) {
+      return;
+    }
+
+    this.user.telefono = phoneNumber || '';
+    this.onFieldChange();
+  }
+
+  onPhoneValidityChange(isValid: boolean): void {
+    this.isPhoneValid = isValid;
+    this.cdr.detectChanges();
+  }
+
+  onCountryChange(countryIso2: string): void {
+    this.selectedCountryIso2 = countryIso2;
+    this.cdr.detectChanges();
+  }
+
   getUserInitials(): string {
-    if (!this.user) return 'U';
+    if (!this.user) {
+      return 'U';
+    }
 
     const nome = this.user.nome ? this.user.nome.charAt(0) : 'U';
     const cognome = this.user.cognome ? this.user.cognome.charAt(0) : '';
@@ -244,7 +307,9 @@ export class InfoUtenteComponent implements OnInit {
   }
 
   getFullName(): string {
-    if (!this.user) return 'Utente';
+    if (!this.user) {
+      return 'Utente';
+    }
 
     const fullName = `${this.user.nome || ''} ${this.user.cognome || ''}`.trim();
     return fullName || 'Utente';
@@ -266,7 +331,9 @@ export class InfoUtenteComponent implements OnInit {
   }
 
   changePasswordAction(): void {
-    if (this.isChangingPassword) return;
+    if (this.isChangingPassword) {
+      return;
+    }
 
     this.changePasswordMessage = '';
     this.changePasswordError = '';
@@ -284,7 +351,8 @@ export class InfoUtenteComponent implements OnInit {
     }
 
     if (this.newPasswordChange.trim().length < 6) {
-      this.changePasswordError = 'La nuova password deve contenere almeno 6 caratteri.';
+      this.changePasswordError =
+        'La nuova password deve contenere almeno 6 caratteri.';
       this.cdr.detectChanges();
       return;
     }
@@ -302,7 +370,8 @@ export class InfoUtenteComponent implements OnInit {
     }
 
     if (this.currentPasswordChange === this.newPasswordChange) {
-      this.changePasswordError = 'La nuova password deve essere diversa da quella attuale.';
+      this.changePasswordError =
+        'La nuova password deve essere diversa da quella attuale.';
       this.cdr.detectChanges();
       return;
     }
@@ -310,7 +379,8 @@ export class InfoUtenteComponent implements OnInit {
     const headers = this.getAuthHeaders();
 
     if (!headers) {
-      this.changePasswordError = 'Sessione non valida. Effettua di nuovo il login.';
+      this.changePasswordError =
+        'Sessione non valida. Effettua di nuovo il login.';
       this.cdr.detectChanges();
       this.router.navigate(['/login']);
       return;
@@ -337,15 +407,12 @@ export class InfoUtenteComponent implements OnInit {
         this.resetChangePasswordFields();
         this.showChangePasswordPanel = false;
 
-        // Aggiorno subito lo stato locale
         if (this.user) {
           this.user.hasPassword = true;
         }
 
         this.computeProfileCompletionState();
         this.cdr.detectChanges();
-
-        // Ricarico dal backend per avere lo stato reale sincronizzato
         this.loadUserData();
       },
       error: (err) => {
@@ -360,7 +427,9 @@ export class InfoUtenteComponent implements OnInit {
   }
 
   saveUserData(): void {
-    if (!this.user || this.isSaving) return;
+    if (!this.user || this.isSaving) {
+      return;
+    }
 
     this.errorMessage = '';
     this.successMessage = '';
@@ -372,6 +441,12 @@ export class InfoUtenteComponent implements OnInit {
 
     if (!nome || !cognome || !telefono || !dataNascita) {
       this.errorMessage = 'Compila tutti i campi obbligatori.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!this.isPhoneValid) {
+      this.errorMessage = 'Inserisci un numero di telefono valido.';
       this.cdr.detectChanges();
       return;
     }
@@ -432,8 +507,6 @@ export class InfoUtenteComponent implements OnInit {
         this.errorMessage = '';
         this.isEditMode = false;
 
-        // Se ho impostato la password durante il completamento profilo,
-        // aggiorno subito anche lo stato locale
         if (this.passwordRequired && this.user) {
           this.user.hasPassword = true;
         }
@@ -460,10 +533,14 @@ export class InfoUtenteComponent implements OnInit {
   }
 
   formatDate(date: string | null): string {
-    if (!date) return '-';
+    if (!date) {
+      return '-';
+    }
 
     const d = new Date(date);
-    if (isNaN(d.getTime())) return date;
+    if (isNaN(d.getTime())) {
+      return date;
+    }
 
     return d.toLocaleDateString('it-IT');
   }
