@@ -115,7 +115,7 @@ passport.use(
           return done(new Error("Email Google non disponibile"));
         }
 
-        const [rows]: any = await db.query(
+        const [rows]: any = await db!.query(
           `SELECT idUtente, nome, cognome, email, ruolo
            FROM utenti
            WHERE email = ?
@@ -126,7 +126,7 @@ passport.use(
         const user = rows[0];
 
         if (!user) {
-          const [result]: any = await db.query(
+          const [result]: any = await db!.query(
             `INSERT INTO utenti (nome, cognome, email, password, ruolo)
              VALUES (?, ?, ?, ?, ?)`,
             [nome, cognome, email, "", "cliente"]
@@ -143,7 +143,7 @@ passport.use(
           return done(null, newUser);
         }
 
-        await db.query(
+        await db!.query(
           `UPDATE utenti
            SET nome = ?, cognome = ?
            WHERE idUtente = ?`,

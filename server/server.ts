@@ -1,14 +1,12 @@
-import dotenv from "dotenv";
-dotenv.config({ path: ".env" });
-
 import express from "express";
 import fileUpload from "express-fileupload";
 import cors from "cors";
 import fs from "fs";
 import cloudinary from "cloudinary";
-import OpenAI from "openai";
 import bcrypt from "bcrypt";
 import passport from "./config/passport";
+import dotenv from "dotenv";
+import { connectDatabase } from "./db_parrucchieri";
 
 // ROUTES
 import aiRoute from "./routes/api-ai";
@@ -18,12 +16,19 @@ import utentiRoute from "./routes/utenti";
 import appuntamentiRoute from "./routes/appuntamenti";
 
 // SUPABASE
-import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL as string,
-  process.env.SUPABASE_ANON_KEY as string
-);
+
+dotenv.config();
+
+// Initialize database connection
+let db: any;
+connectDatabase().then(client => {
+  db = client;
+  console.log("Database connesso nel server");
+}).catch(err => {
+  console.error("Errore connessione database:", err);
+  process.exit(1);
+});
 
 // EXPRESS
 const app = express();
@@ -38,15 +43,16 @@ cloudinary.v2.config({
 
 // MIDDLEWARE
 app.use("/", (req, res, next) => {
-  console.log("----> " + req.method + ":" + req.originalUrl);
+  console.log(`----> ${req.method}: ${req.originalUrl}`);
   next();
 });
 
 app.use("/", express.static("./static"));
+app.use("/uploads", express.static("./uploads"));
 
 app.use(
   cors({
-    origin: "http://localhost:4200",
+    origin: process.env.FRONTEND_URL || "http://localhost:4200",
     credentials: true,
   })
 );
@@ -71,8 +77,6 @@ if (!fs.existsSync(uploadDir)) {
 // =======================
 // CLOUDINARY API
 // =======================
-//
-
 // IMG PARRUCCHIERI
 app.get("/api/imgParrucchieri", async (req, res) => {
   try {
@@ -99,6 +103,7 @@ app.get("/api/imgProdotti", async (req, res) => {
       .execute();
 
     const images = result.resources.map((img: any) => img.secure_url);
+    console.log(images);
     res.json(images);
   } catch {
     res.status(500).send("Errore Cloudinary");
@@ -109,8 +114,6 @@ app.get("/api/imgProdotti", async (req, res) => {
 // =======================
 // ROUTES
 // =======================
-//
-
 app.use("/api/chat", aiRoute);
 app.use("/api/auth", loginRoute);
 app.use("/api/auth", googleAuthRoute);
@@ -119,73 +122,46 @@ app.use("/api/appuntamenti", appuntamentiRoute);
 
 //
 // =======================
-// SUPABASE API
+// SUPABASE API ENDPOINTS
 // =======================
-//
 
 // GET UTENTI
 app.get("/api/utenti", async (req, res) => {
-  const { data, error } = await supabase.from("utenti").select("*");
-
-  if (error) return res.status(500).json(error);
-  res.json(data);
+  try {
+    const [rows] = await db.query("SELECT * FROM utenti");
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore server" });
+  }
 });
 
 // GET SERVIZI
 app.get("/api/servizi", async (req, res) => {
-  const { data, error } = await supabase.from("servizi").select("*");
-
-  if (error) return res.status(500).json(error);
-  res.json(data);
+  try {
+    const [rows] = await db.query("SELECT * FROM servizi");
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Errore server" });
+  }
 });
 
 // GET PRODOTTI
 app.get("/api/prodotti", async (req, res) => {
-  const { data, error } = await supabase.from("prodotti").select("*");
-
-  if (error) return res.status(500).json(error);
-  res.json(data);
-});
-
-//
-// =======================
-// REGISTER
-// =======================
-//
-
-app.post("/api/register", async (req, res) => {
   try {
-    const { nome, cognome, email, password, telefono, data_nascita, ruolo } =
-      req.body;
-
-    // Controllo email
-    const { data: existingUser } = await supabase
-      .from("utenti")
-      .select("idUtente")
-      .eq("email", email)
-      .single();
-
-    if (existingUser) {
-      return res.status(400).json({ message: "Email già registrata" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const { error } = await supabase.from("utenti").insert([
-      {
+    const [rows] = await db.query(`
+      SELECT
+        idProdotto,
+        foto,
         nome,
-        cognome,
-        email,
-        password: hashedPassword,
-        telefono,
-        data_nascita,
-        ruolo,
-      },
-    ]);
-
-    if (error) throw error;
-
-    res.status(201).json({ message: "Account creato!" });
+        descrizione,
+        prezzo,
+        quantitaMagazzino,
+        categoria
+      FROM prodotti
+    `);
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore server" });
@@ -194,10 +170,40 @@ app.post("/api/register", async (req, res) => {
 
 //
 // =======================
-// UPDATE STOCK
+// REGISTER UTENTE
 // =======================
-//
+app.post("/api/register", async (req, res) => {
+  try {
+    const { nome, cognome, email, password, telefono, data_nascita, ruolo } =
+      req.body;
 
+    const [existingUsers] = await db.query(
+      "SELECT idUtente FROM utenti WHERE email = ?",
+      [email]
+    );
+
+    if ((existingUsers as any[]).length > 0) {
+      return res.status(400).json({ message: "Email già registrata" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await db.query(
+      "INSERT INTO utenti (nome, cognome, email, password, telefono, data_nascita, ruolo) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [nome, cognome, email, hashedPassword, telefono, data_nascita, ruolo]
+    );
+
+    res.status(201).json({ message: "Account creato!" });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ message: "Errore server", error: err.message });
+  }
+});
+
+//
+// =======================
+// UPDATE STOCK PRODOTTI
+// =======================
 app.post("/api/products/update-stock", async (req, res) => {
   const cartItems = req.body;
 
@@ -205,26 +211,21 @@ app.post("/api/products/update-stock", async (req, res) => {
     for (const item of cartItems) {
       const qty = item.quantita || 1;
 
-      const { data: prodotto, error } = await supabase
-        .from("prodotti")
-        .select("quantitaMagazzino")
-        .eq("idProdotto", item.id)
-        .single();
+      const [products] = await db.query(
+        "SELECT quantitaMagazzino FROM prodotti WHERE idProdotto = ?",
+        [item.id]
+      );
 
-      if (error || !prodotto)
-        throw new Error(`Prodotto ${item.id} non trovato`);
+      const prodotto = (products as any[])[0];
+      if (!prodotto) throw new Error(`Prodotto ${item.id} non trovato`);
 
       if (prodotto.quantitaMagazzino < qty)
         throw new Error(`Stock insufficiente per ${item.id}`);
 
-      const { error: updateError } = await supabase
-        .from("prodotti")
-        .update({
-          quantitaMagazzino: prodotto.quantitaMagazzino - qty,
-        })
-        .eq("idProdotto", item.id);
-
-      if (updateError) throw updateError;
+      await db.query(
+        "UPDATE prodotti SET quantitaMagazzino = ? WHERE idProdotto = ?",
+        [prodotto.quantitaMagazzino - qty, item.id]
+      );
     }
 
     res.json({ message: "Stock aggiornato" });
@@ -241,8 +242,6 @@ app.post("/api/products/update-stock", async (req, res) => {
 // =======================
 // START SERVER
 // =======================
-//
-
 app.listen(PORT, () => {
   console.log(`Server attivo su http://localhost:${PORT}`);
 });

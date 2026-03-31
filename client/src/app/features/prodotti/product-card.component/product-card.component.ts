@@ -1,10 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-  ChangeDetectorRef
-} from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectorRef } from '@angular/core';
 
 import { Prodotto } from '../../../services/prodotto';
 import { CurrencyPipe } from '@angular/common';

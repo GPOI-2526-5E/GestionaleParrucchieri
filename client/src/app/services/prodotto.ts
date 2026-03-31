@@ -23,6 +23,7 @@ export class ProdottoService {
   cart = this._cart.asReadonly();
 
   private apiUrl = 'http://localhost:3000/api/prodotti';
+  private apiBaseUrl = 'http://localhost:3000';
 
   private STORAGE_KEY = 'cart';
 
@@ -33,7 +34,7 @@ export class ProdottoService {
       map(prodotti =>
         prodotti.map(p => ({
           idProdotto: p.idProdotto ?? p.id,
-          foto: p.foto,
+          foto: this.buildImageUrl(p.foto),
           nome: p.nome,
           descrizione: p.descrizione,
           prezzo: Number(p.prezzo),
@@ -43,6 +44,18 @@ export class ProdottoService {
         }))
       )
     );
+  }
+
+  private buildImageUrl(foto?: string | null): string {
+    if (!foto) {
+      return '';
+    }
+
+    if (/^https?:\/\//i.test(foto)) {
+      return foto;
+    }
+
+    return `${this.apiBaseUrl}${foto.startsWith('/') ? '' : '/'}${foto}`;
   }
 
   private loadCart() {

@@ -58,7 +58,6 @@ export class ProductsListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.productsMD = this.prodottiService.getProdotti();
-
     this.productsSub = this.productsMD.subscribe(products => {
       this.categories = [...new Set(products.map(p => p.categoria))];
       this.forceUiUpdate();
