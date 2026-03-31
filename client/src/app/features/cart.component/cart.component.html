@@ -37,7 +37,7 @@
 
                   <div class="cart-item-info">
                     <h3 class="cart-item-title">
-                      <a [routerLink]="['/product', item.id]">
+                      <a [routerLink]="['/product', item.idProdotto]">
                         {{ item.nome }}
                       </a>
                     </h3>
@@ -76,7 +76,7 @@
                   <div class="cart-quantity">
                     <button
                       type="button"
-                      (click)="decrease(item.id)"
+                      (click)="decrease(item.idProdotto)"
                       aria-label="Riduci quantità"
                       [disabled]="(item.quantita || 1) <= 1"
                     >
@@ -87,7 +87,7 @@
 
                     <button
                       type="button"
-                      (click)="increase(item.id)"
+                      (click)="increase(item.idProdotto)"
                       aria-label="Aumenta quantità"
                       [disabled]="(item.quantita || 1) >= item.qta"
                     >
@@ -98,7 +98,7 @@
                   <button
                     class="cart-remove"
                     type="button"
-                    (click)="removeFromCart(item.id)"
+                    (click)="removeFromCart(item.idProdotto)"
                     [attr.aria-label]="'Rimuovi ' + item.nome + ' dal carrello'"
                     title="Rimuovi prodotto"
                   >

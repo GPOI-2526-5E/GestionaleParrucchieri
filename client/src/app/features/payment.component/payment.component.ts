@@ -312,7 +312,7 @@ export class PaymentComponent implements AfterViewChecked {
   }
 
   trackById(index: number, item: Prodotto): number {
-    return item.id;
+    return item.idProdotto;
   }
 
   pay(): void {

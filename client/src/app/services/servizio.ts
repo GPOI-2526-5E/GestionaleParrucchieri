@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface Servizio {
-  id: number;
+  idServizio: number;
   nome: string;
   descrizione: string;
   durata: number;
@@ -24,7 +24,7 @@ export class ServiziService {
     return this.http.get<any[]>(this.apiUrl).pipe(
       map(servizi =>
         servizi.map(s => ({
-          id: s.idServizio ?? s.id,
+          idServizio: s.idServizio ?? s.id,
           nome: s.nome,
           descrizione: s.descrizione,
           durata: s.durata,
@@ -36,7 +36,7 @@ export class ServiziService {
 
   getServiceById(id: number): Observable<Servizio | undefined> {
     return this.getServizi().pipe(
-      map(servizi => servizi.find(s => s.id == id))
+      map(servizi => servizi.find(s => s.idServizio == id))
     );
   }
 
@@ -57,6 +57,6 @@ export class ServiziService {
   }
 
   removeServiceFromCart(serviceId: number | string): void {
-    this.cart.update(curCart => curCart.filter(service => service.id != serviceId));
+    this.cart.update(curCart => curCart.filter(service => service.idServizio != serviceId));
   }
 }

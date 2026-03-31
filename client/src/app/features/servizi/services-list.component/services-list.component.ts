@@ -25,6 +25,6 @@ export class ServicesListComponent {
   }
 
   trackById(index: number, service: Servizio) {
-    return service.id;
+    return service.idServizio;
   }
 }

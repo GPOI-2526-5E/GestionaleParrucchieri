@@ -54,7 +54,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private appRef: ApplicationRef,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.productsMD = this.prodottiService.getProdotti();
@@ -89,7 +89,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   }
 
   trackById(index: number, product: Prodotto): number {
-    return product.id;
+    return product.idProdotto;
   }
 
   toggleCategoryDropdown(): void {
@@ -111,11 +111,11 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     this.prodottiService.addProductToCart(product);
 
     const sameProductAlertVisible =
-      this.showCartAlert && this.currentAlertProductId === product.id;
+      this.showCartAlert && this.currentAlertProductId === product.idProdotto;
 
     this.showCartAlert = true;
     this.isClosing = false;
-    this.currentAlertProductId = product.id;
+    this.currentAlertProductId = product.idProdotto;
     this.cartAlertMessage = `${product.nome} aggiunto al carrello`;
 
     if (sameProductAlertVisible) {

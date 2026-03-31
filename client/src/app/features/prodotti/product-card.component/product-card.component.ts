@@ -33,7 +33,7 @@ export class ProductCardComponent {
   addToCart() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-    const existingProduct = cart.find((p: Prodotto) => p.id === this.product.id);
+    const existingProduct = cart.find((p: Prodotto) => p.idProdotto === this.product.idProdotto);
 
     const currentQuantity = existingProduct ? (existingProduct.quantita || 1) : 0;
 

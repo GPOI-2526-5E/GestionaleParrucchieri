@@ -68,7 +68,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     if (!this.product) return;
 
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find((p: Prodotto) => p.id === this.product!.id);
+    const existing = cart.find((p: Prodotto) => p.idProdotto === this.product!.idProdotto);
     const qty = existing ? (existing.quantita || 1) : 0;
 
     if (qty >= this.product.qta) {
@@ -83,11 +83,11 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
 
     const sameProduct =
       this.showCartAlert &&
-      this.currentAlertProductId === this.product.id;
+      this.currentAlertProductId === this.product.idProdotto;
 
     this.showCartAlert = true;
     this.isClosing = false;
-    this.currentAlertProductId = this.product.id;
+    this.currentAlertProductId = this.product.idProdotto;
     this.cartAlertMessage = `${this.product.nome} aggiunto`;
 
     this.contProd = sameProduct ? this.contProd + 1 : 1;

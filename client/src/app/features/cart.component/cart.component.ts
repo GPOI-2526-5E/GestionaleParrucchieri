@@ -37,7 +37,7 @@ export class CartComponent {
   }
 
   increase(id: number): void {
-    const product = this.cartItems().find(item => item.id === id);
+    const product = this.cartItems().find(item => item.idProdotto === id);
 
     if (!product) return;
 
@@ -50,7 +50,7 @@ export class CartComponent {
   }
 
   decrease(id: number): void {
-    const product = this.cartItems().find(item => item.id === id);
+    const product = this.cartItems().find(item => item.idProdotto === id);
 
     if (!product) return;
 
@@ -80,6 +80,6 @@ export class CartComponent {
   }
 
   trackById(index: number, item: Prodotto): number {
-    return item.id;
+    return item.idProdotto;
   }
 }

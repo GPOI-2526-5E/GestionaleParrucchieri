@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface Prodotto {
-  id: number;
+  idProdotto: number;
   foto: string;
   nome: string;
   descrizione: string;
@@ -32,7 +32,7 @@ export class ProdottoService {
     return this.http.get<any[]>(this.apiUrl).pipe(
       map(prodotti =>
         prodotti.map(p => ({
-          id: p.idProdotto ?? p.id,
+          idProdotto: p.idProdotto ?? p.id,
           foto: p.foto,
           nome: p.nome,
           descrizione: p.descrizione,
@@ -59,16 +59,16 @@ export class ProdottoService {
 
   getProdottoById(id: number): Observable<Prodotto | undefined> {
     return this.getProdotti().pipe(
-      map(prodotti => prodotti.find(p => p.id == id))
+      map(prodotti => prodotti.find(p => p.idProdotto == id))
     );
   }
 
   addProductToCart(prod: Prodotto) {
     this._cart.update(cart => {
-      const existing = cart.find(p => p.id === prod.id);
+      const existing = cart.find(p => p.idProdotto === prod.idProdotto);
       if (existing) {
         return cart.map(p =>
-          p.id === prod.id
+          p.idProdotto === prod.idProdotto
             ? { ...p, quantita: (p.quantita || 1) + 1 }
             : p
         );
@@ -81,7 +81,7 @@ export class ProdottoService {
   increaseQuantity(productId: number) {
     this._cart.update(cart =>
       cart.map(p =>
-        p.id === productId
+        p.idProdotto === productId
           ? { ...p, quantita: (p.quantita || 1) + 1 }
           : p
       )
@@ -93,7 +93,7 @@ export class ProdottoService {
     this._cart.update(cart =>
       cart
         .map(p =>
-          p.id === productId
+          p.idProdotto === productId
             ? { ...p, quantita: (p.quantita || 1) - 1 }
             : p
         )
@@ -104,7 +104,7 @@ export class ProdottoService {
 
   removeProductFromCart(productId: number | string): void {
     this._cart.update(cart =>
-      cart.filter(product => product.id != productId)
+      cart.filter(product => product.idProdotto != productId)
     );
     this.saveCart();
   }
