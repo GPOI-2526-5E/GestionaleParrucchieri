@@ -2,3 +2,7 @@
 
 # Node
 /node_modules
+/dist
+*.js
+*.js.map
+!eslint.config.js

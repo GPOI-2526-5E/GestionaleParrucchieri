@@ -1,6 +1,9 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
+import dotenv from "dotenv";
 import { db } from "../db_parrucchieri";
+
+dotenv.config();
 
 interface GoogleUser {
   id: number;
@@ -115,25 +118,35 @@ passport.use(
           return done(new Error("Email Google non disponibile"));
         }
 
-        const [rows]: any = await db!.query(
-          `SELECT idUtente, nome, cognome, email, ruolo
-           FROM utenti
-           WHERE email = ?
-           LIMIT 1`,
-          [email]
-        );
+        const { data: user, error: selectError } = await db
+          .from("utenti")
+          .select("idUtente, nome, cognome, email, ruolo")
+          .eq("email", email)
+          .maybeSingle();
 
-        const user = rows[0];
+        if (selectError) {
+          throw selectError;
+        }
 
         if (!user) {
-          const [result]: any = await db!.query(
-            `INSERT INTO utenti (nome, cognome, email, password, ruolo)
-             VALUES (?, ?, ?, ?, ?)`,
-            [nome, cognome, email, "", "cliente"]
-          );
+          const { data: createdUser, error: insertError } = await db
+            .from("utenti")
+            .insert({
+              nome,
+              cognome,
+              email,
+              password: "",
+              ruolo: "cliente",
+            })
+            .select("idUtente")
+            .single();
+
+          if (insertError) {
+            throw insertError;
+          }
 
           const newUser: GoogleUser = {
-            id: result.insertId,
+            id: createdUser.idUtente,
             nome,
             cognome,
             email,
@@ -143,12 +156,14 @@ passport.use(
           return done(null, newUser);
         }
 
-        await db!.query(
-          `UPDATE utenti
-           SET nome = ?, cognome = ?
-           WHERE idUtente = ?`,
-          [nome, cognome, user.idUtente]
-        );
+        const { error: updateError } = await db
+          .from("utenti")
+          .update({ nome, cognome })
+          .eq("idUtente", user.idUtente);
+
+        if (updateError) {
+          throw updateError;
+        }
 
         const existingUser: GoogleUser = {
           id: user.idUtente,

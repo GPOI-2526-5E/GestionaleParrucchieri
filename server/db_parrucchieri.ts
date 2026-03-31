@@ -1,78 +1,79 @@
-import mysql from "mysql2/promise";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-interface DatabaseConfig {
-  host: string;
-  user: string;
-  password: string;
-  database: string;
-  port: number;
+export interface DatabaseConfig {
+  url: string;
+  serviceRoleKey: string;
 }
 
 const getDatabaseConfig = (): DatabaseConfig => {
-  const host = process.env.DB_HOST || "localhost";
-  const user = process.env.DB_USER || "root";
-  const password = process.env.DB_PASSWORD || "";
-  const database = process.env.DB_NAME || "db_parrucchieri";
-  const port = parseInt(process.env.DB_PORT || "3306");
+  const url = process.env.SUPABASE_URL;
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
-  return { host, user, password, database, port };
+  if (!url) {
+    throw new Error("SUPABASE_URL non configurato in .env");
+  }
+
+  if (!serviceRoleKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY o SUPABASE_ANON_KEY non configurati in .env"
+    );
+  }
+
+  return { url, serviceRoleKey };
 };
 
-let connection: mysql.Connection | null = null;
+const { url, serviceRoleKey } = getDatabaseConfig();
 
-export async function connectDatabase(): Promise<mysql.Connection> {
-  try {
-    if (connection) {
-      console.log("✅ Database già connesso");
-      return connection;
-    }
+export const db: SupabaseClient = createClient(url, serviceRoleKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
-    const config = getDatabaseConfig();
-    console.log("🔄 Connessione a MySQL");
+let connectionChecked = false;
 
-    connection = await mysql.createConnection(config);
-
-    console.log("✅ Connessione a MySQL riuscita!");
-
-    return connection;
-  } catch (error) {
-    console.error("❌ Errore connessione database:", error);
-    throw error;
+export async function connectDatabase(): Promise<SupabaseClient> {
+  if (connectionChecked) {
+    return db;
   }
+
+  const { error } = await db
+    .from("utenti")
+    .select("idUtente", { head: true, count: "exact" })
+    .limit(1);
+
+  if (error) {
+    console.error("Errore connessione database:", error);
+    throw new Error(`Connessione a Supabase fallita: ${error.message}`);
+  }
+
+  connectionChecked = true;
+  console.log("Connessione a Supabase riuscita");
+
+  return db;
 }
 
-export function getDatabaseConnection(): mysql.Connection {
-  if (!connection) {
-    throw new Error("Database non connesso.");
-  }
-  return connection;
+export function getSupabaseClient(): SupabaseClient {
+  return db;
 }
 
 export async function disconnectDatabase(): Promise<void> {
-  try {
-    if (connection) {
-      await connection.end();
-      connection = null;
-      console.log("✅ Database disconnesso");
-    }
-  } catch (error) {
-    console.error("❌ Errore disconnessione database:", error);
-    throw error;
-  }
+  connectionChecked = false;
 }
 
 export function isDatabaseConnected(): boolean {
-  return connection !== null;
+  return connectionChecked;
 }
 
-export { connection as db };
-
 export default {
+  db,
   connectDatabase,
-  getDatabaseConnection,
+  getSupabaseClient,
   disconnectDatabase,
   isDatabaseConnected,
 };

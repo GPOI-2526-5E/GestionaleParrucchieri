@@ -6,7 +6,7 @@ import cloudinary from "cloudinary";
 import bcrypt from "bcrypt";
 import passport from "./config/passport";
 import dotenv from "dotenv";
-import { connectDatabase } from "./db_parrucchieri";
+import { connectDatabase, db } from "./db_parrucchieri";
 
 // ROUTES
 import aiRoute from "./routes/api-ai";
@@ -21,9 +21,7 @@ import appuntamentiRoute from "./routes/appuntamenti";
 dotenv.config();
 
 // Initialize database connection
-let db: any;
-connectDatabase().then(client => {
-  db = client;
+connectDatabase().then(() => {
   console.log("Database connesso nel server");
 }).catch(err => {
   console.error("Errore connessione database:", err);
@@ -128,8 +126,9 @@ app.use("/api/appuntamenti", appuntamentiRoute);
 // GET UTENTI
 app.get("/api/utenti", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM utenti");
-    res.json(rows);
+    const { data, error } = await db.from("utenti").select("*");
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore server" });
@@ -139,8 +138,9 @@ app.get("/api/utenti", async (req, res) => {
 // GET SERVIZI
 app.get("/api/servizi", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM servizi");
-    res.json(rows);
+    const { data, error } = await db.from("servizi").select("*");
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore server" });
@@ -150,18 +150,11 @@ app.get("/api/servizi", async (req, res) => {
 // GET PRODOTTI
 app.get("/api/prodotti", async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT
-        idProdotto,
-        foto,
-        nome,
-        descrizione,
-        prezzo,
-        quantitaMagazzino,
-        categoria
-      FROM prodotti
-    `);
-    res.json(rows);
+    const { data, error } = await db
+      .from("prodotti")
+      .select("idProdotto, foto, nome, descrizione, prezzo, quantitaMagazzino, categoria");
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Errore server" });
@@ -177,21 +170,31 @@ app.post("/api/register", async (req, res) => {
     const { nome, cognome, email, password, telefono, data_nascita, ruolo } =
       req.body;
 
-    const [existingUsers] = await db.query(
-      "SELECT idUtente FROM utenti WHERE email = ?",
-      [email]
-    );
+    const { data: existingUser, error: existingError } = await db
+      .from("utenti")
+      .select("idUtente")
+      .eq("email", email)
+      .maybeSingle();
 
-    if ((existingUsers as any[]).length > 0) {
+    if (existingError) throw existingError;
+
+    if (existingUser) {
       return res.status(400).json({ message: "Email già registrata" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.query(
-      "INSERT INTO utenti (nome, cognome, email, password, telefono, data_nascita, ruolo) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [nome, cognome, email, hashedPassword, telefono, data_nascita, ruolo]
-    );
+    const { error: insertError } = await db.from("utenti").insert({
+      nome,
+      cognome,
+      email,
+      password: hashedPassword,
+      telefono,
+      data_nascita,
+      ruolo,
+    });
+
+    if (insertError) throw insertError;
 
     res.status(201).json({ message: "Account creato!" });
   } catch (err: any) {
@@ -211,21 +214,25 @@ app.post("/api/products/update-stock", async (req, res) => {
     for (const item of cartItems) {
       const qty = item.quantita || 1;
 
-      const [products] = await db.query(
-        "SELECT quantitaMagazzino FROM prodotti WHERE idProdotto = ?",
-        [item.id]
-      );
+      const productId = item.id ?? item.idProdotto;
+      const { data: prodotto, error: productError } = await db
+        .from("prodotti")
+        .select("quantitaMagazzino")
+        .eq("idProdotto", productId)
+        .maybeSingle();
 
-      const prodotto = (products as any[])[0];
+      if (productError) throw productError;
       if (!prodotto) throw new Error(`Prodotto ${item.id} non trovato`);
 
       if (prodotto.quantitaMagazzino < qty)
         throw new Error(`Stock insufficiente per ${item.id}`);
 
-      await db.query(
-        "UPDATE prodotti SET quantitaMagazzino = ? WHERE idProdotto = ?",
-        [prodotto.quantitaMagazzino - qty, item.id]
-      );
+      const { error: updateError } = await db
+        .from("prodotti")
+        .update({ quantitaMagazzino: prodotto.quantitaMagazzino - qty })
+        .eq("idProdotto", productId);
+
+      if (updateError) throw updateError;
     }
 
     res.json({ message: "Stock aggiornato" });

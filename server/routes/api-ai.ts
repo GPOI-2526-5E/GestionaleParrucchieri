@@ -5,18 +5,11 @@ import cors from "cors";
 import fs from "fs";
 import cloudinary, { UploadStream } from "cloudinary";
 import OpenAI from "openai";
-import mysql from "mysql2";
+import { db } from "../db_parrucchieri";
 
 const router = express.Router();
 
 dotenv.config({ path: ".env" });
-
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "db_parrucchieri"
-});
 
 const hf = new OpenAI({
     baseURL: "https://router.huggingface.co/v1",
@@ -206,13 +199,16 @@ function buildAdviceClarificationReply(lastUser: string): string {
     return "Posso consigliarti bene, ma prima ho bisogno di qualche dettaglio in più sul tuo tipo di capello e sul risultato che vuoi ottenere.";
 }
 
-function queryDb<T = any>(sql: string, params: any[] = []): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-        db.query(sql, params, (err, result) => {
-            if (err) reject(err);
-            else resolve(result as T[]);
-        });
-    });
+async function getAllServices(): Promise<ServiceCard[]> {
+    const { data, error } = await db
+        .from("servizi")
+        .select("idServizio, nome, descrizione, durata, prezzo");
+
+    if (error) {
+        throw error;
+    }
+
+    return (data || []) as ServiceCard[];
 }
 
 function serviceKeywords(): string[] {
@@ -308,6 +304,8 @@ async function getSuggestedServices(lastUser: string): Promise<ServiceCard[]> {
     const text = normalizeText(lastUser);
 
     try {
+        const allServices = await getAllServices();
+
         if (
             text.includes("servizi") ||
             text.includes("servizio") ||
@@ -316,33 +314,32 @@ async function getSuggestedServices(lastUser: string): Promise<ServiceCard[]> {
             text.includes("offrite") ||
             text.includes("quali servizi")
         ) {
-            return await queryDb<ServiceCard>(`
-                SELECT idServizio, nome, descrizione, durata, prezzo
-                FROM servizi
-                LIMIT 6
-            `);
+            return allServices.slice(0, 6);
         }
 
         if (text.includes("taglio") || text.includes("sfumatura")) {
-            return await queryDb<ServiceCard>(`
-                SELECT idServizio, nome, descrizione, durata, prezzo
-                FROM servizi
-                WHERE LOWER(nome) LIKE '%taglio%'
-                   OR LOWER(nome) LIKE '%sfumatura%'
-                   OR LOWER(descrizione) LIKE '%taglio%'
-                   OR LOWER(descrizione) LIKE '%sfumatura%'
-                LIMIT 4
-            `);
+            return allServices
+                .filter((service) => {
+                    const nome = normalizeText(service.nome);
+                    const descrizione = normalizeText(service.descrizione);
+                    return (
+                        nome.includes("taglio") ||
+                        nome.includes("sfumatura") ||
+                        descrizione.includes("taglio") ||
+                        descrizione.includes("sfumatura")
+                    );
+                })
+                .slice(0, 4);
         }
 
         if (text.includes("barba")) {
-            return await queryDb<ServiceCard>(`
-                SELECT idServizio, nome, descrizione, durata, prezzo
-                FROM servizi
-                WHERE LOWER(nome) LIKE '%barba%'
-                   OR LOWER(descrizione) LIKE '%barba%'
-                LIMIT 4
-            `);
+            return allServices
+                .filter((service) => {
+                    const nome = normalizeText(service.nome);
+                    const descrizione = normalizeText(service.descrizione);
+                    return nome.includes("barba") || descrizione.includes("barba");
+                })
+                .slice(0, 4);
         }
 
         if (
@@ -352,16 +349,19 @@ async function getSuggestedServices(lastUser: string): Promise<ServiceCard[]> {
             text.includes("schiar") ||
             text.includes("colpi di sole")
         ) {
-            return await queryDb<ServiceCard>(`
-                SELECT idServizio, nome, descrizione, durata, prezzo
-                FROM servizi
-                WHERE LOWER(nome) LIKE '%colore%'
-                   OR LOWER(nome) LIKE '%tinta%'
-                   OR LOWER(nome) LIKE '%balayage%'
-                   OR LOWER(descrizione) LIKE '%schiar%'
-                   OR LOWER(descrizione) LIKE '%colpi di sole%'
-                LIMIT 4
-            `);
+            return allServices
+                .filter((service) => {
+                    const nome = normalizeText(service.nome);
+                    const descrizione = normalizeText(service.descrizione);
+                    return (
+                        nome.includes("colore") ||
+                        nome.includes("tinta") ||
+                        nome.includes("balayage") ||
+                        descrizione.includes("schiar") ||
+                        descrizione.includes("colpi di sole")
+                    );
+                })
+                .slice(0, 4);
         }
 
         if (
@@ -371,17 +371,20 @@ async function getSuggestedServices(lastUser: string): Promise<ServiceCard[]> {
             text.includes("anti crespo") ||
             text.includes("anticrespo")
         ) {
-            return await queryDb<ServiceCard>(`
-                SELECT idServizio, nome, descrizione, durata, prezzo
-                FROM servizi
-                WHERE LOWER(nome) LIKE '%tratt%'
-                   OR LOWER(nome) LIKE '%cheratina%'
-                   OR LOWER(nome) LIKE '%ricostruzione%'
-                   OR LOWER(descrizione) LIKE '%tratt%'
-                   OR LOWER(descrizione) LIKE '%cheratina%'
-                   OR LOWER(descrizione) LIKE '%ricostruzione%'
-                LIMIT 4
-            `);
+            return allServices
+                .filter((service) => {
+                    const nome = normalizeText(service.nome);
+                    const descrizione = normalizeText(service.descrizione);
+                    return (
+                        nome.includes("tratt") ||
+                        nome.includes("cheratina") ||
+                        nome.includes("ricostruzione") ||
+                        descrizione.includes("tratt") ||
+                        descrizione.includes("cheratina") ||
+                        descrizione.includes("ricostruzione")
+                    );
+                })
+                .slice(0, 4);
         }
 
         return [];
@@ -397,17 +400,11 @@ async function getBestMatchingServices(
 ): Promise<ServiceCard[]> {
     try {
         if (mode === "list") {
-            return await queryDb<ServiceCard>(`
-                SELECT idServizio, nome, descrizione, durata, prezzo
-                FROM servizi
-                LIMIT 6
-            `);
+            const services = await getAllServices();
+            return services.slice(0, 6);
         }
 
-        const allServices = await queryDb<ServiceCard>(`
-            SELECT idServizio, nome, descrizione, durata, prezzo
-            FROM servizi
-        `);
+        const allServices = await getAllServices();
 
         const scored = allServices
             .map(service => ({
@@ -601,10 +598,7 @@ router.post("/", async (req, res) => {
 
         console.log("Messages ricevuti:", messages);
 
-        const allServices = await queryDb<ServiceCard>(`
-            SELECT idServizio, nome, descrizione, durata, prezzo
-            FROM servizi
-        `);
+        const allServices = await getAllServices();
 
         const lastUser =
             [...messages].reverse().find((m: any) => m?.role === "user")?.content?.toLowerCase() || "";

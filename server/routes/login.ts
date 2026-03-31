@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-import { db } from "../db_parrucchieri";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { db } from "../db_parrucchieri";
 import { verifyToken } from "../middleware/authMiddleware";
 
 const router = express.Router();
@@ -17,6 +17,56 @@ interface User {
   telefono: string | null;
   data_nascita: string | null;
   ruolo: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpires?: string | null;
+}
+
+function buildJwt(user: Pick<User, "idUtente" | "nome" | "cognome" | "email" | "ruolo">): string {
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET mancante nel file .env");
+  }
+
+  return jwt.sign(
+    {
+      userId: user.idUtente,
+      nome: user.nome,
+      cognome: user.cognome,
+      email: user.email,
+      ruolo: user.ruolo
+    },
+    jwtSecret,
+    { expiresIn: "1d" }
+  );
+}
+
+async function getUserByEmail(email: string): Promise<User | null> {
+  const { data, error } = await db
+    .from("utenti")
+    .select("idUtente, nome, cognome, email, password, telefono, data_nascita, ruolo, resetPasswordToken, resetPasswordExpires")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as User | null;
+}
+
+async function getUserById(idUtente: number): Promise<User | null> {
+  const { data, error } = await db
+    .from("utenti")
+    .select("idUtente, nome, cognome, email, password, telefono, data_nascita, ruolo, resetPasswordToken, resetPasswordExpires")
+    .eq("idUtente", idUtente)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as User | null;
 }
 
 router.post("/login", async (req: Request, res: Response) => {
@@ -27,16 +77,7 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email e password obbligatorie" });
     }
 
-    const result = await db.query(
-      `SELECT idUtente, nome, cognome, email, password, telefono, data_nascita, ruolo
-       FROM utenti
-       WHERE email = ?
-       LIMIT 1`,
-      [email]
-    );
-
-    const users = result[0] as User[];
-    const user = users[0];
+    const user = await getUserByEmail(String(email).trim().toLowerCase());
 
     if (!user) {
       return res.status(404).json({ message: "Utente non trovato" });
@@ -54,23 +95,7 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Password errata" });
     }
 
-    const jwtSecret = process.env.JWT_SECRET;
-
-    if (!jwtSecret) {
-      return res.status(500).json({ message: "JWT_SECRET mancante nel file .env" });
-    }
-
-    const token = jwt.sign(
-      {
-        userId: user.idUtente,
-        nome: user.nome,
-        cognome: user.cognome,
-        email: user.email,
-        ruolo: user.ruolo
-      },
-      jwtSecret,
-      { expiresIn: "1d" }
-    );
+    const token = buildJwt(user);
 
     return res.json({
       message: "Login effettuato con successo",
@@ -94,16 +119,7 @@ router.post("/login", async (req: Request, res: Response) => {
 router.get("/me", verifyToken, async (req: any, res: Response) => {
   try {
     const userId = req.user.userId;
-
-    const [rows]: any = await db.query(
-      `SELECT idUtente, nome, cognome, email, password, telefono, data_nascita, ruolo
-       FROM utenti
-       WHERE idUtente = ?
-       LIMIT 1`,
-      [userId]
-    );
-
-    const user = rows[0];
+    const user = await getUserById(userId);
 
     if (!user) {
       return res.status(404).json({ message: "Utente non trovato" });
@@ -136,6 +152,13 @@ router.put("/me", verifyToken, async (req: any, res: Response) => {
       });
     }
 
+    const updatePayload: Partial<User> = {
+      nome,
+      cognome,
+      telefono,
+      data_nascita
+    };
+
     if (password && password.trim() !== "") {
       if (password.trim().length < 6) {
         return res.status(400).json({
@@ -143,21 +166,16 @@ router.put("/me", verifyToken, async (req: any, res: Response) => {
         });
       }
 
-      const hashedPassword = await bcrypt.hash(password.trim(), 10);
+      updatePayload.password = await bcrypt.hash(password.trim(), 10);
+    }
 
-      await db.query(
-        `UPDATE utenti
-         SET nome = ?, cognome = ?, telefono = ?, data_nascita = ?, password = ?
-         WHERE idUtente = ?`,
-        [nome, cognome, telefono, data_nascita, hashedPassword, userId]
-      );
-    } else {
-      await db.query(
-        `UPDATE utenti
-         SET nome = ?, cognome = ?, telefono = ?, data_nascita = ?
-         WHERE idUtente = ?`,
-        [nome, cognome, telefono, data_nascita, userId]
-      );
+    const { error } = await db
+      .from("utenti")
+      .update(updatePayload)
+      .eq("idUtente", userId);
+
+    if (error) {
+      throw error;
     }
 
     return res.json({ message: "Dati aggiornati con successo" });
@@ -171,11 +189,11 @@ router.post("/register", async (req: Request, res: Response) => {
   try {
     const nome = req.body.nome;
     const cognome = req.body.cognome;
-    const email = req.body.email;
+    const email = String(req.body.email || "").trim().toLowerCase();
     const password = req.body.password;
     const telefono = req.body.telefono;
     const data_nascita = req.body.data_nascita;
-    const ruolo = req.body.ruolo;
+    const ruolo = req.body.ruolo || "cliente";
 
     if (!nome || !cognome || !email || !password) {
       return res.status(400).json({
@@ -183,12 +201,9 @@ router.post("/register", async (req: Request, res: Response) => {
       });
     }
 
-    const [existing]: any = await db.query(
-      "SELECT idUtente FROM utenti WHERE email = ? LIMIT 1",
-      [email]
-    );
+    const existing = await getUserByEmail(email);
 
-    if (existing.length > 0) {
+    if (existing) {
       return res.status(400).json({
         message: "Email già registrata"
       });
@@ -196,53 +211,43 @@ router.post("/register", async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [result]: any = await db.query(
-      `INSERT INTO utenti 
-       (nome, cognome, email, password, telefono, data_nascita, ruolo)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
+    const { data: createdUser, error } = await db
+      .from("utenti")
+      .insert({
         nome,
         cognome,
         email,
-        hashedPassword,
-        telefono || null,
-        data_nascita || null,
+        password: hashedPassword,
+        telefono: telefono || null,
+        data_nascita: data_nascita || null,
         ruolo
-      ]
-    );
+      })
+      .select("idUtente, nome, cognome, email, telefono, data_nascita, ruolo")
+      .single();
 
-    const userId = result.insertId;
-
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      return res.status(500).json({
-        message: "JWT_SECRET mancante"
-      });
+    if (error) {
+      throw error;
     }
 
-    const token = jwt.sign(
-      {
-        userId,
-        nome,
-        cognome,
-        email,
-        ruolo: "cliente"
-      },
-      jwtSecret,
-      { expiresIn: "1d" }
-    );
+    const token = buildJwt({
+      idUtente: createdUser.idUtente,
+      nome: createdUser.nome,
+      cognome: createdUser.cognome,
+      email: createdUser.email,
+      ruolo: createdUser.ruolo
+    });
 
     return res.status(201).json({
       message: "Registrazione completata",
       token,
       user: {
-        id: userId,
-        nome,
-        cognome,
-        email,
-        telefono,
-        data_nascita,
-        ruolo: "cliente"
+        id: createdUser.idUtente,
+        nome: createdUser.nome,
+        cognome: createdUser.cognome,
+        email: createdUser.email,
+        telefono: createdUser.telefono,
+        data_nascita: createdUser.data_nascita,
+        ruolo: createdUser.ruolo
       }
     });
 
@@ -256,7 +261,6 @@ router.post("/register", async (req: Request, res: Response) => {
 
 router.post("/verify-password", verifyToken, async (req: any, res: Response) => {
   try {
-    console.log("REQ.BODY VERIFY PASSWORD:", req.body);
     const userId = req.user.userId;
     const { currentPassword } = req.body;
 
@@ -266,15 +270,7 @@ router.post("/verify-password", verifyToken, async (req: any, res: Response) => 
       });
     }
 
-    const [rows]: any = await db.query(
-      `SELECT idUtente, password
-       FROM utenti
-       WHERE idUtente = ?
-       LIMIT 1`,
-      [userId]
-    );
-
-    const user = rows[0];
+    const user = await getUserById(userId);
 
     if (!user) {
       return res.status(404).json({
@@ -334,15 +330,7 @@ router.post("/change-password", verifyToken, async (req: any, res: Response) => 
       });
     }
 
-    const [rows]: any = await db.query(
-      `SELECT idUtente, password
-       FROM utenti
-       WHERE idUtente = ?
-       LIMIT 1`,
-      [userId]
-    );
-
-    const user = rows[0];
+    const user = await getUserById(userId);
 
     if (!user) {
       return res.status(404).json({
@@ -377,12 +365,14 @@ router.post("/change-password", verifyToken, async (req: any, res: Response) => 
 
     const hashedPassword = await bcrypt.hash(newPassword.trim(), 10);
 
-    await db.query(
-      `UPDATE utenti
-       SET password = ?
-       WHERE idUtente = ?`,
-      [hashedPassword, userId]
-    );
+    const { error } = await db
+      .from("utenti")
+      .update({ password: hashedPassword })
+      .eq("idUtente", userId);
+
+    if (error) {
+      throw error;
+    }
 
     return res.status(200).json({
       message: "Password aggiornata con successo"
@@ -406,32 +396,28 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
     }
 
     const cleanEmail = String(email).trim().toLowerCase();
+    const user = await getUserByEmail(cleanEmail);
 
-    const [rows]: any = await db.query(
-      `SELECT idUtente, email
-       FROM utenti
-       WHERE email = ?
-       LIMIT 1`,
-      [cleanEmail]
-    );
-
-    if (!rows || rows.length === 0) {
+    if (!user) {
       return res.status(200).json({
         message: "Se l’email esiste, riceverai un link per reimpostare la password"
       });
     }
 
-    const user = rows[0];
-
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
+    const resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-    await db.query(
-      `UPDATE utenti
-       SET resetPasswordToken = ?, resetPasswordExpires = ?
-       WHERE idUtente = ?`,
-      [resetToken, resetPasswordExpires, user.idUtente]
-    );
+    const { error: updateError } = await db
+      .from("utenti")
+      .update({
+        resetPasswordToken: resetToken,
+        resetPasswordExpires
+      })
+      .eq("idUtente", user.idUtente);
+
+    if (updateError) {
+      throw updateError;
+    }
 
     const resetLink = `http://localhost:4200/reset-password?token=${resetToken}`;
 
@@ -536,15 +522,15 @@ router.post("/reset-password", async (req: Request, res: Response) => {
     const cleanToken = String(token).trim();
     const cleanPassword = String(newPassword).trim();
 
-    const [rows]: any = await db.query(
-      `SELECT idUtente, password, resetPasswordExpires
-       FROM utenti
-       WHERE resetPasswordToken = ?
-       LIMIT 1`,
-      [cleanToken]
-    );
+    const { data: user, error } = await db
+      .from("utenti")
+      .select("idUtente, password, resetPasswordExpires")
+      .eq("resetPasswordToken", cleanToken)
+      .maybeSingle();
 
-    const user = rows[0];
+    if (error) {
+      throw error;
+    }
 
     if (!user) {
       return res.status(400).json({
@@ -579,12 +565,18 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(cleanPassword, 10);
 
-    await db.query(
-      `UPDATE utenti
-       SET password = ?, resetPasswordToken = NULL, resetPasswordExpires = NULL
-       WHERE idUtente = ?`,
-      [hashedPassword, user.idUtente]
-    );
+    const { error: updateError } = await db
+      .from("utenti")
+      .update({
+        password: hashedPassword,
+        resetPasswordToken: null,
+        resetPasswordExpires: null
+      })
+      .eq("idUtente", user.idUtente);
+
+    if (updateError) {
+      throw updateError;
+    }
 
     return res.status(200).json({
       message: "Password aggiornata con successo"
