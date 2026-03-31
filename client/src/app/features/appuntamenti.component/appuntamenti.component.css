@@ -18,7 +18,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5); /* Scurito per far risaltare il calendario */
+  background: rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
 
@@ -116,8 +116,8 @@
 }
 
 :host ::ng-deep .fc {
-  --fc-border-color: rgba(212, 176, 106, 0.1) !important;
-  --fc-page-bg-color: transparent !important;
+  --fc-border-color: rgba(212, 176, 106, 0.1);
+  --fc-page-bg-color: transparent;
   color: #ffffff;
   font-family: inherit;
 }
@@ -125,8 +125,8 @@
 /* Rimuove link blu */
 :host ::ng-deep .fc th a, 
 :host ::ng-deep .fc td a {
-  color: #ffffff !important;
-  text-decoration: none !important;
+  color: #ffffff;
+  text-decoration: none;
 }
 
 /* ==============================
@@ -136,95 +136,94 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2.5rem !important;
+  margin-bottom: 2.5rem;
   gap: 15px;
 }
 
 :host ::ng-deep .fc-toolbar-title {
-  color: #d4b06a !important;
-  font-weight: 700 !important;
+  color: #d4b06a;
+  font-weight: 700;
   text-transform: capitalize;
-  font-size: 1.6rem !important;
+  font-size: 1.6rem;
 }
 
 :host ::ng-deep .fc .fc-button-group {
-  gap: 10px !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  gap: 10px;
+  background: transparent;
+  box-shadow: none;
 }
 
 :host ::ng-deep .fc .fc-button {
-  background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(212, 176, 106, 0.25) !important;
-  color: #ffffff !important;
-  border-radius: 12px !important;
-  padding: 10px 18px !important;
-  font-size: 0.8rem !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 176, 106, 0.25);
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
   letter-spacing: 0.5px;
-  transition: all 0.3s ease !important;
-  margin-left: 0 !important; /* Separa i bottoni uniti */
+  transition: all 0.3s ease;
+  margin-left: 0;
 }
 
 :host ::ng-deep .fc .fc-button:hover {
-  background: rgba(212, 176, 106, 0.15) !important;
-  border-color: #d4b06a !important;
-  color: #d4b06a !important;
-  box-shadow: 0 6px 20px rgba(212, 176, 106, 0.15) !important;
+  background: rgba(212, 176, 106, 0.15);
+  border-color: #d4b06a;
+  color: #d4b06a;
+  box-shadow: 0 6px 20px rgba(212, 176, 106, 0.15);
 }
 
 :host ::ng-deep .fc .fc-button-active {
-  background: #d4b06a !important;
-  border-color: #d4b06a !important;
-  color: #000000 !important;
-  font-weight: 700 !important;
+  background: #d4b06a;
+  border-color: #d4b06a;
+  color: #000000;
+  font-weight: 700;
 }
 
 :host ::ng-deep .fc .fc-today-button {
-  border-style: dashed !important;
-  margin-left: 10px !important;
+  border-style: dashed;
+  margin-left: 10px;
 }
 
 /* ==============================
-   GRIGLIA E ALTEZZA SLOT (Correzione Proporzioni)
+   GRIGLIA E ALTEZZA SLOT
    ============================== */
-/* Aumentiamo l'altezza per far sembrare gli appuntamenti più lunghi */
 :host ::ng-deep .fc-timegrid-slot {
-  height: 55px !important; 
-  border-bottom: 1px solid rgba(212, 176, 106, 0.05) !important;
+  height: 55px; 
+  border-bottom: 1px solid rgba(212, 176, 106, 0.05);
 }
 
 /* Etichette orarie 08:00, 09:00... */
 :host ::ng-deep .fc .fc-timegrid-slot-label-cushion {
-  color: #d4b06a !important;
-  font-weight: 600 !important;
+  color: #d4b06a;
+  font-weight: 600;
   font-size: 0.85rem;
 }
 
 /* Header Giorni */
 :host ::ng-deep .fc-col-header-cell {
-  background: rgba(212, 176, 106, 0.05) !important;
-  padding: 15px 0 !important;
+  background: rgba(212, 176, 106, 0.05);
+  padding: 15px 0;
 }
 
 :host ::ng-deep .fc-col-header-cell-cushion {
-  color: #d4b06a !important;
+  color: #d4b06a;
   text-transform: uppercase;
   font-size: 0.8rem;
   letter-spacing: 1px;
 }
 
 /* ==============================
-   EVENTI (Card Luxury)
+   EVENTI (Card Luxury con colori dinamici)
    ============================== */
 :host ::ng-deep .fc-v-event {
-  background: rgba(212, 176, 106, 0.12) !important;
-  border: none !important;
-  border-left: 4px solid #d4b06a !important;
-  border-radius: 8px !important;
+  background: none;
+  border: none;
+  border-left: 4px solid #d4b06a;
+  border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  display: flex !important;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   transition: transform 0.2s ease;
@@ -237,21 +236,107 @@
 }
 
 :host ::ng-deep .fc-event-main {
-  padding: 8px !important;
-  color: #ffffff !important;
+  padding: 8px;
+  color: #ffffff;
 }
 
 :host ::ng-deep .fc-event-title {
-  font-weight: 700 !important;
-  font-size: 0.9rem !important;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Colori dinamici tramite classi */
+:host ::ng-deep .fc-event.my-appointment {
+  background-color: rgba(212, 176, 106, 0.15);
+  border-left-color: #d4b06a;
+}
+
+:host ::ng-deep .fc-event.other-appointment {
+  background-color: rgba(200, 60, 60, 0.18);
+  border-left-color: darkred;
 }
 
 /* Indicatore ora attuale */
 :host ::ng-deep .fc-now-indicator-line {
-  border-color: #d4b06a !important;
-  border-width: 2px !important;
+  border-color: #d4b06a;
+  border-width: 2px;
 }
 
+/* ==============================
+   SELECT OPERATORI
+   ============================== */
+.appointments-select-wrapper {
+  margin: 35px auto 45px;
+  max-width: 340px;
+  width: 100%;
+  text-align: left;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 176, 106, 0.18);
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.28);
+}
+
+.appointments-select-wrapper label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #d4b06a;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.appointments-select-wrapper select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 176, 106, 0.35);
+  font-size: 15px;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.35s ease;
+  appearance: none;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+
+.appointments-select-wrapper select:hover {
+  border-color: #d4b06a;
+  background: rgba(212, 176, 106, 0.10);
+  box-shadow: 0 6px 18px rgba(212, 176, 106, 0.18);
+}
+
+.appointments-select-wrapper select:focus {
+  background: rgba(212, 176, 106, 0.22);
+  border-color: #d4b06a;
+  box-shadow: 0 0 0 2px rgba(212, 176, 106, 0.35);
+  color: #000;
+}
+
+.appointments-select-wrapper {
+  position: relative;
+}
+
+.appointments-select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 26px;
+  top: 56%;
+  transform: translateY(-50%);
+  color: #d4b06a;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* ==============================
+   RESPONSIVE
+   ============================== */
 @media (max-width: 768px) {
   :host ::ng-deep .fc .fc-toolbar {
     flex-direction: column;
@@ -260,6 +345,16 @@
   
   .appointments-title { font-size: 28px; }
   .calendar-wrapper { padding: 15px; }
+  
+  .appointments-select-wrapper {
+    max-width: 100%;
+    padding: 14px 16px;
+  }
+  
+  .appointments-select-wrapper select {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
 }
 
 /* Scrollbar dorata */
@@ -268,85 +363,3 @@
   background: rgba(212, 176, 106, 0.4); 
   border-radius: 10px; 
 }
-
-
-   .appointments-select-wrapper {
-    margin: 35px auto 45px;
-    max-width: 340px;
-    width: 100%;
-    text-align: left;
-    padding: 18px 20px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(212, 176, 106, 0.18);
-    border-radius: 18px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.28);
-  }
-  
-  .appointments-select-wrapper label {
-    display: block;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #d4b06a;
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 1px;
-  }
-  
-  .appointments-select-wrapper select {
-    width: 100%;
-    padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.45);
-    color: #ffffff;
-    border-radius: 12px;
-    border: 1px solid rgba(212, 176, 106, 0.35);
-    font-size: 15px;
-    font-weight: 600;
-    outline: none;
-    transition: all 0.35s ease;
-    appearance: none;
-    cursor: pointer;
-    backdrop-filter: blur(6px);
-  }
-  
-  .appointments-select-wrapper select:hover {
-    border-color: #d4b06a;
-    background: rgba(212, 176, 106, 0.10);
-    box-shadow: 0 6px 18px rgba(212, 176, 106, 0.18);
-  }
-  
-  .appointments-select-wrapper select:focus {
-    background: rgba(212, 176, 106, 0.22);
-    border-color: #d4b06a;
-    box-shadow: 0 0 0 2px rgba(212, 176, 106, 0.35);
-    color: #000;
-  }
-  
-  .appointments-select-wrapper {
-    position: relative;
-  }
-  
-  .appointments-select-wrapper::after {
-    content: "▼";
-    position: absolute;
-    right: 26px;
-    top: 56%;
-    transform: translateY(-50%);
-    color: #d4b06a;
-    font-size: 12px;
-    pointer-events: none;
-    opacity: 0.85;
-  }
-  
-  @media (max-width: 768px) {
-    .appointments-select-wrapper {
-      max-width: 100%;
-      padding: 14px 16px;
-    }
-    
-    .appointments-select-wrapper select {
-      font-size: 14px;
-      padding: 10px 12px;
-    }
-  }

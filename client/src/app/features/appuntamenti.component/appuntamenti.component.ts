@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FullCalendarModule } from '@fullcalendar/angular';
+import { FullCalendarModule, FullCalendarComponent } from '@fullcalendar/angular';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -10,33 +10,34 @@ import { AiChatDrawerComponent } from '../ai-chat-drawer.component/ai-chat-drawe
 import { FormsModule } from '@angular/forms';
 import { UtentiService } from '../../services/utentiService';
 import { Utente } from "../../models/utente.model";
-import { ChangeDetectorRef } from '@angular/core';
 import { AppuntamentoService } from "../../services/appuntamentoService";
+import { AuthService } from '../../services/auth';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-appuntamenti',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule, NavbarComponent, AiChatDrawerComponent, FormsModule],
+  imports: [
+    CommonModule,
+    FullCalendarModule,
+    NavbarComponent,
+    AiChatDrawerComponent,
+    FormsModule
+  ],
   templateUrl: './appuntamenti.component.html',
   styleUrls: ['./appuntamenti.component.css']
 })
-export class AppuntamentiComponent {
+export class AppuntamentiComponent implements OnInit {
+
+  private api = 'http://localhost:3000/api/auth';
 
   selectedOperator: number | null = null;
-  operatori: Utente[] | null = null;
+  operatori: Utente[] = [];
+  user: any = null;
 
-  constructor(
-    private utenteService: UtentiService,
-    private cdr: ChangeDetectorRef,
-    private appuntamentoService: AppuntamentoService
-  ) { }
+  events: EventInput[] = [];
 
-
-
-  events: EventInput[] = [
-    { title: 'Taglio & Piega', start: '2026-03-26T10:00:00', end: '2026-03-26T11:00:00' },
-    { title: 'Trattamento Viso', start: '2026-03-27T15:30:00', end: '2026-03-27T17:00:00' },
-  ];
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
   calendarOptions: CalendarOptions = {
     plugins: [timeGridPlugin, interactionPlugin],
@@ -48,72 +49,104 @@ export class AppuntamentiComponent {
     slotMaxTime: '22:00:00',
     slotDuration: '00:30:00',
     slotLabelInterval: '00:30',
-    
-    // FIX VISIVI
+    displayEventTime: true,
+    displayEventEnd: true,
     expandRows: true,
     height: 'auto',
     nowIndicator: true,
     selectable: true,
-    eventOverlap: false, // Evita che gli eventi si stringano tra loro
+    eventOverlap: false,
     slotEventOverlap: false,
-
-    // Forza l'altezza minima dell'evento
     eventMinHeight: 40,
-
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
       right: 'timeGridWeek,timeGridDay'
     },
-
     buttonText: {
       today: 'Oggi',
       week: 'Settimana',
       day: 'Giorno'
     },
-
-    slotLabelFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    },
-
+    slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
     dayHeaderFormat: { weekday: 'short', day: 'numeric', omitCommas: true },
-    events: this.events
+    events: []
   };
 
+  constructor(
+    private utenteService: UtentiService,
+    private appuntamentoService: AppuntamentoService,
+    private auth: AuthService,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) { }
+
   ngOnInit() {
+    this.getLoggedUser();
+
     this.utenteService.getOperatori().subscribe({
       next: (operatori) => {
         this.operatori = operatori;
-        console.log("Operatori caricati nel componente:", this.operatori);
 
         if (this.operatori.length > 0) {
           this.selectedOperator = this.operatori[0].idUtente;
         }
 
-        // Forza Angular a rilevare i cambiamenti e aggiornare la vista
         this.cdr.detectChanges();
       },
       error: (err) => console.error("Errore caricando operatori:", err)
     });
   }
 
+  getLoggedUser() {
+    const headers = this.getAuthHeaders();
+
+    this.http.get<any>(`${this.api}/me`, { headers })
+      .subscribe({
+        next: (res) => {
+          if (!res) return;
+
+          this.user = res;
+          console.log("Utente loggato:", this.user);
+
+          if (this.selectedOperator) {
+            this.onOperatorChange(null);
+          }
+
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Errore recupero utente:', err)
+      });
+  }
+
   onOperatorChange(event: any) {
+    if (!this.selectedOperator) return;
 
-    this.appuntamentoService.getAppuntamenti(this.selectedOperator!).subscribe({
-      next: (eventi) => {
-        // Trasforma le date in eventi per FullCalendar
-        this.events = eventi.map(a => ({
-          title: `Appuntamento con cliente ${a.idCliente}`,
-          start: a.dataOraInizio
-        }));
-        console.log('appuntamenti');
+    this.appuntamentoService.getAppuntamenti(this.selectedOperator)
+      .subscribe({
+        next: (eventi) => {
+          this.events = eventi.map(a => {
+            const isMyAppointment = a.idCliente && this.user?.idUtente && a.idCliente === this.user.idUtente;
+            return {
+              title: isMyAppointment ? 'Tuo appuntamento' : '',
+              start: a.dataOraInizio,
+              end: a.dataOraFine,
+              classNames: [isMyAppointment ? 'my-appointment' : 'other-appointment']
+            };
+          });
 
-        // Aggiorna il calendario
-        this.calendarOptions.events = this.events;
-      },
-      error: (err) => console.error("Errore caricando appuntamenti:", err)
-    });
+          const calendarApi = this.calendarComponent.getApi();
+          calendarApi.removeAllEvents();
+          calendarApi.addEventSource(this.events);
+
+          console.log("eventi aggiornati:", this.events);
+        },
+        error: (err) => console.error("Errore caricando appuntamenti:", err)
+      });
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.auth.getToken();
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 }

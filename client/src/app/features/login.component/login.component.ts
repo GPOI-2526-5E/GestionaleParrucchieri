@@ -139,6 +139,7 @@ export class LoginComponent implements OnInit {
 
     this.auth.login(this.email, this.password).subscribe({
       next: (res) => {
+        console.log(res);
         if (res?.token) {
           this.auth.saveToken(res.token);
         }
