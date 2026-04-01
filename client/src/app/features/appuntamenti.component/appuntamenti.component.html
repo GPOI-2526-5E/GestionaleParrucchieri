@@ -12,13 +12,30 @@
       </p>
     </div>
 
-    <div class="appointments-select-wrapper">
-      <label for="operator-select">Seleziona Operatore</label>
-      <select [(ngModel)]="selectedOperator" (change)="onOperatorChange($event)">
-        <option *ngFor="let o of operatori" [value]="o.idUtente">
-          {{ o.nome }} {{ o.cognome }}
-        </option>
-      </select>
+    <div class="appointments-select-wrapper" [class.is-open]="operatorSelectOpen">
+      <label for="operator-trigger">Seleziona Operatore</label>
+      <div class="appointments-select-field" [class.is-open]="operatorSelectOpen">
+        <button id="operator-trigger" type="button" class="appointments-select-trigger"
+          [attr.aria-expanded]="operatorSelectOpen" aria-haspopup="listbox" (click)="toggleOperatorSelect()"
+          (keydown)="onOperatorTriggerKeydown($event)">
+          <span class="appointments-select-trigger-text">
+            <span class="appointments-select-trigger-label">Operatore selezionato</span>
+            <span class="appointments-select-trigger-value">{{ selectedOperatorLabel }}</span>
+          </span>
+          <span class="appointments-select-icon" aria-hidden="true"></span>
+        </button>
+
+        <div class="appointments-select-panel" [class.is-open]="operatorSelectOpen">
+          <ul class="appointments-select-list" role="listbox" [attr.aria-label]="'Seleziona operatore'">
+            <li *ngFor="let o of availableOperators">
+              <button type="button" class="appointments-select-option"
+                [class.is-selected]="selectedOperator === o.idUtente" (click)="selectOperator(o.idUtente)">
+                {{ o.nome }} {{ o.cognome }}
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <div class="calendar-wrapper">

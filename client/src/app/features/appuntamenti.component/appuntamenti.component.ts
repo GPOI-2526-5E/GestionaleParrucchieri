@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FullCalendarModule, FullCalendarComponent } from '@fullcalendar/angular';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
@@ -32,6 +32,7 @@ export class AppuntamentiComponent implements OnInit {
   private api = 'http://localhost:3000/api/auth';
 
   selectedOperator: number | null = null;
+  operatorSelectOpen = false;
   operatori: Utente[] = [];
   user: any = null;
 
@@ -120,6 +121,8 @@ export class AppuntamentiComponent implements OnInit {
   }
 
   onOperatorChange(event: any) {
+    this.closeOperatorSelect();
+
     if (!this.selectedOperator) return;
 
     this.appuntamentoService.getAppuntamenti(this.selectedOperator)
@@ -143,6 +146,71 @@ export class AppuntamentiComponent implements OnInit {
         },
         error: (err) => console.error("Errore caricando appuntamenti:", err)
       });
+  }
+
+  get selectedOperatorLabel(): string {
+    const selected = this.operatori.find(
+      (operatore) => operatore.idUtente === this.selectedOperator
+    );
+
+    if (!selected) {
+      return 'Seleziona operatore';
+    }
+
+    return `${selected.nome} ${selected.cognome}`;
+  }
+
+  get availableOperators(): Utente[] {
+    return this.operatori.filter(
+      (operatore) => operatore.idUtente !== this.selectedOperator
+    );
+  }
+
+  toggleOperatorSelect(): void {
+    this.operatorSelectOpen = !this.operatorSelectOpen;
+  }
+
+  selectOperator(operatorId: number): void {
+    if (this.selectedOperator === operatorId) {
+      this.closeOperatorSelect();
+      return;
+    }
+
+    this.selectedOperator = operatorId;
+    this.onOperatorChange(null);
+  }
+
+  closeOperatorSelect(): void {
+    this.operatorSelectOpen = false;
+  }
+
+  onOperatorTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.toggleOperatorSelect();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      this.closeOperatorSelect();
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.operatorSelectOpen = true;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+
+    if (target?.closest('.appointments-select-wrapper')) {
+      return;
+    }
+
+    this.closeOperatorSelect();
   }
 
   private getAuthHeaders(): HttpHeaders {

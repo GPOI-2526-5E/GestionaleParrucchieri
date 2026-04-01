@@ -26,6 +26,11 @@ interface UserProfile {
   photoURL?: string | null;
 }
 
+interface PasswordChecklistItem {
+  label: string;
+  valid: boolean;
+}
+
 @Component({
   selector: 'app-info-utente',
   standalone: true,
@@ -46,6 +51,8 @@ export class InfoUtenteComponent implements OnInit {
 
   password = '';
   confirmPassword = '';
+  completionPasswordChecklist: PasswordChecklistItem[] = [];
+  completionPasswordValid = false;
 
   isLoading = true;
   isSaving = false;
@@ -141,6 +148,7 @@ export class InfoUtenteComponent implements OnInit {
     this.confirmPassword = '';
     this.showPassword = false;
     this.showConfirmPassword = false;
+    this.updateCompletionPasswordState();
   }
 
   private resetChangePasswordFields(): void {
@@ -171,7 +179,7 @@ export class InfoUtenteComponent implements OnInit {
 
     this.missingRequiredFields = !nome || !cognome || !telefono || !dataNascita;
 
-    this.requirePasswordForCompletion = this.missingRequiredFields && !hasPassword;
+    this.requirePasswordForCompletion = !hasPassword;
     this.passwordRequired = this.requirePasswordForCompletion;
 
     this.showCompletionWarning =
@@ -276,6 +284,11 @@ export class InfoUtenteComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  onCompletionPasswordChange(): void {
+    this.updateCompletionPasswordState();
+    this.cdr.detectChanges();
+  }
+
   onPhoneNumberChange(phoneNumber: string): void {
     if (!this.user) {
       return;
@@ -293,6 +306,33 @@ export class InfoUtenteComponent implements OnInit {
   onCountryChange(countryIso2: string): void {
     this.selectedCountryIso2 = countryIso2;
     this.cdr.detectChanges();
+  }
+
+  private updateCompletionPasswordState(): void {
+    this.completionPasswordChecklist = [
+      {
+        label: 'Almeno 5 caratteri',
+        valid: this.password.length >= 5
+      },
+      {
+        label: 'Almeno una lettera maiuscola',
+        valid: /[A-Z]/.test(this.password)
+      },
+      {
+        label: 'Almeno un numero o carattere speciale',
+        valid: /[0-9!@#$%^&*(),.?":{}|<>]/.test(this.password)
+      },
+      {
+        label: 'Le password coincidono',
+        valid:
+          this.password.length > 0 &&
+          this.confirmPassword.length > 0 &&
+          this.password === this.confirmPassword
+      }
+    ];
+    this.completionPasswordValid = this.completionPasswordChecklist.every(
+      (item: PasswordChecklistItem) => item.valid
+    );
   }
 
   getUserInitials(): string {
@@ -431,6 +471,8 @@ export class InfoUtenteComponent implements OnInit {
       return;
     }
 
+    const wasPasswordRequired = this.passwordRequired;
+
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -458,14 +500,9 @@ export class InfoUtenteComponent implements OnInit {
         return;
       }
 
-      if (this.password.trim().length < 6) {
-        this.errorMessage = 'La password deve contenere almeno 6 caratteri.';
-        this.cdr.detectChanges();
-        return;
-      }
-
-      if (this.password !== this.confirmPassword) {
-        this.errorMessage = 'Le password non coincidono.';
+      if (!this.completionPasswordValid) {
+        this.errorMessage =
+          'La password deve rispettare tutti i requisiti e coincidere con la conferma.';
         this.cdr.detectChanges();
         return;
       }
@@ -503,7 +540,9 @@ export class InfoUtenteComponent implements OnInit {
     this.http.put(`${this.api}/me`, payload, { headers }).subscribe({
       next: (res: any) => {
         this.isSaving = false;
-        this.successMessage = res?.message || 'Dati aggiornati con successo.';
+        this.successMessage = wasPasswordRequired
+          ? 'Informazioni salvate correttamente. Profilo completato con successo.'
+          : (res?.message || 'Informazioni salvate correttamente.');
         this.errorMessage = '';
         this.isEditMode = false;
 

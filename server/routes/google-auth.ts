@@ -39,25 +39,35 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: "http://localhost:4200/login?googleError=true",
-  }),
-  async (req: Request, res: Response) => {
-    try {
-      const user = req.user as JwtUser;
+  (req: Request, res: Response, next) => {
+    passport.authenticate(
+      "google",
+      { session: false },
+      (err: unknown, user?: JwtUser) => {
+        if (err) {
+          console.error("Errore passport callback Google:", err);
+          return res.redirect(
+            "http://localhost:4200/login?googleError=true&reason=callback"
+          );
+        }
 
-      if (!user) {
-        return res.redirect("http://localhost:4200/login?googleError=true");
+        if (!user) {
+          return res.redirect(
+            "http://localhost:4200/login?googleError=true&reason=no-user"
+          );
+        }
+
+        try {
+          const token = generateToken(user);
+          return res.redirect(`http://localhost:4200/login?token=${token}`);
+        } catch (tokenError) {
+          console.error("Errore generazione token Google:", tokenError);
+          return res.redirect(
+            "http://localhost:4200/login?googleError=true&reason=token"
+          );
+        }
       }
-
-      const token = generateToken(user);
-
-      return res.redirect(`http://localhost:4200/login?token=${token}`);
-    } catch (err) {
-      console.error("Errore callback Google:", err);
-      return res.redirect("http://localhost:4200/login?googleError=true");
-    }
+    )(req, res, next);
   }
 );
 

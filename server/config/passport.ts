@@ -76,6 +76,16 @@ function extractGoogleNames(profile: Profile) {
   };
 }
 
+function buildFallbackNames(profile: Profile) {
+  const displayName = (profile.displayName || "").trim();
+  const parts = displayName.split(" ").filter(Boolean);
+
+  return {
+    nome: parts[0] || "Utente",
+    cognome: parts.slice(1).join(" ") || "Google"
+  };
+}
+
 passport.use(
   new GoogleStrategy(
     {
@@ -90,11 +100,14 @@ passport.use(
       done: (error: any, user?: any) => void
     ) => {
       try {
-        const email = profile.emails?.[0]?.value || "";
+        const email = String(profile.emails?.[0]?.value || "").trim().toLowerCase();
         const googleId = profile.id || "";
         const fotoProfilo = profile.photos?.[0]?.value || "";
 
-        const { nome, cognome } = extractGoogleNames(profile);
+        const extractedNames = extractGoogleNames(profile);
+        const fallbackNames = buildFallbackNames(profile);
+        const nome = extractedNames.nome?.trim() || fallbackNames.nome;
+        const cognome = extractedNames.cognome?.trim() || fallbackNames.cognome;
 
         console.log("GOOGLE RAW PROFILE:", {
           id: profile.id,
@@ -136,21 +149,24 @@ passport.use(
               cognome,
               email,
               password: "",
+              telefono: null,
+              data_nascita: null,
               ruolo: "cliente",
             })
-            .select("idUtente")
+            .select("idUtente, nome, cognome, email, ruolo")
             .single();
 
           if (insertError) {
+            console.error("Errore inserimento utente Google:", insertError);
             throw insertError;
           }
 
           const newUser: GoogleUser = {
             id: createdUser.idUtente,
-            nome,
-            cognome,
-            email,
-            ruolo: "cliente"
+            nome: createdUser.nome,
+            cognome: createdUser.cognome,
+            email: createdUser.email,
+            ruolo: createdUser.ruolo
           };
 
           return done(null, newUser);

@@ -45,7 +45,7 @@
             <span>
               {{
               completionMessage ||
-              'Completa i dati mancanti per terminare la registrazione e rendere il profilo completo.'
+              'Completa i dati mancanti e imposta una password per rendere il profilo completo.'
               }}
             </span>
           </div>
@@ -298,6 +298,10 @@
     }" (numberChange)="onPhoneNumberChange($event)" (validityChange)="onPhoneValidityChange($event)"
                   (countryChange)="onCountryChange($event)">
                 </intl-tel-input>
+
+                <div *ngIf="!isPhoneValid" class="inline-status error-text phone-error">
+                  Inserisci un numero di telefono valido.
+                </div>
               </div>
 
               <div class="form-group">
@@ -311,7 +315,8 @@
 
                 <div class="password-input-wrap">
                   <input id="password" [type]="showPassword ? 'text' : 'password'" name="password"
-                    [(ngModel)]="password" placeholder="Inserisci una password" />
+                    [(ngModel)]="password" (ngModelChange)="onCompletionPasswordChange()"
+                    placeholder="Inserisci una password" />
 
                   <button type="button" class="toggle-password-btn" (click)="showPassword = !showPassword"
                     [attr.aria-label]="showPassword ? 'Nascondi password' : 'Mostra password'"
@@ -326,7 +331,8 @@
 
                 <div class="password-input-wrap">
                   <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" name="confirmPassword"
-                    [(ngModel)]="confirmPassword" placeholder="Conferma la password" />
+                    [(ngModel)]="confirmPassword" (ngModelChange)="onCompletionPasswordChange()"
+                    placeholder="Conferma la password" />
 
                   <button type="button" class="toggle-password-btn" (click)="showConfirmPassword = !showConfirmPassword"
                     [attr.aria-label]="showConfirmPassword ? 'Nascondi password' : 'Mostra password'"
@@ -336,14 +342,19 @@
                 </div>
               </div>
 
+              <div class="form-group full-width" *ngIf="passwordRequired && (password || confirmPassword)">
+                <div class="password-alert" [ngClass]="completionPasswordValid ? 'all-valid' : ''">
+                  <div *ngFor="let item of completionPasswordChecklist"
+                    [ngClass]="item.valid ? 'valid' : 'invalid'">
+                    {{ item.label }}
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group full-width">
                 <label for="ruolo">Ruolo</label>
                 <input id="ruolo" type="text" name="ruolo" [ngModel]="user.ruolo" disabled />
               </div>
-            </div>
-
-            <div *ngIf="!isPhoneValid" class="inline-status error-text">
-              Inserisci un numero di telefono valido.
             </div>
 
             <div class="actions">

@@ -628,6 +628,11 @@
   min-width: 0;
 }
 
+.phone-error {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 .form-group label {
   margin-bottom: 7px;
   color: var(--text-soft);
@@ -738,6 +743,8 @@
     rgba(255, 255, 255, 0.03)
   ) !important;
   color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: var(--gold-soft);
   font-size: 14px;
   outline: none;
   box-shadow: none;
@@ -771,6 +778,25 @@
   ) !important;
   border-color: rgba(212, 176, 106, 0.30) !important;
   box-shadow: var(--focus-ring) !important;
+}
+
+::ng-deep intl-tel-input .iti__tel-input:not(:placeholder-shown),
+::ng-deep intl-tel-input input.phone-input:not(:placeholder-shown) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+::ng-deep intl-tel-input .iti__tel-input:-webkit-autofill,
+::ng-deep intl-tel-input .iti__tel-input:-webkit-autofill:hover,
+::ng-deep intl-tel-input .iti__tel-input:-webkit-autofill:focus,
+::ng-deep intl-tel-input input.phone-input:-webkit-autofill,
+::ng-deep intl-tel-input input.phone-input:-webkit-autofill:hover,
+::ng-deep intl-tel-input input.phone-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff !important;
+  caret-color: var(--gold-soft) !important;
+  -webkit-box-shadow: 0 0 0 1000px rgba(23, 23, 23, 0.96) inset !important;
+  box-shadow: 0 0 0 1000px rgba(23, 23, 23, 0.96) inset !important;
+  transition: background-color 9999s ease-out 0s;
 }
 
 ::ng-deep intl-tel-input .iti__country-container {
@@ -927,6 +953,48 @@
 
 .toggle-password-btn:active {
   transform: scale(0.96);
+}
+
+.password-alert {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(220, 90, 90, 0.08);
+  border: 1px solid rgba(220, 90, 90, 0.18);
+}
+
+.password-alert div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.password-alert div:last-child {
+  margin-bottom: 0;
+}
+
+.password-alert .invalid {
+  color: #ff9b9b;
+}
+
+.password-alert .invalid::before {
+  content: "✕";
+  color: #ff6b6b;
+}
+
+.password-alert .valid {
+  color: #8ef0b0;
+}
+
+.password-alert .valid::before {
+  content: "✓";
+  color: #4cd97b;
+}
+
+.password-alert.all-valid {
+  background: rgba(80, 200, 120, 0.12);
+  border: 1px solid rgba(80, 200, 120, 0.28);
 }
 
 /* =========================

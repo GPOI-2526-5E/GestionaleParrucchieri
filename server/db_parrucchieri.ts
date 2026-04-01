@@ -10,8 +10,7 @@ export interface DatabaseConfig {
 
 const getDatabaseConfig = (): DatabaseConfig => {
   const url = process.env.SUPABASE_URL;
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url) {
     throw new Error("SUPABASE_URL non configurato in .env");
@@ -19,7 +18,7 @@ const getDatabaseConfig = (): DatabaseConfig => {
 
   if (!serviceRoleKey) {
     throw new Error(
-      "SUPABASE_SERVICE_ROLE_KEY o SUPABASE_ANON_KEY non configurati in .env"
+      "SUPABASE_SERVICE_ROLE_KEY non configurata in .env. Il backend deve usare la service role key per operazioni server-side come login Google e creazione utenti."
     );
   }
 
