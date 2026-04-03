@@ -30,9 +30,9 @@
 
           <div class="products-topbar-center">
             <div class="products-count">
-              <span class="products-count-number">{{ products.length }}</span>
+              <span class="products-count-number">{{ getFilteredProductsCount() }}</span>
               <span class="products-count-label">
-                {{ products.length == 1 ? 'Prodotto disponibile' : 'Prodotti disponibili' }}
+                {{ getFilteredProductsCount() == 1 ? 'Prodotto disponibile' : 'Prodotti disponibili' }}
               </span>
             </div>
 

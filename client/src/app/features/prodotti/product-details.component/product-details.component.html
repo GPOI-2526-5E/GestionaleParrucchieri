@@ -103,8 +103,8 @@
     </div>
 </div>
 
-<div class="product-image-zoom-backdrop" *ngIf="showImageZoom" (click)="closeImageZoom()">
-    <div class="product-image-zoom-dialog" (click)="$event.stopPropagation()">
+<div class="product-image-zoom-backdrop" *ngIf="showImageZoom" [class.is-closing]="isClosingImageZoom" (click)="closeImageZoom()">
+    <div class="product-image-zoom-dialog" [class.is-closing]="isClosingImageZoom" (click)="$event.stopPropagation()">
         <button type="button" class="product-image-zoom-close" (click)="closeImageZoom()" aria-label="Chiudi zoom">
             <i class="bi bi-x-lg"></i>
         </button>

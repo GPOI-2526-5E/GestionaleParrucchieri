@@ -219,6 +219,11 @@
   justify-content: center;
   padding: 28px;
   background: transparent;
+  animation: productZoomBackdropIn 0.22s ease;
+}
+
+.product-image-zoom-backdrop.is-closing {
+  animation: productZoomBackdropOut 0.24s ease forwards;
 }
 
 .product-image-zoom-dialog {
@@ -241,6 +246,11 @@
     0 30px 90px rgba(0, 0, 0, 0.46),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
   overflow: hidden;
+  animation: productZoomDialogIn 0.28s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.product-image-zoom-dialog.is-closing {
+  animation: productZoomDialogOut 0.24s ease forwards;
 }
 
 .product-image-zoom-header {
@@ -353,6 +363,50 @@
 @keyframes productImageSpin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes productZoomBackdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes productZoomDialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes productZoomBackdropOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes productZoomDialogOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
   }
 }
 

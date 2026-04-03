@@ -33,6 +33,7 @@ import { ProdottoService } from '../../../services/prodotto';
 })
 export class ProductsListComponent implements OnInit, OnDestroy {
   productsMD!: Observable<Prodotto[]>;
+  allProducts: Prodotto[] = [];
 
   selectedCategory: string = 'all';
   categories: string[] = [];
@@ -59,6 +60,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.productsMD = this.prodottiService.getProdotti();
     this.productsSub = this.productsMD.subscribe(products => {
+      this.allProducts = products;
       this.categories = [...new Set(products.map(p => p.categoria))];
       this.forceUiUpdate();
     });
@@ -104,6 +106,16 @@ export class ProductsListComponent implements OnInit, OnDestroy {
 
   getSelectedCategoryLabel(): string {
     return this.selectedCategory === 'all' ? 'Tutti' : this.selectedCategory;
+  }
+
+  getFilteredProductsCount(): number {
+    if (this.selectedCategory === 'all') {
+      return this.allProducts.length;
+    }
+
+    return this.allProducts.filter(
+      product => product.categoria === this.selectedCategory
+    ).length;
   }
 
   onAddToCart(product: Prodotto): void {

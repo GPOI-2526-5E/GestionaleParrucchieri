@@ -22,6 +22,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   product: Prodotto | undefined;
   isImageLoading = true;
   showImageZoom = false;
+  isClosingImageZoom = false;
   zoomLensVisible = false;
   zoomLensX = 50;
   zoomLensY = 50;
@@ -49,6 +50,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   private currentAlertProductId: number | null = null;
   private alertTimeout: any;
   private removeAlertTimeout: any;
+  private imageZoomCloseTimeout: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -75,6 +77,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     clearTimeout(this.alertTimeout);
     clearTimeout(this.removeAlertTimeout);
     clearTimeout(this.errorTimeout);
+    clearTimeout(this.imageZoomCloseTimeout);
   }
 
   addToCart(): void {
@@ -175,16 +178,25 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
 
   openImageZoom(): void {
     if (!this.product?.foto) return;
+    clearTimeout(this.imageZoomCloseTimeout);
     this.showImageZoom = true;
+    this.isClosingImageZoom = false;
     this.cdr.detectChanges();
   }
 
   closeImageZoom(): void {
-    this.showImageZoom = false;
+    this.isClosingImageZoom = true;
     this.zoomLensVisible = false;
-    this.zoomLensX = 50;
-    this.zoomLensY = 50;
     this.cdr.detectChanges();
+
+    clearTimeout(this.imageZoomCloseTimeout);
+    this.imageZoomCloseTimeout = setTimeout(() => {
+      this.showImageZoom = false;
+      this.isClosingImageZoom = false;
+      this.zoomLensX = 50;
+      this.zoomLensY = 50;
+      this.cdr.detectChanges();
+    }, 240);
   }
 
   onZoomImageMove(event: MouseEvent): void {
