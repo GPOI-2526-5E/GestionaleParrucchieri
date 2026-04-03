@@ -152,7 +152,10 @@ app.get("/api/prodotti", async (req, res) => {
   try {
     const { data, error } = await db
       .from("prodotti")
-      .select("idProdotto, foto, nome, descrizione, prezzo, quantitaMagazzino, categoria");
+      .select(
+        'idProdotto, foto, nome, marca, formato, descrizione, prezzoRivendita, prezzoAcquisto, quantitaMagazzino, categoria'
+      )
+      .order("idProdotto", { ascending: true });
     if (error) throw error;
     res.json(data);
   } catch (err) {

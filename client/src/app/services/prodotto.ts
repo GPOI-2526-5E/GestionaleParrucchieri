@@ -7,7 +7,11 @@ export interface Prodotto {
   idProdotto: number;
   foto: string;
   nome: string;
+  marca: string;
+  formato: string;
   descrizione: string;
+  prezzoRivendita: number;
+  prezzoAcquisto: number;
   prezzo: number;
   qta: number;
   categoria: string;
@@ -36,8 +40,14 @@ export class ProdottoService {
           idProdotto: p.idProdotto ?? p.id,
           foto: this.buildImageUrl(p.foto),
           nome: p.nome,
+          marca: p.marca ?? '',
+          formato: p.formato ?? '',
           descrizione: p.descrizione,
-          prezzo: Number(p.prezzo),
+          prezzoRivendita: Number(p.prezzoRivendita ?? p.prezzo ?? 0),
+          prezzoAcquisto: Number(p.prezzoAcquisto ?? 0),
+          // Manteniamo anche `prezzo` come alias di compatibilita'
+          // per i componenti che mostrano il prezzo vendita.
+          prezzo: Number(p.prezzoRivendita ?? p.prezzo ?? 0),
           qta: Number(p.quantitaMagazzino),
           categoria: p.categoria,
           quantita: 0

@@ -37,7 +37,7 @@
         <div class="product-price-card-top">
             <span class="product-price-label">Prezzo</span>
             <div class="product-price">
-                {{ product?.prezzo | currency:'EUR' }}
+                {{ product?.prezzoRivendita | currency:'EUR' }}
             </div>
             <p class="product-price-note">Disponibile in stock limitato</p>
         </div>
@@ -45,8 +45,18 @@
         <div class="product-price-divider"></div>
 
         <div class="product-summary">
+            <div class="product-summary-row" *ngIf="product?.marca">
+                <span>Marca</span>
+                <strong>{{ product?.marca }}</strong>
+            </div>
+
+            <div class="product-summary-row" *ngIf="product?.formato">
+                <span>Formato</span>
+                <strong>{{ product?.formato }}</strong>
+            </div>
+
             <div class="product-summary-row">
-                <span>Quantità in magazzino</span>
+                <span>Quantita in magazzino</span>
                 <strong>{{ product?.qta }}</strong>
             </div>
 

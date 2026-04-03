@@ -26,6 +26,14 @@
         </p>
 
         <div class="product-info-row">
+            <span class="product-info-pill" *ngIf="product.marca">
+                {{ product.marca }}
+            </span>
+
+            <span class="product-info-pill" *ngIf="product.formato">
+                {{ product.formato }}
+            </span>
+
             <span class="product-info-pill">
                 {{ product.qta }} disponibili
             </span>
