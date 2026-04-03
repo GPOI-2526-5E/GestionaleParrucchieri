@@ -280,6 +280,10 @@
 
 .summary-product-img-wrapper {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   width: 60px;
   height: 60px;
 
@@ -288,9 +292,11 @@
 }
 
 .summary-product-img-wrapper img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center center;
   border-radius: 10px;
 
   background: rgba(0, 0, 0, 0.4);

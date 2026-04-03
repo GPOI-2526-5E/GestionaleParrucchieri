@@ -62,10 +62,25 @@ export class ProdottoService {
     }
 
     if (/^https?:\/\//i.test(foto)) {
-      return foto;
+      return this.normalizeCloudinaryImage(foto);
     }
 
     return `${this.apiBaseUrl}${foto.startsWith('/') ? '' : '/'}${foto}`;
+  }
+
+  private normalizeCloudinaryImage(url: string): string {
+    if (!/res\.cloudinary\.com/i.test(url) || !/\/image\/upload\//i.test(url)) {
+      return url;
+    }
+
+    // Uniformiamo il canvas per i packshot:
+    // 1. `e_trim` riduce i margini inutili attorno al prodotto
+    // 2. `c_pad,w_900,h_900` rimette tutto dentro un quadrato coerente
+    // Così bottiglie e vasetti risultano molto più allineati nel catalogo.
+    return url.replace(
+      '/image/upload/',
+      '/image/upload/e_trim/c_pad,w_900,h_900/'
+    );
   }
 
   private loadCart() {

@@ -29,7 +29,20 @@
 
     <div class="product-showcase-center">
         <div class="product-image-card">
-            <img [src]="product?.foto" [alt]="product?.nome" />
+            <div class="product-image-loader" *ngIf="isImageLoading">
+                <div class="product-image-loader-orb"></div>
+                <span>Caricamento immagine...</span>
+            </div>
+
+            <img
+                *ngIf="product?.foto"
+                [src]="product!.foto"
+                [alt]="product?.nome"
+                [class.is-loading]="isImageLoading"
+                (load)="onImageLoad()"
+                (error)="onImageError()"
+                (click)="openImageZoom()"
+            />
         </div>
     </div>
 
@@ -87,6 +100,45 @@
         <span class="cart-toast-count" [class.d-none]="contProd === 1">
             X{{ contProd }}
         </span>
+    </div>
+</div>
+
+<div class="product-image-zoom-backdrop" *ngIf="showImageZoom" (click)="closeImageZoom()">
+    <div class="product-image-zoom-dialog" (click)="$event.stopPropagation()">
+        <button type="button" class="product-image-zoom-close" (click)="closeImageZoom()" aria-label="Chiudi zoom">
+            <i class="bi bi-x-lg"></i>
+        </button>
+
+        <div class="product-image-zoom-header">
+            <span class="product-image-zoom-kicker">Vista prodotto</span>
+            <strong>{{ product?.nome }}</strong>
+        </div>
+
+        <div class="product-image-zoom-stage" *ngIf="product?.foto">
+            <img
+                [src]="getZoomImageUrl(product!.foto)"
+                [alt]="product?.nome"
+                (mousemove)="onZoomImageMove($event)"
+                (mouseleave)="resetZoomImage()"
+            />
+
+            <div
+                class="product-image-lens"
+                *ngIf="zoomLensVisible"
+                [style.left.%]="zoomLensX"
+                [style.top.%]="zoomLensY"
+            >
+                <img
+                    class="product-image-lens-inner"
+                    [src]="getZoomImageUrl(product!.foto)"
+                    [alt]="product?.nome"
+                    [style.width.px]="zoomLensImageWidth"
+                    [style.height.px]="zoomLensImageHeight"
+                    [style.left.px]="zoomLensImageOffsetX"
+                    [style.top.px]="zoomLensImageOffsetY"
+                />
+            </div>
+        </div>
     </div>
 </div>
 
