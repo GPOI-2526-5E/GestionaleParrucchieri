@@ -155,6 +155,9 @@ app.get("/api/prodotti", async (req, res) => {
       .select(
         'idProdotto, foto, nome, marca, formato, descrizione, prezzoRivendita, prezzoAcquisto, quantitaMagazzino, categoria'
       )
+      .order("categoria", { ascending: true })
+      .order("marca", { ascending: true })
+      .order("nome", { ascending: true })
       .order("idProdotto", { ascending: true });
     if (error) throw error;
     res.json(data);
