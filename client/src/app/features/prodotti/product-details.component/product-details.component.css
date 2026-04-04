@@ -295,33 +295,7 @@
   max-width: min(780px, 100%);
   max-height: calc(100vh - 210px);
   filter: drop-shadow(0 28px 38px rgba(0, 0, 0, 0.38));
-  cursor: crosshair;
-}
-
-.product-image-lens {
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  transform: translate(-50%, -50%);
-  border-radius: 999px;
-  border: 1px solid rgba(212, 176, 106, 0.34);
-  box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.34),
-    0 0 0 10px rgba(212, 176, 106, 0.05);
-  overflow: hidden;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.05), rgba(12, 12, 12, 0.14));
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-}
-
-.product-image-lens-inner {
-  position: absolute;
-  max-width: none;
-  max-height: none;
-  object-fit: contain;
-  filter: none;
+  cursor: default;
 }
 
 .product-image-zoom-close {
@@ -777,10 +751,6 @@
     max-height: calc(100vh - 180px);
   }
 
-  .product-image-lens {
-    width: 150px;
-    height: 150px;
-  }
 }
 
 /* ===== ALERT ERRORE (GLASS RED SOFT) ===== */

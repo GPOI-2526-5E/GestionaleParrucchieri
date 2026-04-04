@@ -116,28 +116,9 @@
 
         <div class="product-image-zoom-stage" *ngIf="product?.foto">
             <img
-                [src]="getZoomImageUrl(product!.foto)"
+                [src]="product!.foto"
                 [alt]="product?.nome"
-                (mousemove)="onZoomImageMove($event)"
-                (mouseleave)="resetZoomImage()"
             />
-
-            <div
-                class="product-image-lens"
-                *ngIf="zoomLensVisible"
-                [style.left.%]="zoomLensX"
-                [style.top.%]="zoomLensY"
-            >
-                <img
-                    class="product-image-lens-inner"
-                    [src]="getZoomImageUrl(product!.foto)"
-                    [alt]="product?.nome"
-                    [style.width.px]="zoomLensImageWidth"
-                    [style.height.px]="zoomLensImageHeight"
-                    [style.left.px]="zoomLensImageOffsetX"
-                    [style.top.px]="zoomLensImageOffsetY"
-                />
-            </div>
         </div>
     </div>
 </div>
