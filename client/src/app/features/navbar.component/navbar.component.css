@@ -4,7 +4,7 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
-/* NAVBAR BASE */
+
 .navbar {
   background: transparent;
   position: fixed;
@@ -24,14 +24,14 @@ body {
   z-index: -1;
 }
 
-/* NAVBAR SCROLL */
+
 .navbar.scrolled {
   background: rgba(15, 15, 15, 0.95);
   padding: 10px 0;
   box-shadow: 0 5px 20px rgba(0,0,0,0.5);
 }
 
-/* LOGO */
+
 .navbar-brand img {
   height: 60px;
   transition: 0.3s ease;
@@ -41,7 +41,7 @@ body {
   opacity: 0.85;
 }
 
-/* NAV MENU */
+
 .navbar-nav .nav-link {
   color: white;
   font-weight: 500;
@@ -62,7 +62,7 @@ body {
   padding-bottom: 2px;
 }
 
-/* ICONE */
+
 .icon-btn {
   color: white;
   font-size: 20px;
@@ -84,7 +84,7 @@ body {
   color: #d4b06a;
 }
 
-/* MOBILE TOGGLER */
+
 .navbar-toggler {
   border: none;
 }
@@ -111,7 +111,7 @@ body {
   color: #d4b06a;
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 768px) {
   .navbar-nav .nav-link {
     margin-right: 15px;

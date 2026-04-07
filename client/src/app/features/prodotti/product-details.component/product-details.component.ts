@@ -23,14 +23,10 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   isImageLoading = true;
   showImageZoom = false;
   isClosingImageZoom = false;
-
-  // 🔴 ERROR ALERT
   showError = false;
   shakeAnimation = false;
   errorMessage = '';
   private errorTimeout: any;
-
-  // 🛒 CART TOAST
   showCartAlert = false;
   isClosing = false;
   shakeCart = false;
@@ -84,8 +80,6 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
       );
       return;
     }
-
-    // ✅ AGGIUNTA OK
     this.prodottoService.addProductToCart(this.product);
 
     const sameProduct =
@@ -98,8 +92,6 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     this.cartAlertMessage = `${this.product.nome} aggiunto`;
 
     this.contProd = sameProduct ? this.contProd + 1 : 1;
-
-    // 🔥 SHAKE TOAST
     this.shakeCart = false;
     this.cdr.detectChanges();
 
@@ -130,8 +122,6 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     this.ngZone.run(() => {
       this.errorMessage = msg;
       this.showError = true;
-
-      // reset shake
       this.shakeAnimation = false;
       this.cdr.detectChanges();
 
@@ -147,7 +137,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
       this.errorTimeout = setTimeout(() => {
         this.ngZone.run(() => {
           this.showError = false;
-          this.cdr.detectChanges(); // 👈 QUESTO È IL FIX
+          this.cdr.detectChanges(); 
         });
       }, 2500);
     });
@@ -179,6 +169,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     this.isClosingImageZoom = true;
     this.cdr.detectChanges();
 
+    // La chiusura ritardata lascia terminare l'animazione prima di rimuovere l'overlay.
     clearTimeout(this.imageZoomCloseTimeout);
     this.imageZoomCloseTimeout = setTimeout(() => {
       this.showImageZoom = false;
@@ -187,3 +178,4 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     }, 240);
   }
 }
+

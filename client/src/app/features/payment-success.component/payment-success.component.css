@@ -22,7 +22,7 @@
     background: rgba(0, 0, 0, 0.6);
 }
 
-/* BOX */
+
 .success-box {
     position: relative;
     z-index: 2;
@@ -48,13 +48,13 @@
 .success-icon {
     font-size: 52px;
     color: #7CFC9A;
-    /* verde più elegante */
+    
     margin-bottom: 14px;
 
     filter: drop-shadow(0 4px 12px rgba(40, 180, 90, 0.25));
 }
 
-/* TESTO */
+
 .success-box h1 {
     margin: 0;
     font-size: 24px;

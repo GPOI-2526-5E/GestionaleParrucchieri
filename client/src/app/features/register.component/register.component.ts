@@ -119,8 +119,8 @@ export class RegisterComponent {
     if (!this.isFormValid()) return;
 
     this.isLoading = true;
-    this.isSuccess = false; // reset alert verde
-    this.alertMessage = '';  // reset alert
+    this.isSuccess = false; 
+    this.alertMessage = '';  
     this.alertType = 'success';
 
     this.http.post<any>('http://localhost:3000/api/register', this.userData).subscribe({
@@ -130,9 +130,7 @@ export class RegisterComponent {
         this.alertMessage = 'Registrazione avvenuta con successo! Stai per essere reindirizzato alla home...';
         this.alertType = 'success';
 
-        this.cdr.detectChanges(); // forza aggiornamento della view
-
-        // dopo 5 secondi porta alla home
+        this.cdr.detectChanges(); 
         setTimeout(() => {
           this.router.navigate(['/home']);
         }, 5000);
@@ -143,9 +141,7 @@ export class RegisterComponent {
         this.alertMessage = err.error?.message || 'Errore nella registrazione';
         this.alertType = 'error';
 
-        this.cdr.detectChanges(); // forza aggiornamento alert
-
-        // nascondi alert dopo 5 secondi
+        this.cdr.detectChanges(); 
         setTimeout(() => {
           this.alertMessage = null;
           this.cdr.detectChanges();

@@ -7,39 +7,27 @@ import bcrypt from "bcrypt";
 import passport from "./config/passport";
 import dotenv from "dotenv";
 import { connectDatabase, db } from "./db_parrucchieri";
-
-// ROUTES
 import aiRoute from "./routes/api-ai";
 import loginRoute from "./routes/login";
 import googleAuthRoute from "./routes/google-auth";
 import utentiRoute from "./routes/utenti";
 import appuntamentiRoute from "./routes/appuntamenti";
 
-// SUPABASE
-
 
 dotenv.config();
-
-// Initialize database connection
 connectDatabase().then(() => {
   console.log("Database connesso nel server");
 }).catch(err => {
   console.error("Errore connessione database:", err);
   process.exit(1);
 });
-
-// EXPRESS
 const app = express();
 const PORT = 3000;
-
-// CLOUDINARY
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME as string,
   api_key: process.env.CLOUDINARY_API_KEY as string,
   api_secret: process.env.CLOUDINARY_API_SECRET as string,
 });
-
-// MIDDLEWARE
 app.use("/", (req, res, next) => {
   console.log(`----> ${req.method}: ${req.originalUrl}`);
   next();
@@ -64,18 +52,10 @@ app.use(
     tempFileDir: "./tmp/",
   })
 );
-
-// CARTELLA UPLOAD
 const uploadDir = "./uploads";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
-
-//
-// =======================
-// CLOUDINARY API
-// =======================
-// IMG PARRUCCHIERI
 app.get("/api/imgParrucchieri", async (req, res) => {
   try {
     const result = await cloudinary.v2.search
@@ -90,8 +70,6 @@ app.get("/api/imgParrucchieri", async (req, res) => {
     res.status(500).send("Errore Cloudinary");
   }
 });
-
-// IMG PRODOTTI
 app.get("/api/imgProdotti", async (req, res) => {
   try {
     const result = await cloudinary.v2.search
@@ -107,23 +85,11 @@ app.get("/api/imgProdotti", async (req, res) => {
     res.status(500).send("Errore Cloudinary");
   }
 });
-
-//
-// =======================
-// ROUTES
-// =======================
 app.use("/api/chat", aiRoute);
 app.use("/api/auth", loginRoute);
 app.use("/api/auth", googleAuthRoute);
 app.use("/api/utenti", utentiRoute);
 app.use("/api/appuntamenti", appuntamentiRoute);
-
-//
-// =======================
-// SUPABASE API ENDPOINTS
-// =======================
-
-// GET UTENTI
 app.get("/api/utenti", async (req, res) => {
   try {
     const { data, error } = await db.from("utenti").select("*");
@@ -134,8 +100,6 @@ app.get("/api/utenti", async (req, res) => {
     res.status(500).json({ message: "Errore server" });
   }
 });
-
-// GET SERVIZI
 app.get("/api/servizi", async (req, res) => {
   try {
     const { data, error } = await db.from("servizi").select("*");
@@ -146,8 +110,6 @@ app.get("/api/servizi", async (req, res) => {
     res.status(500).json({ message: "Errore server" });
   }
 });
-
-// GET PRODOTTI
 app.get("/api/prodotti", async (req, res) => {
   try {
     const { data, error } = await db
@@ -166,11 +128,6 @@ app.get("/api/prodotti", async (req, res) => {
     res.status(500).json({ message: "Errore server" });
   }
 });
-
-//
-// =======================
-// REGISTER UTENTE
-// =======================
 app.post("/api/register", async (req, res) => {
   try {
     const { nome, cognome, email, password, telefono, data_nascita, ruolo } =
@@ -208,11 +165,6 @@ app.post("/api/register", async (req, res) => {
     res.status(500).json({ message: "Errore server", error: err.message });
   }
 });
-
-//
-// =======================
-// UPDATE STOCK PRODOTTI
-// =======================
 app.post("/api/products/update-stock", async (req, res) => {
   const cartItems = req.body;
 
@@ -250,11 +202,7 @@ app.post("/api/products/update-stock", async (req, res) => {
     });
   }
 });
-
-//
-// =======================
-// START SERVER
-// =======================
 app.listen(PORT, () => {
   console.log(`Server attivo su http://localhost:${PORT}`);
 });
+

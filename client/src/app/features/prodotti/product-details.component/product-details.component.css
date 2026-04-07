@@ -58,7 +58,7 @@
   z-index: 1;
 }
 
-/* ----- SINISTRA ----- */
+
 .product-showcase-left {
   max-width: 760px;
   align-self: center;
@@ -125,7 +125,7 @@
     0 10px 22px rgba(0, 0, 0, 0.16);
 }
 
-/* ----- CENTRO ----- */
+
 .product-showcase-center {
   display: flex;
   align-items: stretch;
@@ -396,7 +396,7 @@
   }
 }
 
-/* ----- DESTRA ----- */
+
 .product-showcase-right {
   width: 100%;
   min-height: 100%;
@@ -546,7 +546,7 @@
   transform: translateY(-2px);
 }
 
-/* ===== CART TOAST COME LA LISTA ===== */
+
 
 .cart-toast-container {
   position: fixed;
@@ -635,7 +635,7 @@
   }
 }
 
-/* ---------- TABLET ---------- */
+
 @media (max-width: 1200px) {
   .product-showcase {
     padding: 110px 40px 70px;
@@ -658,7 +658,7 @@
   }
 }
 
-/* ---------- MOBILE ---------- */
+
 @media (max-width: 768px) {
   .product-showcase {
     min-height: auto;
@@ -753,7 +753,7 @@
 
 }
 
-/* ===== ALERT ERRORE (GLASS RED SOFT) ===== */
+
 .card-alert {
   position: fixed;
 
@@ -793,13 +793,13 @@
     transform 0.35s ease;
 }
 
-/* USCITA */
+
 .card-alert.hide {
   opacity: 0;
   transform: translateY(-10px);
 }
 
-/* ICONA */
+
 .alert-icon {
   width: 26px;
   height: 26px;
@@ -813,14 +813,14 @@
   font-weight: bold;
 }
 
-/* TESTO */
+
 .alert-text {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
 }
 
-/* ===== TOAST ===== */
+
 .cart-toast-container {
   position: fixed;
   top: 170px;
@@ -840,7 +840,7 @@
   padding: 12px 14px;
   border-radius: 16px;
 
-  /* 🔥 GLASS STYLE COERENTE */
+  
   background: rgba(40, 40, 40, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -865,13 +865,13 @@
   cursor: pointer;
 }
 
-/* USCITA */
+
 .cart-toast.closing {
   opacity: 0;
   transform: translateX(40px);
 }
 
-/* ICONA */
+
 .cart-toast-icon {
   width: 34px;
   height: 34px;
@@ -886,22 +886,22 @@
   background: rgba(212, 176, 106, 0.18);
 }
 
-/* TESTO */
+
 .cart-toast-text {
   font-size: 13px;
   font-weight: 600;
 }
 
-/* COUNT */
+
 .cart-toast-count {
   font-weight: 700;
   color: #f0d79e;
   margin-left: 6px;
 }
 
-/* ===== ANIMAZIONI ===== */
 
-/* ENTRATA */
+
+
 @keyframes toastEnter {
   from {
     opacity: 0;
@@ -914,7 +914,7 @@
   }
 }
 
-/* SHAKE UNIVERSALE */
+
 .card-alert.shake,
 .cart-toast.shake {
   animation: shake 0.35s ease;
@@ -946,7 +946,7 @@
   }
 }
 
-/* ---------- SMALL MOBILE ---------- */
+
 @media (max-width: 480px) {
   .product-showcase {
     padding: 80px 16px 36px;

@@ -82,13 +82,13 @@
   line-height: 1.7;
 }
 
-/* LAYOUT */
+
 .payment-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(300px, 380px);
   gap: 24px;
   align-items: start;
-  /* 🔥 FIX */
+  
 }
 
 .form-divider {
@@ -100,7 +100,7 @@
       transparent);
 }
 
-/* FORM CARD */
+
 .payment-form-card {
   padding: 24px;
   border-radius: 24px;
@@ -125,7 +125,7 @@
   font-weight: 700;
 }
 
-/* FORM */
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -162,16 +162,16 @@
 .form-row {
   display: flex;
   gap: 16px;
-  /* 🔥 spazio orizzontale tra colonne */
+  
   margin-bottom: 4px;
-  /* 🔥 piccolo respiro sotto la riga */
+  
 }
 
 .form-row .form-group {
   flex: 1;
 }
 
-/* SUMMARY CARD */
+
 .payment-summary-card {
   position: sticky;
   top: 100px;
@@ -191,10 +191,10 @@
   gap: 16px;
 
   height: fit-content;
-  /* 🔥 IMPORTANTISSIMO */
+  
 }
 
-/* RIGHE */
+
 .summary-line {
   display: flex;
   justify-content: space-between;
@@ -227,7 +227,7 @@
   font-size: 22px;
 }
 
-/* BUTTON */
+
 .payment-submit {
   margin-top: 10px;
   padding: 14px;
@@ -253,7 +253,7 @@
   transform: scale(0.97);
 }
 
-/* 🔥 FIX DEFINITIVO BADGE */
+
 .summary-products-row {
   display: flex;
   gap: 14px;
@@ -262,7 +262,7 @@
   overflow-y: visible;
 
   padding-top: 12px;
-  /* 🔥 spazio per badge */
+  
   padding-bottom: 8px;
 }
 
@@ -288,7 +288,7 @@
   height: 60px;
 
   margin-top: 4px;
-  /* 🔥 evita clipping */
+  
 }
 
 .summary-product-img-wrapper img {
@@ -304,14 +304,14 @@
   padding: 6px;
 }
 
-/* 🔥 BADGE PERFETTO */
+
 .summary-product-badge {
   position: absolute;
   top: 0;
   right: -6px;
 
   transform: translateY(-35%);
-  /* 🔥 non esce dal container */
+  
 
   min-width: 20px;
   height: 20px;
@@ -354,19 +354,19 @@
   color: #f0c975;
 }
 
-/* SHIPPING */
+
 .shipping-section {
   margin-top: 20px;
 }
 
-/* layout */
+
 .shipping-options {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* card */
+
 .shipping-option {
   display: flex;
   gap: 14px;
@@ -387,13 +387,13 @@
   background: rgba(212, 176, 106, 0.08);
 }
 
-/* radio */
+
 .shipping-option input {
   margin-top: 4px;
   accent-color: #d4b06a;
 }
 
-/* contenuto */
+
 .shipping-content {
   flex: 1;
 }
@@ -416,7 +416,7 @@
 
 .shipping-price.free {
   color: #6ee7b7;
-  /* verde premium */
+  
 }
 
 .shipping-content p {
@@ -425,7 +425,7 @@
   color: #bdbdbd;
 }
 
-/* MAPPA FIX */
+
 .map-container {
   position: relative;
   height: 180px;
@@ -442,7 +442,7 @@
   border: 1px solid rgba(212, 176, 106, 0.2);
 }
 
-/* marker migliorato */
+
 .map-marker {
   position: absolute;
   width: 18px;
@@ -476,7 +476,7 @@
   border: 1px solid rgba(212, 176, 106, 0.2);
 }
 
-/* card info locker */
+
 .locker-info {
   margin-top: 10px;
   padding: 10px;
@@ -489,13 +489,13 @@
   font-size: 13px;
 }
 
-/* DISABLED BUTTON */
+
 .payment-submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* ADDRESS FORM */
+
 .shipping-form {
   margin-top: 20px;
 }
@@ -503,7 +503,7 @@
 .payment-actions {
   margin-top: 20px;
   margin-bottom: 10px;
-  /* 🔥 spazio sotto bottone */
+  
 }
 
 .payment-success {
@@ -588,7 +588,7 @@
     border-color 0.22s ease;
 }
 
-/* HOVER */
+
 .pay-btn:hover:not(:disabled) {
   transform: translateY(-2px);
 
@@ -599,7 +599,7 @@
   border-color: rgba(212, 176, 106, 0.6);
 }
 
-/* CLICK */
+
 .pay-btn:active:not(:disabled) {
   transform: translateY(0);
 
@@ -608,7 +608,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* DISABLED */
+
 .pay-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -631,7 +631,7 @@ input[type=number] {
   appearance: none;
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 992px) {
   .payment-layout {
     grid-template-columns: 1fr;
@@ -659,3 +659,4 @@ input[type=number] {
     font-size: 26px;
   }
 }
+

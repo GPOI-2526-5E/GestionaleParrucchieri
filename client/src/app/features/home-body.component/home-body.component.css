@@ -1,4 +1,4 @@
-/* ===== HERO BACKGROUND ===== */
+
 .hero-background {
   position: relative;
   background-image: url("https://res.cloudinary.com/duimlq34k/image/upload/v1773655635/imgSaloneParrucchieri_cqmzs2.jpg");
@@ -8,7 +8,7 @@
   min-height: 100vh;
 }
 
-/* overlay sfumato per leggere il testo */
+
 .hero-background::before {
   content: "";
   position: absolute;
@@ -22,7 +22,7 @@
   z-index: 1;
 }
 
-/* contenuto sopra overlay */
+
 .gestionale-section {
   position: relative;
   z-index: 2;
@@ -31,7 +31,7 @@
   color: white;
 }
 
-/* HERO GRID */
+
 .hero-grid{
   display: grid;
   grid-template-columns: 1fr 520px;
@@ -44,7 +44,7 @@
   .hero-media{ order: -1; margin-bottom: 18px; }
 }
 
-/* HERO TEXT */
+
 .hero-title{
   font-size: 42px;
   margin: 0 0 10px 0;
@@ -58,7 +58,7 @@
   max-width: 640px;
 }
 
-/* CTA area */
+
 .hero-ctas{ display:flex; gap:12px; margin-bottom: 18px; align-items:center; }
 @media (max-width:600px){ .hero-ctas{ justify-content:center; flex-direction:column; } }
 
@@ -78,7 +78,7 @@
   border:1px solid rgba(212,176,106,.06);
 }
 
-/* HERO IMAGE */
+
 .hero-media{ display:flex; justify-content:center; align-items:center; }
 .hero-image{
   width:100%;
@@ -91,12 +91,12 @@
   object-position: center 70%;
 }
 
-/* HERO LI */
+
 .li-hero{
   cursor: default;
 }
 
-/* SERVICES GRID */
+
 .services-section{ margin-top:40px; }
 .section-title{ color:#fff; font-size:20px; margin-bottom:18px; }
 
@@ -109,7 +109,7 @@
   .services-grid{ grid-template-columns: 1fr; }
 }
 
-/* service-card */
+
 .service-card{
   display:flex;
   flex-direction:column;
@@ -147,7 +147,7 @@
 .service-body p{ color:#c9c9c9; font-size:14px; margin-bottom:12px; }
 .link-plain{ color:#d4b06a; text-decoration:none; font-weight:600; }
 
-/* INFO STRIP */
+
 .info-strip{
   margin-top:28px;
   background: rgba(255,255,255,0.02);

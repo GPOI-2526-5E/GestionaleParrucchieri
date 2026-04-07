@@ -146,24 +146,17 @@ export class PaymentComponent implements AfterViewChecked {
   isValidExpiry(): boolean {
     if (!this.expiry) return false;
 
-    // Rimuove spazi all’inizio/fine
     const clean = this.expiry.trim();
-
-    // Accetta sia M/AA che MM/AA
     const match = clean.match(/^(\d{1,2})\/(\d{2})$/);
     if (!match) return false;
 
     let month = parseInt(match[1], 10);
     const year = 2000 + parseInt(match[2], 10);
-
-    // Controlla mese valido
     if (month < 1 || month > 12) return false;
 
     const now = new Date();
-    const currentMonth = now.getMonth() + 1; // Gennaio = 0
+    const currentMonth = now.getMonth() + 1; 
     const currentYear = now.getFullYear();
-
-    // Carta già scaduta
     if (year < currentYear) return false;
     if (year === currentYear && month < currentMonth) return false;
 
@@ -173,9 +166,7 @@ export class PaymentComponent implements AfterViewChecked {
   isValidCVV(): boolean {
     if (!this.cvv) return false;
 
-    const clean = this.cvv.replace(/\D/g, ''); // solo numeri
-
-    // CVV standard 3 o 4 cifre
+    const clean = this.cvv.replace(/\D/g, ''); 
     return clean.length === 3 || clean.length === 4;
   }
 
@@ -242,6 +233,7 @@ export class PaymentComponent implements AfterViewChecked {
   loadLockers() {
     if (!this.map) return;
 
+    // Il popup Leaflet richiama questa funzione dal markup generato lato client.
     (window as any).selectLockerFromMap = (lockerId: string) => {
       const locker = this.lockers.find(l => l.id === lockerId);
       if (locker) {

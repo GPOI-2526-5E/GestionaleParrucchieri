@@ -48,7 +48,7 @@ body {
   padding: 0;
 }
 
-/* ===== LAYOUT ===== */
+
 
 .login-layout {
   position: relative;
@@ -59,7 +59,7 @@ body {
   grid-template-columns: 1fr minmax(520px, 42%);
 }
 
-/* ===== VISUAL ===== */
+
 
 .login-visual {
   position: absolute;
@@ -180,7 +180,7 @@ body {
   text-transform: uppercase;
 }
 
-/* ===== FORM AREA ===== */
+
 
 .login-panel {
   position: relative;
@@ -207,7 +207,7 @@ body {
   box-shadow: var(--card-shadow);
 }
 
-/* ===== HEADER ===== */
+
 
 .login-header-top {
   margin-bottom: 12px;
@@ -272,7 +272,7 @@ body {
   line-height: 1.5;
 }
 
-/* ===== ALERT ===== */
+
 
 form .custom-alert.success {
   margin-top: 12px;
@@ -338,7 +338,7 @@ form .custom-alert.success {
   color: var(--warning);
 }
 
-/* ===== FORM ===== */
+
 
 .login-form {
   display: flex;
@@ -401,7 +401,7 @@ form .custom-alert.success {
   line-height: 1.3;
 }
 
-/* ===== OPTIONS ===== */
+
 
 .login-row {
   display: flex;
@@ -450,7 +450,7 @@ form .custom-alert.success {
   border-radius: 6px;
 }
 
-/* ===== ERROR LEGACY ===== */
+
 
 .login-server-error {
   padding: 10px 12px;
@@ -462,7 +462,7 @@ form .custom-alert.success {
   line-height: 1.4;
 }
 
-/* ===== BUTTONS ===== */
+
 
 .btn {
   width: 100%;
@@ -562,7 +562,7 @@ form .custom-alert.success {
   box-shadow: var(--focus-ring);
 }
 
-/* ===== DIVIDER ===== */
+
 
 .login-divider {
   position: relative;
@@ -591,7 +591,7 @@ form .custom-alert.success {
   font-size: 11px;
 }
 
-/* ===== PASSWORD INPUT ===== */
+
 
 .password-input-wrap {
   position: relative;
@@ -642,7 +642,7 @@ form .custom-alert.success {
   line-height: 1;
 }
 
-/* ===== ANIMATION ===== */
+
 
 @keyframes fadeSlideIn {
   from {
@@ -656,7 +656,7 @@ form .custom-alert.success {
   }
 }
 
-/* ===== RESPONSIVE ===== */
+
 
 @media (max-width: 1200px) {
   .login-layout {
@@ -828,9 +828,9 @@ form .custom-alert.success {
 }
 
 
-/* ===== REGISTER EXTENSIONS ===== */
 
-/* Row per affiancare input */
+
+
 .row {
   display: flex;
   gap: 10px;
@@ -842,7 +842,7 @@ form .custom-alert.success {
   flex-direction: column;
 }
 
-/* Spaziature */
+
 .mb-2 {
   margin-bottom: 2px;
 }
@@ -851,18 +851,18 @@ form .custom-alert.success {
   margin-bottom: 10px;
 }
 
-/* Fix select (ruolo) */
+
 select.clean-input {
   appearance: none;
   cursor: pointer;
 }
 
-/* Migliora input date */
+
 input[type="date"].clean-input {
   color-scheme: dark;
 }
 
-/* ===== DATE INPUT FIX ===== */
+
 
 .date-input-wrap {
   position: relative;
@@ -871,12 +871,12 @@ input[type="date"].clean-input {
   align-items: center;
 }
 
-/* spazio per icona */
+
 .date-input-wrap .clean-input {
   padding-right: 44px;
 }
 
-/* icona a destra PERFETTA */
+
 .date-icon {
   position: absolute;
   right: 12px;
@@ -885,7 +885,7 @@ input[type="date"].clean-input {
   pointer-events: none;
 }
 
-/* nasconde icona nativa ma mantiene click */
+
 .date-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
   position: absolute;
   right: 0;
@@ -895,7 +895,7 @@ input[type="date"].clean-input {
   cursor: pointer;
 }
 
-/* fix Firefox */
+
 .date-input-wrap input[type="date"] {
   appearance: none;
 }
@@ -916,7 +916,7 @@ input[type="date"].clean-input {
   animation: fadeSlideDown 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Riga singola */
+
 .password-alert div {
   display: flex;
   align-items: center;
@@ -924,7 +924,7 @@ input[type="date"].clean-input {
   margin-bottom: 4px;
 }
 
-/* ❌ NON VALIDO */
+
 .password-alert .invalid {
   color: #ff9b9b;
 }
@@ -934,7 +934,7 @@ input[type="date"].clean-input {
   color: #ff6b6b;
 }
 
-/* ✅ VALIDO */
+
 .password-alert .valid {
   color: #8ef0b0;
 }
@@ -944,7 +944,7 @@ input[type="date"].clean-input {
   color: #4cd97b;
 }
 
-/* Stato COMPLETATO → tutto verde */
+
 .password-alert.all-valid {
   background: rgba(80, 200, 120, 0.12);
   border: 1px solid rgba(80, 200, 120, 0.28);
@@ -962,7 +962,7 @@ input[type="date"].clean-input {
   }
 }
 
-/* ===== RESPONSIVE FIX REGISTER ===== */
+
 
 @media (max-width: 768px) {
   .row {
@@ -970,20 +970,20 @@ input[type="date"].clean-input {
   }
 }
 
-/* ===== MICRO POLISH ===== */
 
-/* uniforma altezza input */
+
+
 .clean-input {
   display: flex;
   align-items: center;
 }
 
-/* evita che password icon rompa layout */
+
 .password-input-wrap {
   width: 100%;
 }
 
-/* fix spacing tra gruppi dentro row */
+
 .row .form-label {
   margin-top: 4px;
 }

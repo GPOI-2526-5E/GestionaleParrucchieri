@@ -1,4 +1,4 @@
-/* ===== FOOTER ===== */
+
 .home-footer{
   border-top: none;
   background: transparent;
@@ -28,7 +28,7 @@
   min-height: 255px;
 }
 
-/* quando aperta: si allunga solo ORARI */
+
 .opening-hours.hours-open{
   min-height: 370px;
 }
@@ -58,7 +58,7 @@
   font-weight: 600;
 }
 
-/* ===== CONTATTI ===== */
+
 .footer-list{
   list-style:none;
   padding:0;
@@ -111,7 +111,7 @@
   align-self: flex-start;
 }
 
-/* ===== ORARI ===== */
+
 .opening-hours .status{
   display:inline-flex;
   align-items:center;
@@ -148,7 +148,7 @@
 
 .hours-summary::-webkit-details-marker{ display:none; }
 
-/* PANNELLO ANIMATO */
+
 .hours-panel{
   display:grid;
   grid-template-rows: 0fr;
@@ -161,7 +161,7 @@
   grid-template-rows: 1fr;
 }
 
-/* lista */
+
 .hours-list{
   list-style:none;
   margin: 0;
@@ -189,7 +189,7 @@
   min-width: 86px;
 }
 
-/* freccia */
+
 .chev{
   transition: transform .25s ease;
   opacity: .9;
@@ -198,7 +198,7 @@
   transform: rotate(180deg);
 }
 
-/* mobile */
+
 @media (max-width: 420px){
   .hours-list li{
     flex-direction:column;
@@ -209,7 +209,7 @@
   }
 }
 
-/* BUTTONS (rimangono come li avevi) */
+
 .luxury-btn{
   background:#d4b06a;
   color:#111;
@@ -226,14 +226,14 @@
   border-radius:8px;
 }
 
-/* piccoli aggiustamenti responsive */
+
 @media (max-width:420px){
   .hero-title{ font-size:28px; }
   .hero-lead{ font-size:14px; }
   .hero-image{ max-width:100%; height:220px; }
 }
 
-/* ===== ORARI: accordion custom (100% stabile) ===== */
+
 
 .hours-accordion{
   border: 1px solid rgba(255,255,255,.08);
@@ -242,7 +242,7 @@
   overflow: hidden;
 }
 
-/* “summary” custom */
+
 .hours-trigger{
   width: 100%;
   display:flex;
@@ -258,13 +258,13 @@
   text-align: left;
 }
 
-/* freccia */
+
 .hours-trigger .chev{
   transition: transform .25s ease;
   opacity: .9;
 }
 
-/* ===== PANNELLO ORARI ===== */
+
 
 .hours-panel{
   display: grid;
@@ -277,34 +277,34 @@
   overflow: hidden;
 }
 
-/* Quando aperto */
+
 .hours-panel.open{
   grid-template-rows: 1fr;
   border-top: 1px solid rgba(255,255,255,.08);
 }
 
-/* ruota la freccia quando open */
+
 .hours-accordion:has(.hours-panel.open) .chev{
   transform: rotate(180deg);
 }
 
-/* se :has non è supportato, fallback semplice */
+
 .opening-hours.hours-open .hours-trigger .chev{
   transform: rotate(180deg);
 }
 
-/* ===== LISTA ===== */
+
 
 .hours-list{
   list-style: none;
   margin: 0;
-  padding: 0; /* chiuso = zero padding */
+  padding: 0; 
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* padding SOLO quando aperto */
+
 .hours-panel.open .hours-list{
   padding: 10px 12px 12px 12px;
 }

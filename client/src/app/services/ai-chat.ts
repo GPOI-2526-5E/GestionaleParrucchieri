@@ -15,13 +15,26 @@ export interface ServiceCard {
   prezzo: number;
 }
 
+export interface ProductCard {
+  idProdotto: number;
+  nome: string;
+  descrizione: string;
+  prezzo: number;
+  marca: string;
+  formato: string;
+  categoria: string;
+  foto: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AiChatService {
+  private apiBaseUrl = 'http://localhost:3000';
+
   constructor(private http: HttpClient) {}
 
-  async send(messages: ChatMessage[]): Promise<{ reply: string; services: ServiceCard[] }> {
+  async send(messages: ChatMessage[]): Promise<{ reply: string; services: ServiceCard[]; products: ProductCard[] }> {
     const request = firstValueFrom(
-      this.http.post<{ reply?: string; services?: ServiceCard[] }>(
+      this.http.post<{ reply?: string; services?: ServiceCard[]; products?: ProductCard[] }>(
         'http://localhost:3000/api/chat',
         { messages }
       )
@@ -36,29 +49,50 @@ export class AiChatService {
 
       return {
         reply: res?.reply || 'Nessuna risposta disponibile',
-        services: Array.isArray(res?.services) ? res.services : []
+        services: Array.isArray(res?.services) ? res.services : [],
+        products: Array.isArray(res?.products)
+          ? res.products.map(product => ({
+              ...product,
+              foto: this.buildImageUrl(product.foto)
+            }))
+          : []
       };
     } catch (error: any) {
       console.error('AI CHAT SERVICE ERROR:', error);
 
       if (error?.message === 'TIMEOUT') {
         return {
-          reply: 'Sto impiegando troppo tempo a rispondere. Riprova tra qualche secondo 🙂',
-          services: []
+          reply: 'Sto impiegando troppo tempo a rispondere. Riprova tra qualche secondo.',
+          services: [],
+          products: []
         };
       }
 
       if (error?.status) {
         return {
           reply: `Errore server (${error.status}). Controlla il backend.`,
-          services: []
+          services: [],
+          products: []
         };
       }
 
       return {
         reply: 'Errore di connessione. Controlla che il server sia attivo.',
-        services: []
+        services: [],
+        products: []
       };
     }
+  }
+
+  private buildImageUrl(foto?: string | null): string {
+    if (!foto) {
+      return '';
+    }
+
+    if (/^https?:\/\//i.test(foto)) {
+      return foto;
+    }
+
+    return `${this.apiBaseUrl}${foto.startsWith('/') ? '' : '/'}${foto}`;
   }
 }

@@ -10,15 +10,14 @@
   top: 0;
   right: 0;
   height: 100vh;
-  width: min(420px, 92vw);
+  width: min(430px, 92vw);
   max-width: 100%;
-  background: rgba(15,15,15,.92);
+  background: rgba(15,15,15,.94);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-left: 1px solid rgba(212,176,106,.22);
   box-shadow: -20px 0 60px rgba(0,0,0,.5);
   z-index: 2100;
-
   transform: translateX(105%);
   transition: transform .28s ease;
   display: flex;
@@ -33,22 +32,51 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 14px;
   padding: 18px 16px;
   border-bottom: 1px solid rgba(212,176,106,.18);
   flex-shrink: 0;
 }
 
+.ai-header-copy{
+  min-width: 0;
+}
+
 .ai-title{
-  color:#fff;
-  font-weight:600;
-  letter-spacing:.5px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: .5px;
 }
 
 .ai-subtitle{
-  color:#bbb;
-  font-size:12px;
-  margin-top:4px;
-  line-height: 1.4;
+  color: #bbb;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+.ai-reset{
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(212,176,106,.28);
+  background: linear-gradient(180deg, rgba(212,176,106,.14), rgba(212,176,106,.06));
+  color: #f3dfb1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.ai-reset:hover:not(:disabled){
+  background: linear-gradient(180deg, rgba(212,176,106,.22), rgba(212,176,106,.10));
+  border-color: rgba(212,176,106,.48);
+  transform: translateY(-1px);
+}
+
+.ai-reset:disabled{
+  opacity: .55;
+  cursor: not-allowed;
 }
 
 .ai-close{
@@ -63,19 +91,17 @@
 
 .ai-close:hover{
   opacity: 1;
-  color:#d4b06a;
+  color: #d4b06a;
 }
 
-/* BODY */
 .ai-body{
-  padding:16px;
-  flex:1;
-  overflow:auto;
+  padding: 16px;
+  flex: 1;
+  overflow: auto;
   min-height: 0;
   scroll-behavior: smooth;
 }
 
-/* Scrollbar (Chrome/Edge) */
 .ai-body::-webkit-scrollbar{
   width: 10px;
 }
@@ -90,24 +116,23 @@
   background: rgba(212,176,106,.25);
 }
 
-/* FOOTER */
 .ai-footer{
-  display:flex;
-  gap:10px;
-  padding:12px 16px;
-  border-top:1px solid rgba(212,176,106,.18);
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(212,176,106,.18);
   flex-shrink: 0;
 }
 
 .ai-input{
-  flex:1;
+  flex: 1;
   min-width: 0;
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(212,176,106,.18);
   border-radius: 10px;
   padding: 10px 12px;
-  color:#fff;
-  outline:none;
+  color: #fff;
+  outline: none;
 }
 
 .ai-input::placeholder{
@@ -120,42 +145,24 @@
 }
 
 .ai-send{
-  background:#d4b06a;
-  color:#111;
-  border:0;
-  border-radius:10px;
-  padding:10px 14px;
-  font-weight:600;
-  cursor:pointer;
+  background: #d4b06a;
+  color: #111;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
   flex-shrink: 0;
 }
 
 .ai-send:hover{
-  background:#e6c27a;
+  background: #e6c27a;
 }
 
 .ai-send:disabled{
   opacity: .65;
   cursor: not-allowed;
 }
-
-/* bottone "Chiedi all'IA" come un link identico agli altri */
-.ai-nav-btn{
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  box-shadow: none !important;
-}
-
-/* ===== STATO VUOTO ===== */
 
 .ai-empty{
   border: 1px dashed rgba(212,176,106,.22);
@@ -166,30 +173,29 @@
 }
 
 .ai-empty-title{
-  color:#fff;
-  font-weight:600;
-  letter-spacing:.2px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: .2px;
   margin-bottom: 6px;
 }
 
 .ai-empty-subtitle{
-  color:#bbb;
+  color: #bbb;
   font-size: 12px;
   line-height: 1.4;
 }
 
-/* Chip suggerimenti */
 .ai-suggestions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 12px;
 }
 
 .ai-chip{
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(212,176,106,.22);
-  color:#fff;
+  color: #fff;
   padding: 8px 12px;
   border-radius: 999px;
   font-size: 12px;
@@ -203,22 +209,20 @@
   transform: translateY(-1px);
 }
 
-/* ===== MESSAGGI CHAT ===== */
-
 .ai-message{
   max-width: 80%;
   padding: 12px 16px;
   border-radius: 16px;
   margin-bottom: 12px;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.45;
   white-space: pre-line;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 
 .ai-message-bot{
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,.06);
   border: 1px solid rgba(212,176,106,.2);
   color: #fff;
   border-top-left-radius: 4px;
@@ -231,44 +235,54 @@
   border-top-right-radius: 4px;
 }
 
-/* Typing */
-.ai-typing{
-  color:#bbb;
-  font-size:12px;
-  margin-top: 8px;
+.ai-result-section{
+  margin-top: 18px;
+  margin-bottom: 14px;
 }
 
-/* Mobile */
-@media (max-width: 640px){
-  .ai-drawer{
-    width: 100vw;
-  }
-
-  .ai-message{
-    max-width: 88%;
-  }
-
-  .ai-footer{
-    padding: 12px;
-  }
+.ai-section-head{
+  margin-bottom: 12px;
 }
 
-/* ===== CARD SERVIZI ===== */
+.ai-section-kicker{
+  color: #d4b06a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.ai-section-title{
+  margin-top: 4px;
+  color: #f7f1e5;
+  font-size: 14px;
+  line-height: 1.4;
+}
 
 .ai-services{
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 8px;
-  margin-bottom: 12px;
 }
 
 .ai-service-card{
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(212,176,106,.14), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
   border: 1px solid rgba(212,176,106,.22);
   border-radius: 16px;
   padding: 14px;
   box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
+
+.ai-service-card::before{
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, rgba(212,176,106,.82), rgba(212,176,106,.14));
 }
 
 .ai-service-top{
@@ -308,4 +322,198 @@
   border: 1px solid rgba(212,176,106,.18);
   color: #f0d8a4;
   font-size: 12px;
+}
+
+.ai-products{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-product-card{
+  position: relative;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 15px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(212,176,106,.22);
+  background:
+    radial-gradient(circle at top right, rgba(212,176,106,.16), transparent 36%),
+    linear-gradient(180deg, rgba(27,27,27,.94), rgba(19,19,19,.98));
+  box-shadow: 0 16px 36px rgba(0,0,0,.24);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.ai-product-card::after{
+  content: "";
+  position: absolute;
+  inset: auto 14px 0 14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,176,106,.18), transparent);
+}
+
+.ai-product-card:hover{
+  transform: translateY(-2px);
+  border-color: rgba(212,176,106,.34);
+  box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+.ai-product-card:focus-visible{
+  outline: 2px solid rgba(212,176,106,.58);
+  outline-offset: 2px;
+}
+
+.ai-product-media{
+  width: 112px;
+  height: 112px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top, rgba(212,176,106,.14), transparent 58%),
+    rgba(255,255,255,.04);
+  border: 1px solid rgba(212,176,106,.14);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.ai-product-media-empty{
+  background:
+    radial-gradient(circle at top, rgba(212,176,106,.12), transparent 58%),
+    linear-gradient(180deg, rgba(34,34,34,.92), rgba(24,24,24,.98));
+}
+
+.ai-product-media img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+  display: block;
+}
+
+.ai-product-media-fallback{
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212,176,106,.10);
+  border: 1px solid rgba(212,176,106,.18);
+  color: #f3ddb0;
+}
+
+.ai-product-media-fallback svg{
+  width: 44px;
+  height: 44px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ai-product-content{
+  min-width: 0;
+}
+
+.ai-product-top{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ai-product-brand{
+  color: #d4b06a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.ai-product-name{
+  color: #fffaf0;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+  max-width: 100%;
+}
+
+.ai-product-price{
+  color: #f0c86d;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(212,176,106,.10);
+  border: 1px solid rgba(212,176,106,.18);
+}
+
+.ai-product-pills{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.ai-product-pill{
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(212,176,106,.16);
+  color: #ebd7aa;
+  font-size: 11px;
+}
+
+.ai-product-desc{
+  margin-top: 8px;
+  color: #d6d2ca;
+  font-size: 13px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.ai-typing{
+  color: #bbb;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+@media (max-width: 640px){
+  .ai-drawer{
+    width: 100vw;
+  }
+
+  .ai-message{
+    max-width: 88%;
+  }
+
+  .ai-footer{
+    padding: 12px;
+  }
+
+  .ai-product-card{
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .ai-product-media{
+    width: 100%;
+    height: 148px;
+  }
 }

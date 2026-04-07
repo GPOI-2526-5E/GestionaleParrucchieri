@@ -45,8 +45,7 @@ export class ProdottoService {
           descrizione: p.descrizione,
           prezzoRivendita: Number(p.prezzoRivendita ?? p.prezzo ?? 0),
           prezzoAcquisto: Number(p.prezzoAcquisto ?? 0),
-          // Manteniamo anche `prezzo` come alias di compatibilita'
-          // per i componenti che mostrano il prezzo vendita.
+          // `prezzo` resta disponibile per i componenti che usano ancora il nome precedente.
           prezzo: Number(p.prezzoRivendita ?? p.prezzo ?? 0),
           qta: Number(p.quantitaMagazzino),
           categoria: p.categoria,
@@ -73,10 +72,7 @@ export class ProdottoService {
       return url;
     }
 
-    // Uniformiamo il canvas per i packshot:
-    // 1. `e_trim` riduce i margini inutili attorno al prodotto
-    // 2. `c_pad,w_900,h_900` rimette tutto dentro un quadrato coerente
-    // Così bottiglie e vasetti risultano molto più allineati nel catalogo.
+    // Uniforma il canvas dei packshot senza perdere il ritaglio del prodotto.
     return url.replace(
       '/image/upload/',
       '/image/upload/e_trim/c_pad,w_900,h_900/'
@@ -171,3 +167,4 @@ export class ProdottoService {
     return this.http.post('http://localhost:3000/api/products/update-stock', cartItems);
   }
 }
+

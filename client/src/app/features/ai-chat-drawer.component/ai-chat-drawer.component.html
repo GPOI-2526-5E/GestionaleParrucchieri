@@ -2,49 +2,40 @@
 
 <aside class="ai-drawer" [class.open]="chatUi.isOpen()" aria-label="Chat AI">
   <header class="ai-header">
-    <div>
+    <div class="ai-header-copy">
       <div class="ai-title">Assistente AI</div>
-      <div class="ai-subtitle">Consigli su taglio, colore, trattamenti e prodotti</div>
+      <div class="ai-subtitle">Consigli sui servizi del salone e sui prodotti disponibili sul sito</div>
+      <button class="ai-reset" type="button" (click)="startNewConversation()" [disabled]="isSending">
+        Nuova conversazione
+      </button>
     </div>
-    <button class="ai-close" type="button" (click)="close()" aria-label="Chiudi">✕</button>
+
+    <button class="ai-close" type="button" (click)="close()" aria-label="Chiudi">&times;</button>
   </header>
 
   <section class="ai-body">
-
     <div class="ai-empty" *ngIf="messages.length === 0 && !isSending">
-      <div class="ai-empty-title">Inizia a scrivere con l’AI ✨</div>
+      <div class="ai-empty-title">Inizia a scrivere con l'assistente</div>
 
       <div class="ai-empty-subtitle">
-        Esempi: “Che taglio mi consigli?” oppure “Vorrei un balayage, come funziona?”
+        Esempi: "Che servizi offrite?" oppure "Mostrami alcuni prodotti del sito"
       </div>
 
       <div class="ai-suggestions">
-        <button
-          type="button"
-          class="ai-chip"
-          (click)="quick('Che servizi offrite?')">
+        <button type="button" class="ai-chip" (click)="quick('Che servizi offrite?')">
           Servizi
         </button>
 
-        <button
-          type="button"
-          class="ai-chip"
-          (click)="quick('Consigliami un taglio adatto ai miei capelli')">
+        <button type="button" class="ai-chip" (click)="quick('Consigliami un taglio adatto ai miei capelli')">
           Taglio
         </button>
 
-        <button
-          type="button"
-          class="ai-chip"
-          (click)="quick('Vorrei un balayage: come si mantiene?')">
-          Balayage
+        <button type="button" class="ai-chip" (click)="quick('Che servizi colore offrite e quale potrebbe essere il piu adatto?')">
+          Colore
         </button>
 
-        <button
-          type="button"
-          class="ai-chip"
-          (click)="quick('Che trattamento consigli per capelli rovinati?')">
-          Trattamenti
+        <button type="button" class="ai-chip" (click)="quick('Mostrami alcuni prodotti del sito')">
+          Prodotti
         </button>
       </div>
     </div>
@@ -57,31 +48,80 @@
       {{ m.content }}
     </div>
 
-    <!-- card servizi -->
-    <div class="ai-services" *ngIf="services.length > 0">
-      <div
-        class="ai-service-card"
-        *ngFor="let s of services; trackBy: trackByService">
+    <section class="ai-result-section" *ngIf="services.length > 0">
+      <div class="ai-section-head">
+        <div class="ai-section-kicker">Servizi</div>
+        <div class="ai-section-title">Servizi del salone collegati alla tua richiesta</div>
+      </div>
 
-        <div class="ai-service-top">
-          <div class="ai-service-name">{{ s.nome }}</div>
-          <div class="ai-service-price" *ngIf="s.prezzo != null">€ {{ s.prezzo }}</div>
-        </div>
+      <div class="ai-services">
+        <div class="ai-service-card" *ngFor="let s of services; trackBy: trackByService">
+          <div class="ai-service-top">
+            <div class="ai-service-name">{{ s.nome }}</div>
+            <div class="ai-service-price" *ngIf="s.prezzo != null">&euro; {{ s.prezzo }}</div>
+          </div>
 
-        <div class="ai-service-desc" *ngIf="s.descrizione">
-          {{ s.descrizione }}
-        </div>
+          <div class="ai-service-desc" *ngIf="s.descrizione">
+            {{ s.descrizione }}
+          </div>
 
-        <div class="ai-service-meta" *ngIf="s.durata">
-          Durata: {{ s.durata }} min
+          <div class="ai-service-meta" *ngIf="s.durata">
+            Durata: {{ s.durata }} min
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="ai-result-section" *ngIf="products.length > 0">
+      <div class="ai-section-head">
+        <div class="ai-section-kicker">Prodotti</div>
+        <div class="ai-section-title">Prodotti del sito che possono fare al caso tuo</div>
+      </div>
+
+      <div class="ai-products">
+        <button
+          type="button"
+          class="ai-product-card"
+          *ngFor="let p of products; trackBy: trackByProduct"
+          (click)="openProduct(p)">
+          <div class="ai-product-media" [class.ai-product-media-empty]="!p.foto">
+            <img *ngIf="p.foto" [src]="p.foto" [alt]="p.nome" />
+            <div class="ai-product-media-fallback" *ngIf="!p.foto">
+              <svg viewBox="0 0 64 64" aria-hidden="true">
+                <rect x="16" y="14" width="32" height="36" rx="8"></rect>
+                <path d="M24 24h16"></path>
+                <path d="M24 31h16"></path>
+                <path d="M24 38h10"></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="ai-product-content">
+            <div class="ai-product-top">
+              <div>
+                <div class="ai-product-brand" *ngIf="p.marca">{{ p.marca }}</div>
+                <div class="ai-product-name">{{ p.nome }}</div>
+              </div>
+
+              <div class="ai-product-price" *ngIf="p.prezzo != null">&euro; {{ p.prezzo }}</div>
+            </div>
+
+            <div class="ai-product-pills">
+              <span class="ai-product-pill" *ngIf="p.formato">{{ p.formato }}</span>
+              <span class="ai-product-pill" *ngIf="p.categoria">{{ p.categoria }}</span>
+            </div>
+
+            <div class="ai-product-desc" *ngIf="p.descrizione">
+              {{ p.descrizione }}
+            </div>
+          </div>
+        </button>
+      </div>
+    </section>
 
     <div class="ai-typing" *ngIf="isSending">
-      Sto scrivendo…
+      Sto scrivendo...
     </div>
-
   </section>
 
   <footer class="ai-footer">
@@ -90,13 +130,9 @@
       [(ngModel)]="inputText"
       (keydown.enter)="!isSending && send()"
       [disabled]="isSending"
-      placeholder="Scrivi un messaggio…" />
+      placeholder="Scrivi un messaggio..." />
 
-    <button
-      class="ai-send"
-      type="button"
-      (click)="send()"
-      [disabled]="isSending">
+    <button class="ai-send" type="button" (click)="send()" [disabled]="isSending">
       Invia
     </button>
   </footer>

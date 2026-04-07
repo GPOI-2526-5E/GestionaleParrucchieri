@@ -141,7 +141,7 @@
   font-weight: 700;
 }
 
-/* ===== CUSTOM DROPDOWN ===== */
+
 
 .products-filter {
   position: relative;
@@ -292,7 +292,7 @@
   border-color: rgba(212, 176, 106, 0.14);
 }
 
-/* ===== SCROLLBAR ===== */
+
 
 .dropdown-list::-webkit-scrollbar {
   width: 6px;
@@ -311,7 +311,7 @@
   background: rgba(212, 176, 106, 0.5);
 }
 
-/* ===== LOADING ===== */
+
 
 .products-loading {
   text-align: center;
@@ -338,7 +338,7 @@
   height: 3rem;
 }
 
-/* ===== EMPTY ===== */
+
 
 .products-empty {
   text-align: center;
@@ -366,7 +366,7 @@
   line-height: 1.6;
 }
 
-/* ===== CART TOAST FIXED ===== */
+
 
 .cart-toast-container {
   position: fixed;
@@ -464,7 +464,7 @@
   }
 }
 
-/* ===== RESPONSIVE ===== */
+
 
 @media (max-width: 768px) {
   .products-section {

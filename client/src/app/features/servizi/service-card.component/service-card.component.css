@@ -37,13 +37,7 @@
   pointer-events: none;
 }
 
-/* .service-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(212, 176, 106, 0.42);
-  box-shadow:
-    0 22px 46px rgba(0, 0, 0, 0.42),
-    0 8px 18px rgba(212, 176, 106, 0.08);
-} */
+
 
 .service-card-body {
   display: flex;
