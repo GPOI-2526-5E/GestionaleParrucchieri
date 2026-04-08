@@ -9,7 +9,27 @@
         </div>
     </div>
 
-    <img class="product-image" [src]="product.foto" [alt]="product.nome">
+    <img
+        *ngIf="hasProductImage"
+        class="product-image"
+        [src]="product.foto"
+        [alt]="product.nome"
+        (error)="onImageError()">
+
+    <div *ngIf="!hasProductImage" class="product-image product-image-fallback" aria-hidden="true">
+        <div class="product-fallback-badge">
+            {{ product.marca || 'Prodotto' }}
+        </div>
+
+        <div class="product-fallback-icon">
+            <span class="product-fallback-mark"></span>
+        </div>
+
+        <div class="product-fallback-meta">
+            <span class="product-fallback-name">{{ product.nome }}</span>
+            <span class="product-fallback-category">{{ product.categoria }}</span>
+        </div>
+    </div>
 
     <div class="product-card-body">
 

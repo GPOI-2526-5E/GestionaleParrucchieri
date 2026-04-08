@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 
 import { Prodotto } from '../../../services/prodotto';
 import { CurrencyPipe } from '@angular/common';
@@ -12,17 +12,32 @@ import { CommonModule } from '@angular/common';
   templateUrl: './product-card.component.html',
   styleUrls: ['./product-card.component.css']
 })
-export class ProductCardComponent {
+export class ProductCardComponent implements OnChanges {
 
   @Input() product!: Prodotto;
   @Output() addProductToCart = new EventEmitter<Prodotto>();
 
+  imageUnavailable = false;
   showError = false;
   shakeAnimation = false;
   errorMessage = '';
   private alertTimeout: any;
 
   constructor(private cdr: ChangeDetectorRef) { }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['product']) {
+      this.imageUnavailable = false;
+    }
+  }
+
+  get hasProductImage(): boolean {
+    return !!this.product?.foto?.trim() && !this.imageUnavailable;
+  }
+
+  onImageError() {
+    this.imageUnavailable = true;
+  }
 
   addToCart() {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
