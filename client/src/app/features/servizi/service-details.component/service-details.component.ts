@@ -2,13 +2,12 @@ import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
-import { AiChatDrawerComponent } from '../../ai-chat-drawer.component/ai-chat-drawer.component';
 import { ServiziService, Servizio } from '../../../services/servizio';
 
 @Component({
   selector: 'app-service-details',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, AiChatDrawerComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, RouterLink],
   templateUrl: './service-details.component.html',
   styleUrls: ['./service-details.component.css']
 })

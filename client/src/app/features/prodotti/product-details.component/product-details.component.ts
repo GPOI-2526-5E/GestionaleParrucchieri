@@ -8,13 +8,12 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
-import { AiChatDrawerComponent } from '../../ai-chat-drawer.component/ai-chat-drawer.component';
 import { ProdottoService, Prodotto } from '../../../services/prodotto';
 
 @Component({
   selector: 'app-product-details',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, AiChatDrawerComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, RouterLink],
   templateUrl: './product-details.component.html',
   styleUrls: ['./product-details.component.css']
 })

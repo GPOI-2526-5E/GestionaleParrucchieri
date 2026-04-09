@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { NavbarComponent } from '../navbar.component/navbar.component';
-import { AiChatDrawerComponent } from '../ai-chat-drawer.component/ai-chat-drawer.component';
 
 import { Prodotto } from '../../services/prodotto';
 import { ProdottoService } from '../../services/prodotto';
@@ -12,7 +11,7 @@ import { ProdottoService } from '../../services/prodotto';
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, AiChatDrawerComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, RouterLink],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css',
 })

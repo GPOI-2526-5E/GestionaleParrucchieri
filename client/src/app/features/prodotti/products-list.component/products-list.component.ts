@@ -12,7 +12,6 @@ import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { NavbarComponent } from '../../navbar.component/navbar.component';
-import { AiChatDrawerComponent } from '../../ai-chat-drawer.component/ai-chat-drawer.component';
 import { ProductCardComponent } from '../product-card.component/product-card.component';
 
 import { Prodotto } from '../../../services/prodotto';
@@ -25,7 +24,6 @@ import { ProdottoService } from '../../../services/prodotto';
     CommonModule,
     FormsModule,
     NavbarComponent,
-    AiChatDrawerComponent,
     ProductCardComponent
   ],
   templateUrl: './products-list.component.html',

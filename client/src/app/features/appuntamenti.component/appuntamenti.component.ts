@@ -6,7 +6,6 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import itLocale from '@fullcalendar/core/locales/it';
 import { NavbarComponent } from '../navbar.component/navbar.component';
-import { AiChatDrawerComponent } from '../ai-chat-drawer.component/ai-chat-drawer.component';
 import { FormsModule } from '@angular/forms';
 import { UtentiService } from '../../services/utentiService';
 import { Utente } from "../../models/utente.model";
@@ -21,7 +20,6 @@ import { HttpHeaders, HttpClient } from '@angular/common/http';
     CommonModule,
     FullCalendarModule,
     NavbarComponent,
-    AiChatDrawerComponent,
     FormsModule
   ],
   templateUrl: './appuntamenti.component.html',

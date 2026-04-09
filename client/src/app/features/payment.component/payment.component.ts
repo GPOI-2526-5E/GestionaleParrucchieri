@@ -4,7 +4,6 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
 import { NavbarComponent } from '../navbar.component/navbar.component';
-import { AiChatDrawerComponent } from '../ai-chat-drawer.component/ai-chat-drawer.component';
 import { Prodotto } from '../../services/prodotto';
 import { ProdottoService } from '../../services/prodotto';
 import { LockerService, LockerOption } from '../../services/locker';
@@ -21,7 +20,7 @@ L.Icon.Default.mergeOptions({
 @Component({
   selector: 'app-payment.component',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, AiChatDrawerComponent, RouterLink, FormsModule],
+  imports: [CommonModule, NavbarComponent, RouterLink, FormsModule],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.css',
 })
