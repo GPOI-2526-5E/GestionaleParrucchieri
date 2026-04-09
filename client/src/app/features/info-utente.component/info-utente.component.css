@@ -440,6 +440,10 @@
   gap: 22px;
 }
 
+.editor-form-grid.single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .content-panel,
 .editor-main-panel,
 .editor-side-panel {
