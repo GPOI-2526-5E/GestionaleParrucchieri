@@ -69,6 +69,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   addToCart(): void {
     if (!this.product) return;
 
+    // Controllo lato client del limite quantità: evita UX incoerente prima della chiamata backend.
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existing = cart.find((p: Prodotto) => p.idProdotto === this.product!.idProdotto);
     const qty = existing ? (existing.quantita || 1) : 0;
@@ -101,6 +102,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
 
     clearTimeout(this.alertTimeout);
 
+    // Chiusura in due fasi: prima trigger CSS di uscita, poi rimozione dal DOM.
     this.alertTimeout = setTimeout(() => {
       this.ngZone.run(() => {
         this.isClosing = true;
@@ -118,6 +120,8 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
   }
 
   showErrorAlert(msg: string) {
+    // Forziamo il passaggio in NgZone perché il flusso include timer/animazioni e vogliamo
+    // garantire il refresh UI in modo prevedibile.
     this.ngZone.run(() => {
       this.errorMessage = msg;
       this.showError = true;

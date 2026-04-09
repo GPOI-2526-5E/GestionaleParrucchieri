@@ -126,6 +126,8 @@ export class AppuntamentiComponent implements OnInit {
     this.appuntamentoService.getAppuntamenti(this.selectedOperator)
       .subscribe({
         next: (eventi) => {
+          // Mostriamo il titolo solo per gli appuntamenti del cliente loggato:
+          // gli altri slot restano prenotati ma senza dettagli sensibili.
           this.events = eventi.map(a => {
             const isMyAppointment = a.idCliente && this.user?.idUtente && a.idCliente === this.user.idUtente;
             return {

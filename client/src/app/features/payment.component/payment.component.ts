@@ -84,6 +84,8 @@ export class PaymentComponent implements AfterViewChecked {
   }
 
   ngAfterViewChecked() {
+    // Il container mappa compare solo con spedizione locker: inizializziamo qui una sola volta
+    // quando il nodo DOM esiste davvero.
     if (
       this.shippingMethod === 'locker' &&
       !this.mapInitialized &&
@@ -92,6 +94,7 @@ export class PaymentComponent implements AfterViewChecked {
       this.initMap();
       this.loadLockers();
 
+      // Leaflet può calcolare male le dimensioni appena montato: forziamo il resize dopo il render.
       setTimeout(() => {
         this.map.invalidateSize();
       }, 200);
@@ -232,7 +235,8 @@ export class PaymentComponent implements AfterViewChecked {
   loadLockers() {
     if (!this.map) return;
 
-    // Il popup Leaflet richiama questa funzione dal markup generato lato client.
+    // Il bottone nel popup usa onclick HTML: esponiamo una callback globale per collegare il click
+    // alla selezione locker nel componente Angular.
     (window as any).selectLockerFromMap = (lockerId: string) => {
       const locker = this.lockers.find(l => l.id === lockerId);
       if (locker) {
@@ -289,6 +293,8 @@ export class PaymentComponent implements AfterViewChecked {
     this.updateTotal();
 
     if (this.shippingMethod !== 'locker') {
+      // Uscendo dalla modalità locker smontiamo la mappa per evitare istanze/marker duplicati
+      // al prossimo ingresso.
       this.mapInitialized = false;
 
       if (this.map) {

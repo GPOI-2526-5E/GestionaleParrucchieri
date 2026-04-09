@@ -79,6 +79,8 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   }
 
   private forceUiUpdate(): void {
+    // Strategia difensiva per UI asincrona: detectChanges immediato + tick globale
+    // + passaggio nel frame successivo per sincronizzare dropdown/alert animati.
     this.cdr.detectChanges();
     this.appRef.tick();
 
@@ -119,6 +121,8 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   onAddToCart(product: Prodotto): void {
     this.prodottiService.addProductToCart(product);
 
+    // Se l'utente aggiunge più volte lo stesso prodotto mentre il toast è visibile,
+    // incrementiamo il contatore invece di riaprire un nuovo alert.
     const sameProductAlertVisible =
       this.showCartAlert && this.currentAlertProductId === product.idProdotto;
 
