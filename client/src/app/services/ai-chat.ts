@@ -89,10 +89,6 @@ export class AiChatService {
       return '';
     }
 
-    if (/^https?:\/\//i.test(foto)) {
-      return foto;
-    }
-
-    return `${this.apiBaseUrl}${foto.startsWith('/') ? '' : '/'}${foto}`;
+    return /^https?:\/\//i.test(foto) ? foto : '';
   }
 }
