@@ -1,7 +1,5 @@
 import express from "express";
-import fileUpload from "express-fileupload";
 import cors from "cors";
-import fs from "fs";
 import cloudinary from "cloudinary";
 import bcrypt from "bcrypt";
 import passport from "./config/passport";
@@ -34,7 +32,6 @@ app.use("/", (req, res, next) => {
 });
 
 app.use("/", express.static("./static"));
-app.use("/uploads", express.static("./uploads"));
 
 app.use(
   cors({
@@ -45,17 +42,6 @@ app.use(
 
 app.use(express.json());
 app.use(passport.initialize());
-
-app.use(
-  fileUpload({
-    useTempFiles: true,
-    tempFileDir: "./tmp/",
-  })
-);
-const uploadDir = "./uploads";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
 app.get("/api/imgParrucchieri", async (req, res) => {
   try {
     const result = await cloudinary.v2.search
