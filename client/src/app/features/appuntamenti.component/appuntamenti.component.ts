@@ -10,8 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { UtentiService } from '../../services/utentiService';
 import { Utente } from "../../models/utente.model";
 import { AppuntamentoService } from "../../services/appuntamentoService";
-import { AuthService } from '../../services/auth';
-import { HttpHeaders, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-appuntamenti',
@@ -75,7 +74,6 @@ export class AppuntamentiComponent implements OnInit {
   constructor(
     private utenteService: UtentiService,
     private appuntamentoService: AppuntamentoService,
-    private auth: AuthService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) { }
@@ -98,9 +96,7 @@ export class AppuntamentiComponent implements OnInit {
   }
 
   getLoggedUser() {
-    const headers = this.getAuthHeaders();
-
-    this.http.get<any>(`${this.api}/me`, { headers })
+    this.http.get<any>(`${this.api}/me`)
       .subscribe({
         next: (res) => {
           if (!res) return;
@@ -211,10 +207,5 @@ export class AppuntamentiComponent implements OnInit {
     }
 
     this.closeOperatorSelect();
-  }
-
-  private getAuthHeaders(): HttpHeaders {
-    const token = this.auth.getToken();
-    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 }

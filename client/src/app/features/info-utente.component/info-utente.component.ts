@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
   OnInit
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { IntlTelInputComponent } from 'intl-tel-input/angularWithUtils';
 import 'intl-tel-input/styles';
@@ -118,29 +118,11 @@ export class InfoUtenteComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private auth: AuthService,
-    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    if (!this.auth.isLoggedIn()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
     this.loadUserData();
-  }
-
-  private getAuthHeaders(): HttpHeaders | null {
-    const token = this.auth.getToken();
-
-    if (!token) {
-      return null;
-    }
-
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
   }
 
   private resetCompletionPasswordFields(): void {
@@ -208,17 +190,7 @@ export class InfoUtenteComponent implements OnInit {
     this.successMessage = '';
     this.cdr.detectChanges();
 
-    const headers = this.getAuthHeaders();
-
-    if (!headers) {
-      this.isLoading = false;
-      this.errorMessage = 'Sessione non valida. Effettua di nuovo il login.';
-      this.cdr.detectChanges();
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    this.http.get<any>(`${this.api}/me`, { headers }).subscribe({
+    this.http.get<any>(`${this.api}/me`).subscribe({
       next: (res) => {
         if (!res) {
           this.errorMessage = 'Il server non ha restituito dati utente.';
@@ -416,16 +388,6 @@ export class InfoUtenteComponent implements OnInit {
       return;
     }
 
-    const headers = this.getAuthHeaders();
-
-    if (!headers) {
-      this.changePasswordError =
-        'Sessione non valida. Effettua di nuovo il login.';
-      this.cdr.detectChanges();
-      this.router.navigate(['/login']);
-      return;
-    }
-
     this.isChangingPassword = true;
     this.cdr.detectChanges();
 
@@ -435,8 +397,7 @@ export class InfoUtenteComponent implements OnInit {
         currentPassword: this.currentPasswordChange.trim(),
         newPassword: this.newPasswordChange.trim(),
         confirmNewPassword: this.confirmNewPasswordChange.trim()
-      },
-      { headers }
+      }
     ).subscribe({
       next: (res: any) => {
         this.isChangingPassword = false;
@@ -508,15 +469,6 @@ export class InfoUtenteComponent implements OnInit {
       }
     }
 
-    const headers = this.getAuthHeaders();
-
-    if (!headers) {
-      this.errorMessage = 'Sessione non valida. Effettua di nuovo il login.';
-      this.cdr.detectChanges();
-      this.router.navigate(['/login']);
-      return;
-    }
-
     this.isSaving = true;
     this.cdr.detectChanges();
 
@@ -537,7 +489,7 @@ export class InfoUtenteComponent implements OnInit {
       payload.password = this.password.trim();
     }
 
-    this.http.put(`${this.api}/me`, payload, { headers }).subscribe({
+    this.http.put(`${this.api}/me`, payload).subscribe({
       next: (res: any) => {
         this.isSaving = false;
         this.successMessage = wasPasswordRequired
@@ -568,7 +520,6 @@ export class InfoUtenteComponent implements OnInit {
 
   logout(): void {
     this.auth.logout();
-    this.router.navigate(['/login']);
   }
 
   formatDate(date: string | null): string {

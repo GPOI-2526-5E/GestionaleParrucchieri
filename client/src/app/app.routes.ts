@@ -13,6 +13,7 @@ import { InfoUtenteComponent } from './features/info-utente.component/info-utent
 import { AppuntamentiComponent } from './features/appuntamenti.component/appuntamenti.component';
 import { PasswordDimenticataComponent } from './features/password-dimenticata.component/password-dimenticata.component';
 import { ResetPasswordComponent } from './features/reset-password.component/reset-password.component';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -26,8 +27,8 @@ export const routes: Routes = [
     { path: 'payment-success', component: PaymentSuccessComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'account', component: InfoUtenteComponent },
-    { path: 'appointments', component: AppuntamentiComponent },
+    { path: 'account', component: InfoUtenteComponent, canActivate: [authGuard] },
+    { path: 'appointments', component: AppuntamentiComponent, canActivate: [authGuard] },
     { path: 'forgot-password', component: PasswordDimenticataComponent },
     { path: 'reset-password', component: ResetPasswordComponent },
     { path: '**', redirectTo: '/home' }
