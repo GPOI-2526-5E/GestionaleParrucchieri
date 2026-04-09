@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { IntlTelInputComponent } from 'intl-tel-input/angularWithUtils';
-import 'intl-tel-input/styles';
 
 import { AuthService } from '../../services/auth';
 import { NavbarComponent } from '../navbar.component/navbar.component';
