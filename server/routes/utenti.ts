@@ -36,4 +36,15 @@ router.get("/operatori", async (req: Request, res: Response) => {
   }
 });
 
+// router.get("/", async (req, res) => {
+//   try {
+//     const { data, error } = await db.from("utenti").select("*");
+//     if (error) throw error;
+//     res.json(data);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Errore server" });
+//   }
+// });
+
   export default router;

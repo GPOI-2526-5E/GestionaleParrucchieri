@@ -76,16 +76,7 @@ app.use("/api/auth", loginRoute);
 app.use("/api/auth", googleAuthRoute);
 app.use("/api/utenti", utentiRoute);
 app.use("/api/appuntamenti", appuntamentiRoute);
-app.get("/api/utenti", async (req, res) => {
-  try {
-    const { data, error } = await db.from("utenti").select("*");
-    if (error) throw error;
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Errore server" });
-  }
-});
+
 app.get("/api/servizi", async (req, res) => {
   try {
     const { data, error } = await db.from("servizi").select("*");
