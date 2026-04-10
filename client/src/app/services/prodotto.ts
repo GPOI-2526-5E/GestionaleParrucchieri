@@ -166,5 +166,11 @@ export class ProdottoService {
   updateStock(cartItems: Prodotto[]) {
     return this.http.post('http://localhost:3000/api/products/update-stock', cartItems);
   }
-}
 
+  completeCheckout(cartItems: Prodotto[], total: number) {
+    return this.http.post('http://localhost:3000/api/checkout/complete', {
+      cartItems,
+      total
+    });
+  }
+}

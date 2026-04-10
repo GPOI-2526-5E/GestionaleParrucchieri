@@ -321,7 +321,7 @@ export class PaymentComponent implements AfterViewChecked {
 
     setTimeout(() => {
 
-      this.prodottoService.updateStock(this.cartItems).subscribe({
+      this.prodottoService.completeCheckout(this.cartItems, this.finalTotal).subscribe({
 
         next: () => {
 

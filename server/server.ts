@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cloudinary from "cloudinary";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import passport from "./config/passport";
 import dotenv from "dotenv";
 import { connectDatabase, db } from "./db_parrucchieri";
@@ -42,6 +43,30 @@ app.use(
 
 app.use(express.json());
 app.use(passport.initialize());
+
+function getOptionalUserIdFromRequest(req: express.Request): number | null {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token || !process.env.JWT_SECRET) {
+    return null;
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
+      userId?: number;
+    };
+
+    return decoded.userId ?? null;
+  } catch {
+    return null;
+  }
+}
 app.get("/api/imgParrucchieri", async (req, res) => {
   try {
     const result = await cloudinary.v2.search
@@ -179,7 +204,102 @@ app.post("/api/products/update-stock", async (req, res) => {
     });
   }
 });
+
+app.post("/api/checkout/complete", async (req, res) => {
+  const cartItems = Array.isArray(req.body?.cartItems) ? req.body.cartItems : [];
+  const total = Number(req.body?.total ?? 0);
+  const userId = getOptionalUserIdFromRequest(req);
+
+  if (cartItems.length === 0) {
+    return res.status(400).json({ message: "Carrello vuoto" });
+  }
+
+  if (!Number.isFinite(total) || total <= 0) {
+    return res.status(400).json({ message: "Totale non valido" });
+  }
+
+  try {
+    for (const item of cartItems) {
+      const qty = Number(item.quantita || 1);
+      const productId = Number(item.idProdotto ?? item.id);
+
+      if (!Number.isFinite(productId) || !Number.isFinite(qty) || qty <= 0) {
+        throw new Error("Prodotto o quantità non validi");
+      }
+
+      const { data: prodotto, error: productError } = await db
+        .from("prodotti")
+        .select("idProdotto, quantitaMagazzino")
+        .eq("idProdotto", productId)
+        .maybeSingle();
+
+      if (productError) throw productError;
+      if (!prodotto) throw new Error(`Prodotto ${productId} non trovato`);
+      if (prodotto.quantitaMagazzino < qty) {
+        throw new Error(`Stock insufficiente per il prodotto ${productId}`);
+      }
+    }
+
+    const now = new Date().toISOString();
+
+    const { data: vendita, error: venditaError } = await db
+      .from("vendite")
+      .insert({
+        idCliente: userId,
+        data: now,
+        totale: total,
+      })
+      .select("idVendita")
+      .single();
+
+    if (venditaError) throw venditaError;
+
+    const dettagli = cartItems.map((item: any) => ({
+      idVendita: vendita.idVendita,
+      idProdotto: Number(item.idProdotto ?? item.id),
+      quantita: Number(item.quantita || 1),
+      prezzoUnitario: Number(item.prezzo ?? item.prezzoRivendita ?? 0),
+    }));
+
+    const { error: dettagliError } = await db
+      .from("dettagliovendita")
+      .insert(dettagli);
+
+    if (dettagliError) throw dettagliError;
+
+    for (const item of cartItems) {
+      const qty = Number(item.quantita || 1);
+      const productId = Number(item.idProdotto ?? item.id);
+
+      const { data: prodotto, error: productError } = await db
+        .from("prodotti")
+        .select("quantitaMagazzino")
+        .eq("idProdotto", productId)
+        .maybeSingle();
+
+      if (productError) throw productError;
+      if (!prodotto) throw new Error(`Prodotto ${productId} non trovato`);
+
+      const { error: updateError } = await db
+        .from("prodotti")
+        .update({ quantitaMagazzino: prodotto.quantitaMagazzino - qty })
+        .eq("idProdotto", productId);
+
+      if (updateError) throw updateError;
+    }
+
+    res.status(201).json({
+      message: "Checkout completato",
+      idVendita: vendita.idVendita,
+    });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({
+      message: "Errore durante il salvataggio della vendita",
+      error: err.message,
+    });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Server attivo su http://localhost:${PORT}`);
 });
-
