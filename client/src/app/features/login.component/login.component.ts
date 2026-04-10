@@ -46,8 +46,18 @@ export class LoginComponent implements OnInit {
       });
     }
 
+    const postLoginRedirect = localStorage.getItem('postLoginRedirect');
+
     if (this.auth.isLoggedIn()) {
-      this.router.navigate(['/account']);
+      if (
+        postLoginRedirect &&
+        postLoginRedirect !== '/login' &&
+        postLoginRedirect !== '/'
+      ) {
+        this.redirectAfterLogin();
+      } else {
+        this.router.navigate(['/account']);
+      }
       return;
     }
 
@@ -106,9 +116,9 @@ export class LoginComponent implements OnInit {
   }
 
   redirectAfterLogin(): void {
-    const returnUrl = localStorage.getItem('returnUrl');
+    const returnUrl = localStorage.getItem('postLoginRedirect');
 
-    localStorage.removeItem('returnUrl');
+    localStorage.removeItem('postLoginRedirect');
 
     if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
       this.router.navigateByUrl(returnUrl);
@@ -118,9 +128,10 @@ export class LoginComponent implements OnInit {
   }
 
   goBack(): void {
-    const returnUrl = localStorage.getItem('returnUrl');
+    const returnUrl = localStorage.getItem('postLoginRedirect');
 
     if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
+      localStorage.removeItem('postLoginRedirect');
       this.router.navigateByUrl(returnUrl);
     } else {
       this.router.navigate(['/home']);
@@ -187,10 +198,10 @@ export class LoginComponent implements OnInit {
     this.alertMessage = '';
     this.isLoading = true;
 
-    const savedReturnUrl = localStorage.getItem('returnUrl');
+    const savedReturnUrl = localStorage.getItem('postLoginRedirect');
 
     if (!savedReturnUrl || savedReturnUrl === '/login' || savedReturnUrl === '/') {
-      localStorage.setItem('returnUrl', '/home');
+      localStorage.removeItem('postLoginRedirect');
     }
 
     this.cdr.detectChanges();
