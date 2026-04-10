@@ -262,7 +262,7 @@
   overflow-y: visible;
 
   padding-top: 12px;
-  
+  padding-right: 6px;
   padding-bottom: 8px;
 }
 
@@ -283,12 +283,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   width: 60px;
   height: 60px;
 
   margin-top: 4px;
-  
+  padding-right: 4px;
 }
 
 .summary-product-img-wrapper img {
@@ -308,10 +308,9 @@
 .summary-product-badge {
   position: absolute;
   top: 0;
-  right: -6px;
+  right: -4px;
 
   transform: translateY(-35%);
-  
 
   min-width: 20px;
   height: 20px;
@@ -659,4 +658,3 @@ input[type=number] {
     font-size: 26px;
   }
 }
-

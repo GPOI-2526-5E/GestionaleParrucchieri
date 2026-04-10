@@ -7,6 +7,7 @@ import { NavbarComponent } from '../navbar.component/navbar.component';
 
 import { Prodotto } from '../../services/prodotto';
 import { ProdottoService } from '../../services/prodotto';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-cart',
@@ -31,7 +32,11 @@ export class CartComponent {
     )
   );
 
-  constructor(private prodottoService: ProdottoService, private router: Router) {
+  constructor(
+    private prodottoService: ProdottoService,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.cartItems = this.prodottoService.cart;
   }
 
@@ -71,6 +76,12 @@ export class CartComponent {
       alert('Il carrello è vuoto');
       return;
     }
+
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
     localStorage.setItem('cart', JSON.stringify(cart));
     localStorage.setItem('cart_total', JSON.stringify(this.finalTotal()));
     console.log(cart);
