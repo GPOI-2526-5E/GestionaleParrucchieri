@@ -95,6 +95,8 @@ export class AppuntamentiComponent implements OnInit {
       },
       error: (err) => console.error("Errore caricando operatori:", err)
     });
+
+    
   }
 
   getLoggedUser() {
