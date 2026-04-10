@@ -4,36 +4,38 @@
   <div class="appointments-overlay"></div>
 
   <div class="appointments-section">
-    <div class="appointments-hero">
-      <p class="appointments-eyebrow">Prenota Ora</p>
-      <h1 class="appointments-title">Appuntamenti</h1>
-      <p class="appointments-subtitle">
-        Seleziona la fascia oraria desiderata per prenotare il tuo appuntamento nel salone.
-      </p>
-    </div>
+    <div class="appointments-top-row">
+      <div class="appointments-hero">
+        <p class="appointments-eyebrow">Prenotazioni</p>
+        <h1 class="appointments-title">Prenota il tuo appuntamento</h1>
+        <p class="appointments-subtitle">
+          Scegli operatore e fascia oraria. Il calendario ora e impostato per una lettura piu rapida su desktop e mobile.
+        </p>
+      </div>
 
-    <div class="appointments-select-wrapper" [class.is-open]="operatorSelectOpen">
-      <label for="operator-trigger">Seleziona Operatore</label>
-      <div class="appointments-select-field" [class.is-open]="operatorSelectOpen">
-        <button id="operator-trigger" type="button" class="appointments-select-trigger"
-          [attr.aria-expanded]="operatorSelectOpen" aria-haspopup="listbox" (click)="toggleOperatorSelect()"
-          (keydown)="onOperatorTriggerKeydown($event)">
-          <span class="appointments-select-trigger-text">
-            <span class="appointments-select-trigger-label">Operatore selezionato</span>
-            <span class="appointments-select-trigger-value">{{ selectedOperatorLabel }}</span>
-          </span>
-          <span class="appointments-select-icon" aria-hidden="true"></span>
-        </button>
+      <div class="appointments-select-wrapper" [class.is-open]="operatorSelectOpen">
+        <label for="operator-trigger">Operatore</label>
+        <div class="appointments-select-field" [class.is-open]="operatorSelectOpen">
+          <button id="operator-trigger" type="button" class="appointments-select-trigger"
+            [attr.aria-expanded]="operatorSelectOpen" aria-haspopup="listbox" (click)="toggleOperatorSelect()"
+            (keydown)="onOperatorTriggerKeydown($event)">
+            <span class="appointments-select-trigger-text">
+              <span class="appointments-select-trigger-label">Selezionato</span>
+              <span class="appointments-select-trigger-value">{{ selectedOperatorLabel }}</span>
+            </span>
+            <span class="appointments-select-icon" aria-hidden="true"></span>
+          </button>
 
-        <div class="appointments-select-panel" [class.is-open]="operatorSelectOpen">
-          <ul class="appointments-select-list" role="listbox" [attr.aria-label]="'Seleziona operatore'">
-            <li *ngFor="let o of availableOperators">
-              <button type="button" class="appointments-select-option"
-                [class.is-selected]="selectedOperator === o.idUtente" (click)="selectOperator(o.idUtente)">
-                {{ o.nome }} {{ o.cognome }}
-              </button>
-            </li>
-          </ul>
+          <div class="appointments-select-panel" [class.is-open]="operatorSelectOpen">
+            <ul class="appointments-select-list" role="listbox" [attr.aria-label]="'Seleziona operatore'">
+              <li *ngFor="let o of availableOperators">
+                <button type="button" class="appointments-select-option"
+                  [class.is-selected]="selectedOperator === o.idUtente" (click)="selectOperator(o.idUtente)">
+                  {{ o.nome }} {{ o.cognome }}
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
