@@ -28,7 +28,7 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'account', component: InfoUtenteComponent, canActivate: [authGuard] },
-    { path: 'appointments', component: AppuntamentiComponent, canActivate: [authGuard] },
+    { path: 'appointments', component: AppuntamentiComponent },
     { path: 'forgot-password', component: PasswordDimenticataComponent },
     { path: 'reset-password', component: ResetPasswordComponent },
     { path: '**', redirectTo: '/home' }

@@ -87,6 +87,7 @@ export class AppuntamentiComponent implements OnInit {
 
         if (this.operatori.length > 0) {
           this.selectedOperator = this.operatori[0].idUtente;
+          this.onOperatorChange(null);
         }
 
         this.cdr.detectChanges();
@@ -110,7 +111,11 @@ export class AppuntamentiComponent implements OnInit {
 
           this.cdr.detectChanges();
         },
-        error: (err) => console.error('Errore recupero utente:', err)
+        error: () => {
+          // Utente non loggato: il calendario resta visibile, ma senza evidenziare "Tuo appuntamento".
+          this.user = null;
+          this.cdr.detectChanges();
+        }
       });
   }
 
