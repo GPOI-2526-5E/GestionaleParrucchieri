@@ -47,6 +47,15 @@ export class AppuntamentiComponent implements OnInit {
     5: { name: 'Venerdi', intervals: [{ start: '07:00', end: '19:30' }] },
     6: { name: 'Sabato', intervals: [{ start: '07:00', end: '18:00' }] }
   };
+  readonly openingScheduleList: DailySchedule[] = [
+    this.openingSchedule[1],
+    this.openingSchedule[2],
+    this.openingSchedule[3],
+    this.openingSchedule[4],
+    this.openingSchedule[5],
+    this.openingSchedule[6],
+    this.openingSchedule[0]
+  ];
 
   selectedOperator: number | null = null;
   operatorSelectOpen = false;
@@ -71,7 +80,7 @@ export class AppuntamentiComponent implements OnInit {
     firstDay: 1,
     allDaySlot: false,
     slotMinTime: '07:00:00',
-    slotMaxTime: '22:00:00',
+    slotMaxTime: '21:30:00',
     slotDuration: '00:30:00',
     slotLabelInterval: '00:30',
     displayEventTime: true,
@@ -152,6 +161,15 @@ export class AppuntamentiComponent implements OnInit {
   }
 
   handleEventClick(arg: any) {
+    if (arg.event?.display === 'background') {
+      const startDate = arg.event.start instanceof Date
+        ? arg.event.start
+        : new Date(arg.event.start);
+
+      this.showAlert(this.getInvalidSlotMessage(startDate));
+      return;
+    }
+
     this.router.navigate(['/dettaglio-appuntamento'], {
       queryParams: {
         start: arg.event.start?.toISOString(),

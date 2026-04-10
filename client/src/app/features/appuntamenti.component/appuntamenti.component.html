@@ -9,24 +9,43 @@
         <p class="appointments-eyebrow">Prenotazioni</p>
         <h1 class="appointments-title">Prenota il tuo appuntamento</h1>
         <p class="appointments-subtitle">
-          Scegli operatore e fascia oraria. Il calendario ora e impostato per una lettura piu rapida su desktop e mobile.
+          Scegli operatore e fascia oraria. Il calendario ora e impostato per una lettura piu rapida su desktop e
+          mobile.
         </p>
+
+        <div class="appointments-hours-card">
+          <div class="appointments-hours-head">
+            <p class="appointments-hours-kicker">Orari salone</p>
+          </div>
+
+          <div class="appointments-hours-list">
+            <div class="appointments-hours-row" *ngFor="let day of openingScheduleList">
+              <span class="appointments-hours-day">{{ day.name }}</span>
+              <span class="appointments-hours-value" *ngIf="day.intervals.length; else closedDay">
+                <ng-container *ngFor="let interval of day.intervals; let last = last">
+                  {{ interval.start }} - {{ interval.end }}<span *ngIf="!last"> • </span>
+                </ng-container>
+              </span>
+              <ng-template #closedDay>
+                <span class="appointments-hours-value is-closed">Chiuso</span>
+              </ng-template>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="appointments-select-wrapper" [class.is-open]="operatorSelectOpen">
+      <div class="appointments-select-wrapper is-open">
         <label for="operator-trigger">Operatore</label>
-        <div class="appointments-select-field" [class.is-open]="operatorSelectOpen">
-          <button id="operator-trigger" type="button" class="appointments-select-trigger"
-            [attr.aria-expanded]="operatorSelectOpen" aria-haspopup="listbox" (click)="toggleOperatorSelect()"
-            (keydown)="onOperatorTriggerKeydown($event)">
+        <div class="appointments-select-field is-open">
+          <button id="operator-trigger" type="button" class="appointments-select-trigger" aria-expanded="true"
+            aria-haspopup="listbox">
             <span class="appointments-select-trigger-text">
               <span class="appointments-select-trigger-label">Selezionato</span>
               <span class="appointments-select-trigger-value">{{ selectedOperatorLabel }}</span>
             </span>
-            <span class="appointments-select-icon" aria-hidden="true"></span>
           </button>
 
-          <div class="appointments-select-panel" [class.is-open]="operatorSelectOpen">
+          <div class="appointments-select-panel is-open">
             <ul class="appointments-select-list" role="listbox" [attr.aria-label]="'Seleziona operatore'">
               <li *ngFor="let o of availableOperators">
                 <button type="button" class="appointments-select-option"
@@ -41,7 +60,8 @@
     </div>
 
     <div class="calendar-wrapper">
-      <div class="appointments-alert error appointments-calendar-alert" [class.hide]="!showError" [class.shake]="shakeAnimation">
+      <div class="appointments-alert error appointments-calendar-alert" [class.hide]="!showError"
+        [class.shake]="shakeAnimation">
         <div class="appointments-alert-icon">!</div>
         <div class="appointments-alert-text">{{ errorMessage }}</div>
       </div>
