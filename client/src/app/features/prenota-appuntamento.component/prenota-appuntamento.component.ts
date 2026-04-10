@@ -8,6 +8,16 @@ import { AppuntamentoService } from '../../services/appuntamentoService';
 import { Utente } from '../../models/utente.model';
 import { AuthService } from '../../services/auth';
 
+interface OpeningInterval {
+  start: string;
+  end: string;
+}
+
+interface DailySchedule {
+  name: string;
+  intervals: OpeningInterval[];
+}
+
 @Component({
   selector: 'app-prenota-appuntamento.component',
   imports: [
@@ -22,6 +32,15 @@ import { AuthService } from '../../services/auth';
 export class PrenotaAppuntamentoComponent implements OnInit {
   operatori: Utente[] = [];
   minDateTime = '';
+  private readonly openingSchedule: Record<number, DailySchedule> = {
+    0: { name: 'Domenica', intervals: [] },
+    1: { name: 'Lunedi', intervals: [] },
+    2: { name: 'Martedi', intervals: [{ start: '08:00', end: '12:30' }, { start: '14:00', end: '19:30' }] },
+    3: { name: 'Mercoledi', intervals: [{ start: '13:00', end: '21:30' }] },
+    4: { name: 'Giovedi', intervals: [{ start: '08:00', end: '12:30' }, { start: '14:00', end: '19:30' }] },
+    5: { name: 'Venerdi', intervals: [{ start: '07:00', end: '19:30' }] },
+    6: { name: 'Sabato', intervals: [{ start: '07:00', end: '18:00' }] }
+  };
 
   constructor(
     private utentiService: UtentiService,
@@ -83,6 +102,13 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
     if (!idCliente) {
       alert('Impossibile identificare l\'utente. Effettua di nuovo il login.');
+      return;
+    }
+
+    const validationMessage = this.validateAppointmentWindow();
+
+    if (validationMessage) {
+      alert(validationMessage);
       return;
     }
 
@@ -149,7 +175,62 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     if (Number.isNaN(hours) || Number.isNaN(minutes)) {
       return null;
     }
+    
+    return hours * 60 + minutes;
+  }
 
+  private validateAppointmentWindow(): string | null {
+    const start = new Date(this.form.dataOraInizio);
+    const end = new Date(this.form.dataOraFine);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return 'Inserisci una data di inizio e una di fine valide.';
+    }
+
+    if (start < new Date()) {
+      return 'Non puoi prenotare in un orario gia passato.';
+    }
+
+    if (end <= start) {
+      return 'L\'orario di fine deve essere successivo all\'inizio.';
+    }
+
+    if (!this.isWithinOpeningHours(start, end)) {
+      const daySchedule = this.openingSchedule[start.getDay()];
+
+      if (!daySchedule || daySchedule.intervals.length === 0) {
+        return 'Il salone e chiuso nel giorno selezionato.';
+      }
+
+      return `Puoi prenotare solo negli orari di apertura del ${daySchedule.name}.`;
+    }
+
+    return null;
+  }
+
+  private isWithinOpeningHours(start: Date, end: Date): boolean {
+    if (start.toDateString() !== end.toDateString()) {
+      return false;
+    }
+
+    const daySchedule = this.openingSchedule[start.getDay()];
+
+    if (!daySchedule || daySchedule.intervals.length === 0) {
+      return false;
+    }
+
+    const startMinutes = start.getHours() * 60 + start.getMinutes();
+    const endMinutes = end.getHours() * 60 + end.getMinutes();
+
+    return daySchedule.intervals.some((interval) => {
+      const intervalStart = this.timeToMinutes(interval.start);
+      const intervalEnd = this.timeToMinutes(interval.end);
+      return startMinutes >= intervalStart && endMinutes <= intervalEnd;
+    });
+  }
+
+  private timeToMinutes(value: string): number {
+    const [hours, minutes] = value.split(':').map(Number);
     return hours * 60 + minutes;
   }
 }

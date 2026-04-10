@@ -37,6 +37,108 @@
   padding: 128px 0 64px;
 }
 
+.appointments-alert {
+  z-index: 8;
+  width: min(520px, calc(100% - 20px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.35s ease;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.appointments-calendar-alert {
+  position: absolute;
+  top: 76px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+}
+
+.appointments-alert.error {
+  background: rgba(200, 60, 60, 0.18);
+  border: 1px solid rgba(255, 120, 120, 0.25);
+  color: #ffecec;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.appointments-alert-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.appointments-alert-text {
+  line-height: 1.5;
+}
+
+.appointments-alert.hide {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.appointments-alert:not(.hide) {
+  animation: appointmentsAlertIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes appointmentsAlertIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.appointments-alert.shake {
+  animation: appointmentsAlertShake 0.35s ease;
+}
+
+@keyframes appointmentsAlertShake {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px);
+  }
+
+  40% {
+    transform: translateX(4px);
+  }
+
+  60% {
+    transform: translateX(-3px);
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
 .appointments-top-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(330px, 390px);
@@ -220,6 +322,7 @@
 }
 
 .calendar-wrapper {
+  position: relative;
   padding: 20px;
   border-radius: 24px;
   border: 1px solid rgba(212, 176, 106, 0.2);
@@ -229,7 +332,7 @@
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
-  cursor: pointer;
+  cursor: default;
 }
 
 :host ::ng-deep .fc {
@@ -289,6 +392,27 @@
   padding: 12px 0;
 }
 
+:host ::ng-deep .fc .fc-timegrid-col-bg .fc-non-business {
+  background: transparent !important;
+}
+
+:host ::ng-deep .fc .fc-timegrid-col-bg .fc-non-business + .fc-non-business {
+  border-top: none;
+}
+
+:host ::ng-deep .fc .fc-timegrid-col.fc-day-today {
+  background-color: rgba(212, 176, 106, 0.12);
+}
+
+:host ::ng-deep .fc-bg-event.invalid-slot-background {
+  background: rgba(170, 170, 170, 0.2) !important;
+  opacity: 1 !important;
+}
+
+:host ::ng-deep .fc-bg-event.invalid-slot-background.is-past-slot {
+  background: rgba(170, 170, 170, 0.2) !important;
+}
+
 :host ::ng-deep .fc-col-header-cell-cushion {
   color: #e6c786;
   text-transform: uppercase;
@@ -303,9 +427,34 @@
   font-size: 13px;
 }
 
+:host ::ng-deep .fc .fc-timegrid-slot-label {
+  vertical-align: top;
+}
+
+:host ::ng-deep .fc .fc-timegrid-axis-frame,
+:host ::ng-deep .fc-direction-ltr .fc-timegrid-slot-label-frame {
+  align-items: flex-start;
+}
+
+:host ::ng-deep .fc .fc-timegrid-axis-cushion,
+:host ::ng-deep .fc .fc-timegrid-slot-label-cushion {
+  min-width: 54px;
+  padding-top: 0;
+  transform: translateY(-0.55em);
+}
+
 :host ::ng-deep .fc-timegrid-slot {
-  height: 44px;
+  height: 52px;
   border-bottom: 1px solid rgba(212, 176, 106, 0.06);
+}
+
+:host ::ng-deep .fc .fc-timegrid-slot-lane,
+:host ::ng-deep .fc .fc-timegrid-col-events {
+  cursor: pointer;
+}
+
+:host ::ng-deep .fc .fc-bg-event.invalid-slot-background {
+  pointer-events: none;
 }
 
 :host ::ng-deep .fc-v-event {
@@ -316,13 +465,54 @@
   transition: transform 0.15s ease, filter 0.15s ease;
 }
 
+:host ::ng-deep .fc-timegrid-event-harness {
+  margin-bottom: 0 !important;
+  inset-inline: 4px !important;
+}
+
+:host ::ng-deep .fc-timegrid-event-harness > .fc-timegrid-event {
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+:host ::ng-deep .fc-timegrid-event-harness.fc-timegrid-event-harness-inset > .fc-timegrid-event {
+  inset-inline: 0 !important;
+}
+
+:host ::ng-deep .fc-timegrid-event.fc-timegrid-event-short {
+  inset-block: 0 !important;
+}
+
+:host ::ng-deep .fc-timegrid-event {
+  margin-bottom: 0 !important;
+}
+
+:host ::ng-deep .fc-timegrid-event .fc-event-main {
+  height: 100% !important;
+  padding: 0 !important;
+}
+
+:host ::ng-deep .fc-timegrid-event.fc-timegrid-event-short .fc-event-main-frame {
+  height: 100% !important;
+  min-height: 100%;
+  padding: 8px !important;
+  justify-content: center;
+}
+
+:host ::ng-deep .fc-timegrid-event .fc-event-main-frame {
+  height: 100% !important;
+  min-height: 100% !important;
+  padding: 8px !important;
+}
+
 :host ::ng-deep .fc-v-event:hover {
   transform: translateY(-1px);
   filter: brightness(1.08);
 }
 
 :host ::ng-deep .fc-event-main {
-  padding: 8px;
   color: #fff;
 }
 
@@ -393,6 +583,6 @@
   }
 
   :host ::ng-deep .fc-timegrid-slot {
-    height: 40px;
+    height: 46px;
   }
 }

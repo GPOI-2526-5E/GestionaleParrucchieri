@@ -41,6 +41,11 @@
     </div>
 
     <div class="calendar-wrapper">
+      <div class="appointments-alert error appointments-calendar-alert" [class.hide]="!showError" [class.shake]="shakeAnimation">
+        <div class="appointments-alert-icon">!</div>
+        <div class="appointments-alert-text">{{ errorMessage }}</div>
+      </div>
+
       <full-calendar #calendar [options]="calendarOptions"></full-calendar>
     </div>
   </div>
