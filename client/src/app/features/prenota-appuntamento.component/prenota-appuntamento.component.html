@@ -50,6 +50,7 @@
                 type="datetime-local"
                 [(ngModel)]="form.dataOraInizio"
                 name="dataOraInizio"
+                [min]="minDateTime"
               />
             </div>
 
@@ -95,7 +96,7 @@
           Prenota appuntamento
         </button>
 
-        <button type="button" class="cancel-btn" routerLink="/appuntamenti">
+        <button type="button" class="cancel-btn" [routerLink]="['/appointments']">
           Annulla
         </button>
       </div>

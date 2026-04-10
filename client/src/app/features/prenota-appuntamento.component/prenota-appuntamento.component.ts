@@ -21,6 +21,7 @@ import { AuthService } from '../../services/auth';
 })
 export class PrenotaAppuntamentoComponent implements OnInit {
   operatori: Utente[] = [];
+  minDateTime = '';
 
   constructor(
     private utentiService: UtentiService,
@@ -39,6 +40,8 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.minDateTime = this.getCurrentDateTimeLocal();
+
     this.utentiService.getOperatori().subscribe({
       next: (operatori) => {
         this.operatori = operatori;
@@ -108,5 +111,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     const pad = (part: number) => part.toString().padStart(2, '0');
 
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  private getCurrentDateTimeLocal(): string {
+    return this.toDateTimeLocalValue(new Date().toISOString());
   }
 }
