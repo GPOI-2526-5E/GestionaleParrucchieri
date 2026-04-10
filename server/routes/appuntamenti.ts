@@ -1,11 +1,15 @@
 import { Router, Request, Response } from "express";
 import { db } from "../db_parrucchieri";
+import { verifyToken } from "../middleware/authMiddleware";
 
 interface Appuntamento {
   idAppuntamento: number;
   idCliente: number;
   idOperatore: number;
   dataOraInizio: string;
+  dataOraFine: string;
+  stato: string;
+  note: string | null;
 }
 
 const router = Router();
@@ -19,7 +23,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     const { data, error } = await db
       .from("appuntamenti")
-      .select("idAppuntamento, idCliente, idOperatore, dataOraInizio")
+      .select("idAppuntamento, idCliente, idOperatore, dataOraInizio, dataOraFine, stato, note")
       .eq("idOperatore", idOperatoreNum);
 
     if (error) {
@@ -29,6 +33,51 @@ router.get("/", async (req: Request, res: Response) => {
     return res.json({ appuntamenti: (data || []) as Appuntamento[] });
   } catch (err: any) {
     console.error("Errore GET /appuntamenti:", err);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+router.post("/", verifyToken, async (req: any, res: Response) => {
+  try {
+    const idCliente = req.user?.userId;
+    const {
+      idOperatore,
+      dataOraInizio,
+      dataOraFine,
+      stato,
+      note
+    } = req.body;
+
+    if (!idCliente) {
+      return res.status(401).json({ message: "Utente non autenticato" });
+    }
+
+    if (!idOperatore || !dataOraInizio || !dataOraFine) {
+      return res.status(400).json({
+        message: "idOperatore, dataOraInizio e dataOraFine sono obbligatori"
+      });
+    }
+
+    const { data, error } = await db
+      .from("appuntamenti")
+      .insert({
+        idCliente,
+        idOperatore,
+        dataOraInizio,
+        dataOraFine,
+        stato: stato || "prenotato",
+        note: note || null
+      })
+      .select("idAppuntamento, idCliente, idOperatore, dataOraInizio, dataOraFine, stato, note")
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return res.status(201).json(data as Appuntamento);
+  } catch (err: any) {
+    console.error("Errore POST /appuntamenti:", err);
     return res.status(500).json({ message: err.message });
   }
 });

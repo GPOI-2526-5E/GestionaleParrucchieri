@@ -11,6 +11,7 @@ import { UtentiService } from '../../services/utentiService';
 import { Utente } from "../../models/utente.model";
 import { AppuntamentoService } from "../../services/appuntamentoService";
 import { HttpClient } from '@angular/common/http';
+import { Route, Router } from '@angular/router';
 
 @Component({
   selector: 'app-appuntamenti',
@@ -54,6 +55,8 @@ export class AppuntamentiComponent implements OnInit {
     nowIndicator: true,
     stickyHeaderDates: true,
     selectable: true,
+    dateClick: this.handleDateClick.bind(this),
+    eventClick: this.handleEventClick.bind(this),
     eventOverlap: false,
     slotEventOverlap: false,
     eventMinHeight: 40,
@@ -76,7 +79,8 @@ export class AppuntamentiComponent implements OnInit {
     private utenteService: UtentiService,
     private appuntamentoService: AppuntamentoService,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -96,36 +100,52 @@ export class AppuntamentiComponent implements OnInit {
       error: (err) => console.error("Errore caricando operatori:", err)
     });
 
-    
+
+  }
+
+  handleDateClick(arg: any) {
+    //console.log(arg.date);
+    this.router.navigate(['/prenotazione'], {
+      queryParams: { data: arg.dateStr }
+    });
+  }
+
+  handleEventClick(arg: any) {
+    this.router.navigate(['/dettaglio-appuntamento'], {
+      queryParams: {
+        start: arg.event.start?.toISOString(),
+        end: arg.event.end?.toISOString()
+      }
+    })
   }
 
   getLoggedUser() {
-    this.http.get<any>(`${this.api}/me`)
-      .subscribe({
-        next: (res) => {
-          if (!res) return;
+      this.http.get<any>(`${this.api}/me`)
+        .subscribe({
+          next: (res) => {
+            if (!res) return;
 
-          this.user = res;
-          console.log("Utente loggato:", this.user);
+            this.user = res;
+            console.log("Utente loggato:", this.user);
 
-          if (this.selectedOperator) {
-            this.onOperatorChange(null);
+            if (this.selectedOperator) {
+              this.onOperatorChange(null);
+            }
+
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            // Utente non loggato: il calendario resta visibile, ma senza evidenziare "Tuo appuntamento".
+            this.user = null;
+            this.cdr.detectChanges();
           }
-
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          // Utente non loggato: il calendario resta visibile, ma senza evidenziare "Tuo appuntamento".
-          this.user = null;
-          this.cdr.detectChanges();
-        }
-      });
-  }
+        });
+    }
 
   onOperatorChange(event: any) {
-    this.closeOperatorSelect();
+      this.closeOperatorSelect();
 
-    if (!this.selectedOperator) return;
+      if(!this.selectedOperator) return;
 
     this.appuntamentoService.getAppuntamenti(this.selectedOperator)
       .subscribe({

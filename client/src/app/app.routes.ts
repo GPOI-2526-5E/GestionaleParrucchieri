@@ -14,6 +14,7 @@ import { AppuntamentiComponent } from './features/appuntamenti.component/appunta
 import { PasswordDimenticataComponent } from './features/password-dimenticata.component/password-dimenticata.component';
 import { ResetPasswordComponent } from './features/reset-password.component/reset-password.component';
 import { authGuard } from './guards/auth.guard';
+import { PrenotaAppuntamentoComponent } from './features/prenota-appuntamento.component/prenota-appuntamento.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -31,5 +32,6 @@ export const routes: Routes = [
     { path: 'appointments', component: AppuntamentiComponent },
     { path: 'forgot-password', component: PasswordDimenticataComponent },
     { path: 'reset-password', component: ResetPasswordComponent },
+    { path: 'prenotazione', component: PrenotaAppuntamentoComponent},
     { path: '**', redirectTo: '/home' }
 ];

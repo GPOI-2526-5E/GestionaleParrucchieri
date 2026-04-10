@@ -1,1 +1,106 @@
-<p>prenota-appuntamento.component works!</p>
+<app-navbar></app-navbar>
+
+<div class="profile-page">
+  <div class="profile-backdrop"></div>
+  <div class="profile-noise"></div>
+
+  <div class="profile-shell">
+
+    <!-- HERO -->
+    <div class="profile-hero-card">
+      <div class="profile-hero-copy">
+        <p class="profile-kicker">Prenotazione</p>
+        <h1>Prenota il tuo appuntamento</h1>
+        <p class="profile-hero-text">
+          Scegli operatore, orario e aggiungi eventuali note.
+          In pochi secondi puoi fissare il tuo prossimo appuntamento.
+        </p>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <form class="profile-editor-shell" (ngSubmit)="prenotaAppuntamento()">
+
+      <div class="editor-form-grid">
+
+        <!-- COLONNA PRINCIPALE -->
+        <div class="editor-main-panel">
+          <div class="panel-heading">
+            <span class="panel-tag">Dettagli</span>
+            <h3>Dati appuntamento</h3>
+            <p>Compila le informazioni per completare la prenotazione.</p>
+          </div>
+
+          <div class="form-grid">
+
+            <!-- OPERATORE -->
+            <div class="form-group full-width">
+              <label>Operatore</label>
+              <select [(ngModel)]="form.idOperatore" name="idOperatore">
+                <option *ngFor="let op of operatori" [value]="op.idUtente">
+                  {{ op.nome }} {{ op.cognome }}
+                </option>
+              </select>
+            </div>
+
+            <!-- DATA INIZIO -->
+            <div class="form-group">
+              <label>Data e ora inizio</label>
+              <input
+                type="datetime-local"
+                [(ngModel)]="form.dataOraInizio"
+                name="dataOraInizio"
+              />
+            </div>
+
+            <!-- DATA FINE -->
+            <div class="form-group">
+              <label>Data e ora fine</label>
+              <input
+                type="datetime-local"
+                [(ngModel)]="form.dataOraFine"
+                name="dataOraFine"
+              />
+            </div>
+
+            <!-- STATO -->
+            <div class="form-group">
+              <label>Stato</label>
+              <select [(ngModel)]="form.stato" name="stato">
+                <option value="prenotato">Prenotato</option>
+                <option value="completato">Completato</option>
+                <option value="annullato">Annullato</option>
+              </select>
+            </div>
+
+            <!-- NOTE -->
+            <div class="form-group full-width">
+              <label>Note</label>
+              <textarea
+                rows="3"
+                [(ngModel)]="form.note"
+                name="note"
+                placeholder="Scrivi eventuali richieste..."
+              ></textarea>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTONI -->
+      <div class="profile-footer-actions">
+        <button type="submit" class="save-btn">
+          Prenota appuntamento
+        </button>
+
+        <button type="button" class="cancel-btn" routerLink="/appuntamenti">
+          Annulla
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
