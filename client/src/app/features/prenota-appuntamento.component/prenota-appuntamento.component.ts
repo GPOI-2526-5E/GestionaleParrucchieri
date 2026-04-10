@@ -65,6 +65,11 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   }
 
   prenotaAppuntamento(): void {
+    if (!this.isOraFineSuccessiva()) {
+      alert('L\'orario di fine deve essere successivo all\'orario di inizio.');
+      return;
+    }
+
     const token = this.authService.getToken();
     const payloadBase64 = token?.split('.')[1];
 
@@ -115,5 +120,36 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
   private getCurrentDateTimeLocal(): string {
     return this.toDateTimeLocalValue(new Date().toISOString());
+  }
+
+  private isOraFineSuccessiva(): boolean {
+    if (!this.form.dataOraInizio || !this.form.dataOraFine) {
+      return true;
+    }
+
+    const oraInizio = this.extractMinutesFromDateTime(this.form.dataOraInizio);
+    const oraFine = this.extractMinutesFromDateTime(this.form.dataOraFine);
+
+    if (oraInizio === null || oraFine === null) {
+      return true;
+    }
+
+    return oraFine > oraInizio;
+  }
+
+  private extractMinutesFromDateTime(value: string): number | null {
+    const timePart = value.split('T')[1];
+
+    if (!timePart) {
+      return null;
+    }
+
+    const [hours, minutes] = timePart.split(':').map(Number);
+
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+      return null;
+    }
+
+    return hours * 60 + minutes;
   }
 }
