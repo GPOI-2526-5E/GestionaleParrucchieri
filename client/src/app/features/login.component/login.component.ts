@@ -128,11 +128,13 @@ export class LoginComponent implements OnInit {
   }
 
   goBack(): void {
-    const returnUrl = localStorage.getItem('postLoginRedirect');
+    const backUrl = localStorage.getItem('loginBackUrl');
 
-    if (returnUrl && returnUrl !== '/login' && returnUrl !== '/') {
-      localStorage.removeItem('postLoginRedirect');
-      this.router.navigateByUrl(returnUrl);
+    localStorage.removeItem('loginBackUrl');
+    localStorage.removeItem('postLoginRedirect');
+
+    if (backUrl && backUrl !== '/login' && backUrl !== '/') {
+      this.router.navigateByUrl(backUrl);
     } else {
       this.router.navigate(['/home']);
     }

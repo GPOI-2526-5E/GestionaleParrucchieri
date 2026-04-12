@@ -9,6 +9,12 @@ export const authGuard: CanActivateFn = (_route, state) => {
     if (auth.isLoggedIn())
         return true;
 
+    const currentUrl = router.url;
+
+    if (currentUrl && currentUrl !== state.url && currentUrl !== '/login') {
+        localStorage.setItem('loginBackUrl', currentUrl);
+    }
+
     localStorage.setItem('postLoginRedirect', state.url);
     router.navigate(['/login']);
 

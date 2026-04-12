@@ -25,6 +25,14 @@ export class NavbarComponent {
     this.chatUi.open('navbar');
   }
 
+  rememberLoginOrigin(): void {
+    const currentUrl = this.router.url;
+
+    if (currentUrl && currentUrl !== '/login') {
+      localStorage.setItem('loginBackUrl', currentUrl);
+    }
+  }
+
   scrollToFragment(fragment: string) {
     const isHome = this.router.url == '/' || this.router.url.startsWith('/#');
 

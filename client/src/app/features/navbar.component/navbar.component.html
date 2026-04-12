@@ -52,7 +52,7 @@
           <i class="bi bi-bag"></i>
         </a>
 
-        <a [routerLink]="['/login']" class="icon-btn d-flex align-items-center text-decoration-none"
+        <a [routerLink]="['/login']" (click)="rememberLoginOrigin()" class="icon-btn d-flex align-items-center text-decoration-none"
           [ngClass]="{ 'active-icon': isUserPage() }">
           <i class="bi bi-person-circle"></i>
         </a>

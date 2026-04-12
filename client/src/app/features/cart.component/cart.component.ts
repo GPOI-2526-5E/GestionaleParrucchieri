@@ -78,6 +78,7 @@ export class CartComponent {
     }
 
     if (!this.authService.isLoggedIn()) {
+      localStorage.setItem('loginBackUrl', '/cart');
       localStorage.setItem('postLoginRedirect', '/payment');
       this.router.navigate(['/login']);
       return;
