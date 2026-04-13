@@ -2,6 +2,8 @@
     <div class="footer-columns">
         <div id="chi-siamo">
             <h4>Chi siamo</h4>
+            <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1776086886/SnapInsta.to_650037472_18098133971480943_8433970668867022342_n_sjramm.webp"
+                alt="Team de I Parrucchieri" class="footer-story-image" />
             <p>
                 I Parrucchieri Fossano è un salone artigianale nel cuore della città, dove esperienza e passione si
                 traducono in cura del dettaglio e attenzione alla persona. Offriamo consulenze personalizzate, tagli
@@ -45,9 +47,12 @@
                     <i class="bi bi-whatsapp" aria-hidden="true"></i>
                 </a>
             </div>
+
+            <img src="https://res.cloudinary.com/duimlq34k/image/upload/v1776086706/SnapInsta.to_640381851_18560734534059097_5349278833360770663_n_a0mcqr.webp"
+                alt="Atmosfera del salone" class="footer-contact-image footer-contact-image-bottom" />
         </div>
 
-        <div class="footer-card opening-hours" [class.hours-open]="hoursOpen">
+        <div class="footer-card opening-hours">
             <h4>
                 Orari
                 <span class="status" [class.open]="isOpen" [class.closed]="!isOpen">
@@ -63,28 +68,22 @@
                 Prenotazione consigliata, soprattutto venerdì e sabato.
             </p>
 
-            <div class="hours-accordion">
-                <button type="button" class="hours-trigger" (click)="hoursOpen = !hoursOpen"
-                    [attr.aria-expanded]="hoursOpen">
-                    <span>Vedi tutti gli orari</span>
-                    <span class="chev" aria-hidden="true">▾</span>
-                </button>
-
-                <div class="hours-panel" [class.open]="hoursOpen">
-                    <ul class="hours-list">
-                        <li><span>Lunedì</span><span>Chiuso</span></li>
-                        <li><span>Martedì</span><span>08:00–12:30 • 14:00–19:30</span></li>
-                        <li><span>Mercoledì</span><span>13:00–21:30</span></li>
-                        <li><span>Giovedì</span><span>08:00–12:30 • 14:00–19:30</span></li>
-                        <li><span>Venerdì</span><span>07:00–19:30</span></li>
-                        <li><span>Sabato</span><span>07:00–18:00</span></li>
-                        <li><span>Domenica</span><span>Chiuso</span></li>
-                    </ul>
-                </div>
+            <div class="hours-panel hours-panel-static open">
+                <ul class="hours-list">
+                    <li><span>Lunedì</span><span>Chiuso</span></li>
+                    <li><span>Martedì</span><span>08:00–12:30 • 14:00–19:30</span></li>
+                    <li><span>Mercoledì</span><span>13:00–21:30</span></li>
+                    <li><span>Giovedì</span><span>08:00–12:30 • 14:00–19:30</span></li>
+                    <li><span>Venerdì</span><span>07:00–19:30</span></li>
+                    <li><span>Sabato</span><span>07:00–18:00</span></li>
+                    <li><span>Domenica</span><span>Chiuso</span></li>
+                </ul>
             </div>
 
-            <a [routerLink]="['/appointments']" routerLinkActive="active"
-                class="footer-link footer-primary-action">Prenota ora</a>
+            <div class="opening-hours-actions">
+                <a [routerLink]="['/appointments']" routerLinkActive="active"
+                    class="footer-link footer-primary-action">Prenota ora</a>
+            </div>
         </div>
 
     </div>

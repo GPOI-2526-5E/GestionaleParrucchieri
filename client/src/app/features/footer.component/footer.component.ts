@@ -9,9 +9,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './footer.component.css',
 })
 export class FooterComponent {
-
-
-  hoursOpen = false;
   isOpen = false;
   todayName = '';
   todayHours = '';

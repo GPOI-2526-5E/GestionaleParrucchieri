@@ -13,8 +13,6 @@ import { FooterComponent } from '../footer.component/footer.component';
   styleUrl: './home-body.component.css',
 })
 export class HomeBodyComponent {
-
-
   chatUi = inject(ChatUiService);
 
   openAiFromCard() {

@@ -94,17 +94,23 @@ body {
 }
 
 .ai-nav-btn {
-  background: transparent;
-  border: 1px solid #d4b06a;
-  color: #d4b06a;
+  background: rgba(212,176,106,.05);
+  border: 1px solid rgba(212,176,106,.2);
+  color: #e6c784;
   font-weight: 600;
-  border-radius: 6px;
-  padding: 5px 12px;
-  transition: background 0.3s ease, color 0.3s ease;
+  border-radius: 14px;
+  padding: 7px 14px;
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  transition: transform .28s cubic-bezier(.22,1,.36,1), background .28s ease, color .28s ease, border-color .28s ease, box-shadow .28s ease;
 }
 
 .ai-nav-btn:hover {
-  color: white;
+  transform: translateY(-1px);
+  color: #fff3d2;
+  border-color: rgba(212,176,106,.34);
+  background: rgba(212,176,106,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.18);
 }
 
 .icon-btn.active-icon i {
