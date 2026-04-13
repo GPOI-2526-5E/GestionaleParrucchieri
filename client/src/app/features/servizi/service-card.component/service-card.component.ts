@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Servizio } from '../../../services/servizio';
+import { Servizio } from '../../../models/servizio.model';
 import { CurrencyPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 

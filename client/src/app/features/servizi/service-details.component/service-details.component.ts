@@ -2,7 +2,8 @@ import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
-import { ServiziService, Servizio } from '../../../services/servizio';
+import { ServiziService } from '../../../services/servizio';
+import { Servizio } from '../../../models/servizio.model';
 
 @Component({
   selector: 'app-service-details',

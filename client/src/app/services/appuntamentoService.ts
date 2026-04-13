@@ -7,10 +7,9 @@ import { Appuntamento } from '../models/appuntamento.model';
 export interface CreaAppuntamentoPayload {
   idCliente: number;
   idOperatore: number | null;
+  idServizio: number | null;
   dataOraInizio: string;
   dataOraFine: string;
-  stato: string;
-  note: string;
 }
 
 @Injectable({

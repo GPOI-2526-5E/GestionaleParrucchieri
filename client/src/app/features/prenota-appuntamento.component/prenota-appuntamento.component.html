@@ -43,6 +43,15 @@
               </select>
             </div>
 
+            <div class="form-group full-width">
+              <label>Servizi</label>
+              <select [(ngModel)]="form.idServizio" name="idServizio" (change)="onServizioChange()">
+                <option *ngFor="let ser of servizi" [ngValue]="ser.idServizio">
+                  {{ ser.nome }} | {{ ser.prezzo }} €
+                </option>
+              </select>
+            </div>
+
             <!-- DATA INIZIO -->
             <div class="form-group">
               <label>Data e ora inizio</label>
@@ -51,39 +60,21 @@
                 [(ngModel)]="form.dataOraInizio"
                 name="dataOraInizio"
                 [min]="minDateTime"
+                (change)="onServizioChange()"
+                disabled="true"
               />
             </div>
 
             <!-- DATA FINE -->
             <div class="form-group">
-              <label>Data e ora fine</label>
+              <label>ora fine</label>
               <input
-                type="datetime-local"
+                type="time"
                 [(ngModel)]="form.dataOraFine"
                 name="dataOraFine"
                 [min]="minDateTime"
+                disabled="true"
               />
-            </div>
-
-            <!-- STATO -->
-            <div class="form-group">
-              <label>Stato</label>
-              <select [(ngModel)]="form.stato" name="stato">
-                <option value="prenotato">Prenotato</option>
-                <option value="completato">Completato</option>
-                <option value="annullato">Annullato</option>
-              </select>
-            </div>
-
-            <!-- NOTE -->
-            <div class="form-group full-width">
-              <label>Note</label>
-              <textarea
-                rows="3"
-                [(ngModel)]="form.note"
-                name="note"
-                placeholder="Scrivi eventuali richieste..."
-              ></textarea>
             </div>
 
           </div>

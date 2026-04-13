@@ -2,14 +2,7 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-export interface Servizio {
-  idServizio: number;
-  nome: string;
-  descrizione: string;
-  durata: number;
-  prezzo: number;
-}
+import { Servizio } from '../models/servizio.model';
 
 @Injectable({
   providedIn: 'root'

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../navbar.component/navbar.component';
 import { ServiceCardComponent } from '../service-card.component/service-card.component';
-import { Servizio } from '../../../services/servizio';
+import { Servizio } from '../../../models/servizio.model';
 import { ServiziService } from '../../../services/servizio';
 import { Observable } from 'rxjs';
 

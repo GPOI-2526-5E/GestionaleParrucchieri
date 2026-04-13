@@ -156,7 +156,7 @@ export class AppuntamentiComponent implements OnInit {
     }
 
     this.router.navigate(['/prenotazione'], {
-      queryParams: { data: arg.dateStr }
+      queryParams: { data: arg.dateStr, operatore: this.selectedOperator}
     });
   }
 

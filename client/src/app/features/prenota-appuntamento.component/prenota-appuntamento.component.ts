@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -6,7 +6,9 @@ import { NavbarComponent } from '../navbar.component/navbar.component';
 import { UtentiService } from '../../services/utentiService';
 import { AppuntamentoService } from '../../services/appuntamentoService';
 import { Utente } from '../../models/utente.model';
+import { Servizio } from '../../models/servizio.model';
 import { AuthService } from '../../services/auth';
+import { ServiziService } from '../../services/servizio';
 
 interface OpeningInterval {
   start: string;
@@ -31,6 +33,7 @@ interface DailySchedule {
 })
 export class PrenotaAppuntamentoComponent implements OnInit {
   operatori: Utente[] = [];
+  servizi: Servizio[] = [];
   minDateTime = '';
   private readonly openingSchedule: Record<number, DailySchedule> = {
     0: { name: 'Domenica', intervals: [] },
@@ -47,15 +50,16 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     private appuntamentoService: AppuntamentoService,
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef,
+    private servizioService: ServiziService
+  ) { }
 
   form = {
     idOperatore: null as number | null,
+    idServizio: null as number | null,
     dataOraInizio: '',
-    dataOraFine: '',
-    stato: 'prenotato',
-    note: ''
+    dataOraFine: ''
   };
 
   ngOnInit(): void {
@@ -65,21 +69,53 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       next: (operatori) => {
         this.operatori = operatori;
 
-        if (!this.form.idOperatore && this.operatori.length > 0) {
-          this.form.idOperatore = this.operatori[0].idUtente;
-        }
+        this.route.queryParamMap.subscribe((params) => {
+          const selectedDate = params.get('data');
+          const selectedOperator = params.get('operatore');
+
+          if (selectedDate) {
+            this.form.dataOraInizio = this.toDateTimeLocalValue(selectedDate);
+          }
+
+          if (selectedOperator) {
+            this.form.idOperatore = Number(selectedOperator);
+          }
+
+          // fallback se non arriva niente dai params
+          if (!this.form.idOperatore && this.operatori.length > 0) {
+            this.form.idOperatore = this.operatori[0].idUtente;
+          }
+
+          this.cdr.detectChanges();
+        });
       },
-      error: (err: unknown) => {
-        console.error(err);
-      }
+      error: (err) => console.error(err)
     });
 
-    this.route.queryParamMap.subscribe((params) => {
-      const selectedDate = params.get('data');
+    this.servizioService.getServizi().subscribe({
+      next: (servizi) => {
+        this.servizi = servizi;
 
-      if (selectedDate) {
-        this.form.dataOraInizio = this.toDateTimeLocalValue(selectedDate);
-      }
+        this.route.queryParamMap.subscribe((params) => {
+          const selectedServizio = params.get('servizio');
+
+          if (selectedServizio) {
+            this.form.idServizio = Number(selectedServizio);
+          }
+
+          // fallback se non arriva niente dai params
+          if (!this.form.idServizio && this.servizi.length > 0) {
+            this.form.idServizio = this.servizi[0].idServizio;
+          }
+
+          if (this.form.dataOraInizio && this.form.idServizio) {
+            this.onServizioChange();
+          }
+
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err) => console.error(err)
     });
   }
 
@@ -175,7 +211,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     if (Number.isNaN(hours) || Number.isNaN(minutes)) {
       return null;
     }
-    
+
     return hours * 60 + minutes;
   }
 
@@ -232,5 +268,34 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   private timeToMinutes(value: string): number {
     const [hours, minutes] = value.split(':').map(Number);
     return hours * 60 + minutes;
+  }
+
+  onServizioChange(): void {
+    if (!this.form.idServizio || !this.form.dataOraInizio) return;
+
+    const servizio = this.servizi.find(
+      s => s.idServizio === this.form.idServizio
+    );
+
+    if (!servizio) return;
+
+    const durata = servizio.durata;
+    //console.log(servizio.durata)
+
+    const start = new Date(this.form.dataOraInizio);
+
+    if (Number.isNaN(start.getTime())) return;
+
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + durata);
+
+    this.form.dataOraFine = this.formatTime(end);
+
+    this.cdr.detectChanges();
+  }
+
+  private formatTime(date: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
   }
 }
