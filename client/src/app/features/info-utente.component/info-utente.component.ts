@@ -47,6 +47,7 @@ export class InfoUtenteComponent implements OnInit {
   private api = 'http://localhost:3000/api/auth';
 
   user: UserProfile | null = null;
+  isProfilePhotoBroken = false;
 
   password = '';
   confirmPassword = '';
@@ -209,8 +210,14 @@ export class InfoUtenteComponent implements OnInit {
             : '',
           ruolo: res.ruolo ?? '',
           hasPassword: !!res.hasPassword,
-          photoURL: res.photoURL ?? res.picture ?? res.avatar ?? null
+          photoURL:
+            res.photoURL ??
+            res.picture ??
+            res.avatar_url ??
+            res.avatar ??
+            null
         };
+        this.isProfilePhotoBroken = false;
 
         this.computeProfileCompletionState();
         this.isEditMode = this.showCompletionWarning;
@@ -225,6 +232,30 @@ export class InfoUtenteComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  getProfilePhotoUrl(): string | null {
+    if (!this.user?.photoURL || this.isProfilePhotoBroken) {
+      return null;
+    }
+
+    const rawUrl = String(this.user.photoURL).trim();
+    if (!rawUrl) {
+      return null;
+    }
+
+    const normalizedUrl = rawUrl.startsWith('//') ? `https:${rawUrl}` : rawUrl;
+
+    if (normalizedUrl.includes('googleusercontent.com')) {
+      return normalizedUrl.replace(/=s\d+-c$/, '=s256-c');
+    }
+
+    return normalizedUrl;
+  }
+
+  onProfilePhotoError(): void {
+    this.isProfilePhotoBroken = true;
+    this.cdr.detectChanges();
   }
 
   enableEditMode(): void {

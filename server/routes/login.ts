@@ -133,7 +133,8 @@ router.get("/me", verifyToken, async (req: any, res: Response) => {
       telefono: user.telefono,
       data_nascita: user.data_nascita,
       ruolo: user.ruolo,
-      hasPassword: !!user.password && user.password.trim() !== ""
+      hasPassword: !!user.password && user.password.trim() !== "",
+      photoURL: req.user?.photoURL ?? null
     });
   } catch (error: any) {
     console.error("Errore GET /me:", error);

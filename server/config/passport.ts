@@ -11,6 +11,7 @@ interface GoogleUser {
   cognome: string;
   email: string;
   ruolo: string;
+  photoURL?: string | null;
 }
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -166,7 +167,8 @@ passport.use(
             nome: createdUser.nome,
             cognome: createdUser.cognome,
             email: createdUser.email,
-            ruolo: createdUser.ruolo
+            ruolo: createdUser.ruolo,
+            photoURL: fotoProfilo || null
           };
 
           return done(null, newUser);
@@ -186,7 +188,8 @@ passport.use(
           nome,
           cognome,
           email: user.email,
-          ruolo: user.ruolo
+          ruolo: user.ruolo,
+          photoURL: fotoProfilo || null
         };
 
         return done(null, existingUser);

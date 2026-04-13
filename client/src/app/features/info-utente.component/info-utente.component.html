@@ -23,7 +23,10 @@
       </div>
 
       <div class="profile-hero-actions">
-        <button class="logout-btn" type="button" (click)="logout()">Logout</button>
+        <button class="logout-btn" type="button" (click)="logout()">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
       </div>
     </div>
 
@@ -65,8 +68,9 @@
 
               <div class="identity-main">
                 <div class="identity-avatar-wrap">
-                  <img *ngIf="user.photoURL" [src]="user.photoURL" alt="Foto profilo" class="profile-avatar-img" />
-                  <div *ngIf="!user.photoURL" class="avatar-box">
+                  <img *ngIf="getProfilePhotoUrl()" [src]="getProfilePhotoUrl()!" alt="Foto profilo"
+                    class="profile-avatar-img" referrerpolicy="no-referrer" (error)="onProfilePhotoError()" />
+                  <div *ngIf="!getProfilePhotoUrl()" class="avatar-box">
                     {{ getUserInitials() }}
                   </div>
                 </div>
@@ -269,8 +273,9 @@
 
             <div class="editor-avatar-card">
               <div class="profile-avatar-wrapper">
-                <img *ngIf="user.photoURL" [src]="user.photoURL" alt="Foto profilo" class="profile-avatar-img" />
-                <div *ngIf="!user.photoURL" class="avatar-box">
+                <img *ngIf="getProfilePhotoUrl()" [src]="getProfilePhotoUrl()!" alt="Foto profilo"
+                  class="profile-avatar-img" referrerpolicy="no-referrer" (error)="onProfilePhotoError()" />
+                <div *ngIf="!getProfilePhotoUrl()" class="avatar-box">
                   {{ getUserInitials() }}
                 </div>
               </div>

@@ -10,6 +10,7 @@ interface JwtUser {
   cognome: string;
   email: string;
   ruolo: string;
+  photoURL?: string | null;
 }
 
 function generateToken(user: JwtUser) {
@@ -26,6 +27,7 @@ function generateToken(user: JwtUser) {
       cognome: user.cognome,
       email: user.email,
       ruolo: user.ruolo,
+      photoURL: user.photoURL ?? null,
     },
     jwtSecret,
     { expiresIn: "1d" }
@@ -34,7 +36,10 @@ function generateToken(user: JwtUser) {
 
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account"
+  })
 );
 
 router.get(
