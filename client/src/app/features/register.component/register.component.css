@@ -983,6 +983,71 @@ input[type="date"].clean-input {
   width: 100%;
 }
 
+::ng-deep intl-tel-input {
+  display: block;
+  width: 100%;
+}
+
+::ng-deep intl-tel-input .iti {
+  position: relative;
+  width: 100%;
+}
+
+::ng-deep intl-tel-input .iti__tel-input,
+::ng-deep intl-tel-input input.phone-input {
+  width: 100% !important;
+  min-height: 46px;
+  padding: 10px 13px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: var(--input-bg) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: var(--gold-soft);
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+::ng-deep intl-tel-input .iti__tel-input::placeholder,
+::ng-deep intl-tel-input input.phone-input::placeholder {
+  color: rgba(255, 255, 255, 0.36) !important;
+}
+
+::ng-deep intl-tel-input .iti__tel-input:hover,
+::ng-deep intl-tel-input input.phone-input:hover {
+  background: var(--input-bg-hover) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+::ng-deep intl-tel-input .iti__tel-input:focus,
+::ng-deep intl-tel-input input.phone-input:focus {
+  background: var(--input-bg-focus) !important;
+  border-color: rgba(212, 176, 106, 0.46) !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+::ng-deep intl-tel-input .iti__selected-country {
+  padding-left: 12px;
+  padding-right: 10px;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-right: 1px solid rgba(212, 176, 106, 0.1);
+}
+
+::ng-deep intl-tel-input .iti__selected-country:hover {
+  background: rgba(212, 176, 106, 0.06) !important;
+}
+
+::ng-deep intl-tel-input .iti__selected-dial-code {
+  color: var(--gold-soft) !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 
 .row .form-label {
   margin-top: 4px;

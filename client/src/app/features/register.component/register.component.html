@@ -85,8 +85,17 @@
                     </div>
                     <div class="col-6 mb-2">
                         <label class="form-label">Conferma</label>
-                        <input [(ngModel)]="confirmPassword" name="confirmPassword" type="password" class="clean-input"
-                            placeholder="Conferma password" required />
+                        <div class="password-input-wrap">
+                            <input [(ngModel)]="confirmPassword" name="confirmPassword"
+                                [type]="showConfirmPassword ? 'text' : 'password'" class="clean-input"
+                                placeholder="Conferma password" required />
+                            <button type="button" class="toggle-password-btn"
+                                (click)="showConfirmPassword = !showConfirmPassword"
+                                [attr.aria-label]="showConfirmPassword ? 'Nascondi password' : 'Mostra password'"
+                                [attr.title]="showConfirmPassword ? 'Nascondi password' : 'Mostra password'">
+                                <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -100,8 +109,14 @@
                 <div class="row">
                     <div class="col-6 mb-2">
                         <label class="form-label">Telefono</label>
-                        <input [(ngModel)]="userData.telefono" name="telefono" type="tel" class="clean-input"
-                            placeholder="333 123 4567" />
+                        <intl-tel-input name="telefono" [initialValue]="userData.telefono || ''"
+                            [initOptions]="initTelOptions" [inputProps]="{
+                                id: 'telefono',
+                                class: 'clean-input phone-input',
+                                placeholder: 'Inserisci il numero di telefono'
+                            }" (numberChange)="onPhoneNumberChange($event)"
+                            (validityChange)="onPhoneValidityChange($event)">
+                        </intl-tel-input>
                     </div>
 
                     <div class="col-6 mb-2">

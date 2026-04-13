@@ -1,8 +1,11 @@
-import { Component, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewChecked, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as L from 'leaflet';
+import { IntlTelInputComponent } from 'intl-tel-input/angularWithUtils';
+import { AuthService } from '../../services/auth';
 import { NavbarComponent } from '../navbar.component/navbar.component';
 import { Prodotto } from '../../services/prodotto';
 import { ProdottoService } from '../../services/prodotto';
@@ -20,11 +23,12 @@ L.Icon.Default.mergeOptions({
 @Component({
   selector: 'app-payment.component',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink, FormsModule],
+  imports: [CommonModule, NavbarComponent, RouterLink, FormsModule, IntlTelInputComponent],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.css',
 })
-export class PaymentComponent implements AfterViewChecked {
+export class PaymentComponent implements OnInit, AfterViewChecked {
+  private authApi = 'http://localhost:3000/api/auth';
 
   cartItems: Prodotto[] = [];
   totalQuantity: number = 0;
@@ -38,6 +42,8 @@ export class PaymentComponent implements AfterViewChecked {
   surname: string = '';
   email: string = '';
   phone: string = '';
+  isPhoneValid = false;
+  isLoadingUserData = false;
   cardName: string = '';
   cardNumber: string = '';
   expiry: string = '';
@@ -57,7 +63,34 @@ export class PaymentComponent implements AfterViewChecked {
   lockers: LockerOption[] = [];
   selectedLocker: LockerOption | null = null;
 
+  initTelOptions = {
+    initialCountry: 'auto' as const,
+    geoIpLookup: (
+      success: (iso2: any) => void,
+      failure: () => void
+    ) => {
+      fetch('https://ipapi.co/json/')
+        .then((res) => res.json())
+        .then((data) => {
+          const code = String(data?.country_code || 'it').toLowerCase();
+          success(code as any);
+        })
+        .catch(() => {
+          success('it' as any);
+          failure();
+        });
+    },
+    preferredCountries: ['it', 'gb', 'fr', 'de', 'es', 'us'],
+    separateDialCode: true,
+    nationalMode: false,
+    strictMode: true,
+    formatOnDisplay: true,
+    autoPlaceholder: 'polite' as const
+  };
+
   constructor(
+    private http: HttpClient,
+    private auth: AuthService,
     private prodottoService: ProdottoService,
     private lockerService: LockerService,
     private cdr: ChangeDetectorRef
@@ -81,6 +114,8 @@ export class PaymentComponent implements AfterViewChecked {
 
       this.updateTotal();
     }
+
+    this.loadLoggedUserData();
   }
 
   ngAfterViewChecked() {
@@ -133,7 +168,46 @@ export class PaymentComponent implements AfterViewChecked {
   }
 
   isValidPhone(): boolean {
-    return /^[0-9+\s]{8,15}$/.test(this.phone);
+    return this.isPhoneValid && this.phone.trim() !== '';
+  }
+
+  onPhoneNumberChange(phoneNumber: string): void {
+    this.phone = phoneNumber || '';
+  }
+
+  onPhoneValidityChange(isValid: boolean): void {
+    this.isPhoneValid = isValid;
+  }
+
+  private loadLoggedUserData(): void {
+    if (!this.auth.isLoggedIn()) {
+      return;
+    }
+
+    this.isLoadingUserData = true;
+
+    this.http.get<any>(`${this.authApi}/me`).subscribe({
+      next: (user) => {
+        if (!user) {
+          this.isLoadingUserData = false;
+          this.cdr.detectChanges();
+          return;
+        }
+
+        this.name = user.nome ?? this.name;
+        this.surname = user.cognome ?? this.surname;
+        this.email = user.email ?? this.email;
+        this.phone = user.telefono != null ? String(user.telefono) : this.phone;
+        this.isPhoneValid = this.phone.trim() !== '';
+        this.isLoadingUserData = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Errore caricamento dati utente per checkout:', err);
+        this.isLoadingUserData = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   isValidCardName(): boolean {

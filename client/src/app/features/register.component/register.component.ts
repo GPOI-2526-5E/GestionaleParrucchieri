@@ -5,11 +5,12 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
+import { IntlTelInputComponent } from 'intl-tel-input/angularWithUtils';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, IntlTelInputComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
@@ -27,10 +28,37 @@ export class RegisterComponent {
 
   confirmPassword = '';
   showPassword = false;
+  showConfirmPassword = false;
   isLoading = false;
   isSuccess = false;
+  isPhoneValid = false;
   alertMessage: string | null = null;
   alertType: 'success' | 'error' | 'warning' = 'error';
+
+  initTelOptions = {
+    initialCountry: 'auto' as const,
+    geoIpLookup: (
+      success: (iso2: any) => void,
+      failure: () => void
+    ) => {
+      fetch('https://ipapi.co/json/')
+        .then((res) => res.json())
+        .then((data) => {
+          const code = String(data?.country_code || 'it').toLowerCase();
+          success(code as any);
+        })
+        .catch(() => {
+          success('it' as any);
+          failure();
+        });
+    },
+    preferredCountries: ['it', 'gb', 'fr', 'de', 'es', 'us'],
+    separateDialCode: true,
+    nationalMode: false,
+    strictMode: true,
+    formatOnDisplay: true,
+    autoPlaceholder: 'polite' as const
+  };
 
   constructor(public auth: AuthService, private router: Router,
     private http: HttpClient, private cdr: ChangeDetectorRef) { }
@@ -83,7 +111,15 @@ export class RegisterComponent {
   }
 
   isValidPhone(): boolean {
-    return /^[0-9]{8,10}$/.test(this.userData.telefono);
+    return this.isPhoneValid && this.userData.telefono.trim() !== '';
+  }
+
+  onPhoneNumberChange(phoneNumber: string): void {
+    this.userData.telefono = phoneNumber || '';
+  }
+
+  onPhoneValidityChange(isValid: boolean): void {
+    this.isPhoneValid = isValid;
   }
 
   isAdult(): boolean {

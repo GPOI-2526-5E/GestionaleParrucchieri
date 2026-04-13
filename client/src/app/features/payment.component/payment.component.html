@@ -39,8 +39,21 @@
 
                             <div class="form-group">
                                 <label>Telefono</label>
-                                <input type="text" inputmode="numeric" [(ngModel)]="phone" name="phone"
-                                    placeholder="+39 3331234567" />
+                                <ng-container *ngIf="!isLoadingUserData; else phoneLoading">
+                                    <intl-tel-input name="phone" [initialValue]="phone || ''"
+                                        [initOptions]="initTelOptions" [inputProps]="{
+                                            id: 'phone',
+                                            class: 'payment-phone-input',
+                                            placeholder: 'Inserisci il numero di telefono'
+                                        }" (numberChange)="onPhoneNumberChange($event)"
+                                        (validityChange)="onPhoneValidityChange($event)">
+                                    </intl-tel-input>
+                                </ng-container>
+
+                                <ng-template #phoneLoading>
+                                    <input type="text" class="payment-loading-input" value="Caricamento numero..."
+                                        disabled />
+                                </ng-template>
                             </div>
                         </div>
 
