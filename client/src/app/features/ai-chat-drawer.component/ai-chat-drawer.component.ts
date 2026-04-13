@@ -69,6 +69,11 @@ export class AiChatDrawerComponent {
     this.chatUi.close();
   }
 
+  openService(service: ServiceCard) {
+    this.router.navigate(['/service', service.idServizio]);
+    this.chatUi.close();
+  }
+
   async send() {
     const text = this.inputText.trim();
 

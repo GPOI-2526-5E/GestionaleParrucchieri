@@ -14,6 +14,7 @@ type AlertType = 'success' | 'error' | 'warning';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
+  private readonly GOOGLE_REMEMBER_KEY = 'oauth_remember_me';
   email: string = '';
   password: string = '';
   rememberMe: boolean = false;
@@ -74,7 +75,9 @@ export class LoginComponent implements OnInit {
       const googleError = params['googleError'];
 
       if (token) {
-        this.auth.saveToken(token);
+        const rememberGoogleLogin = localStorage.getItem(this.GOOGLE_REMEMBER_KEY) === '1';
+        this.auth.saveToken(token, rememberGoogleLogin);
+        localStorage.removeItem(this.GOOGLE_REMEMBER_KEY);
         this.isLoading = false;
         this.showAlert('Accesso con Google effettuato con successo!', 'success');
 
@@ -90,6 +93,7 @@ export class LoginComponent implements OnInit {
       }
 
       if (googleError) {
+        localStorage.removeItem(this.GOOGLE_REMEMBER_KEY);
         this.isLoading = false;
         this.showAlert('Errore durante l’accesso con Google.', 'error');
 
@@ -150,12 +154,9 @@ export class LoginComponent implements OnInit {
     this.alertMessage = '';
     this.cdr.detectChanges();
 
-    this.auth.login(this.email, this.password).subscribe({
+    this.auth.login(this.email, this.password, this.rememberMe).subscribe({
       next: (res) => {
         console.log(res);
-        if (res?.token) {
-          this.auth.saveToken(res.token);
-        }
 
         if (this.rememberMe) {
           localStorage.setItem('rememberedEmail', this.email);
@@ -199,6 +200,7 @@ export class LoginComponent implements OnInit {
   loginWithGoogle(): void {
     this.alertMessage = '';
     this.isLoading = true;
+    localStorage.setItem(this.GOOGLE_REMEMBER_KEY, this.rememberMe ? '1' : '0');
 
     const savedReturnUrl = localStorage.getItem('postLoginRedirect');
 

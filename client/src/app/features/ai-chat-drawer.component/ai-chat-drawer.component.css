@@ -275,6 +275,12 @@
   border-radius: 16px;
   padding: 14px;
   box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
 .ai-service-card::before{
@@ -283,6 +289,12 @@
   inset: 0 auto 0 0;
   width: 3px;
   background: linear-gradient(180deg, rgba(212,176,106,.82), rgba(212,176,106,.14));
+}
+
+.ai-service-card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(212,176,106,.4);
+  box-shadow: 0 14px 28px rgba(0,0,0,.24);
 }
 
 .ai-service-top{

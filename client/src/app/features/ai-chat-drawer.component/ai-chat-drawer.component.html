@@ -55,7 +55,11 @@
       </div>
 
       <div class="ai-services">
-        <div class="ai-service-card" *ngFor="let s of services; trackBy: trackByService">
+        <button
+          type="button"
+          class="ai-service-card"
+          *ngFor="let s of services; trackBy: trackByService"
+          (click)="openService(s)">
           <div class="ai-service-top">
             <div class="ai-service-name">{{ s.nome }}</div>
             <div class="ai-service-price" *ngIf="s.prezzo != null">&euro; {{ s.prezzo }}</div>
@@ -68,7 +72,7 @@
           <div class="ai-service-meta" *ngIf="s.durata">
             Durata: {{ s.durata }} min
           </div>
-        </div>
+        </button>
       </div>
     </section>
 

@@ -23,8 +23,9 @@ interface GenericResponse {
 })
 export class AuthService {
   private api = 'http://localhost:3000/api/auth';
+  private readonly TOKEN_KEY = 'login_token';
 
-  private _token = signal<string | null>(localStorage.getItem('login_token'));
+  private _token = signal<string | null>(this.getStoredToken());
 
   isLoggedIn = computed(() => !!this._token());
 
@@ -51,14 +52,18 @@ export class AuthService {
     private router: Router
   ) {}
 
-  login(email: string, password: string): Observable<LoginResponse> {
+  login(
+    email: string,
+    password: string,
+    rememberMe: boolean
+  ): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.api}/login`, {
       email,
       password,
     }).pipe(
       tap((response) => {
         if (response?.token) {
-          this.saveToken(response.token);
+          this.saveToken(response.token, rememberMe);
         }
       })
     );
@@ -68,8 +73,15 @@ export class AuthService {
     window.location.href = `${this.api}/google`;
   }
 
-  saveToken(token: string): void {
-    localStorage.setItem('login_token', token);
+  saveToken(token: string, rememberMe: boolean = true): void {
+    if (rememberMe) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+      sessionStorage.removeItem(this.TOKEN_KEY);
+    } else {
+      sessionStorage.setItem(this.TOKEN_KEY, token);
+      localStorage.removeItem(this.TOKEN_KEY);
+    }
+
     this._token.set(token);
   }
 
@@ -78,7 +90,8 @@ export class AuthService {
   }
 
   clearToken(): void {
-    localStorage.removeItem('login_token');
+    localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
     this._token.set(null);
   }
 
@@ -127,5 +140,9 @@ export class AuthService {
       newPassword,
       confirmPassword
     });
+  }
+
+  private getStoredToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY) || sessionStorage.getItem(this.TOKEN_KEY);
   }
 }
