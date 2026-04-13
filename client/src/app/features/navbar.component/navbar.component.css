@@ -95,14 +95,18 @@ body {
 
 .ai-nav-btn {
   background: rgba(212,176,106,.05);
-  border: 1px solid rgba(212,176,106,.2);
-  color: #e6c784;
+  border: 1.5px solid rgba(212,176,106,.4);
+  color: #d4b06a;
   font-weight: 600;
   border-radius: 14px;
-  padding: 7px 14px;
+  padding: 7px 15px;
   backdrop-filter: blur(12px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
   transition: transform .28s cubic-bezier(.22,1,.36,1), background .28s ease, color .28s ease, border-color .28s ease, box-shadow .28s ease;
+}
+
+.navbar-nav .nav-link.ai-nav-btn {
+  color: #d4b06a;
 }
 
 .ai-nav-btn:hover {
