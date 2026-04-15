@@ -351,7 +351,7 @@ router.post("/change-password", verifyToken, async (req: any, res: Response) => 
     );
 
     if (!isCurrentPasswordValid) {
-      return res.status(401).json({
+      return res.status(400).json({
         message: "La password attuale non è corretta"
       });
     }

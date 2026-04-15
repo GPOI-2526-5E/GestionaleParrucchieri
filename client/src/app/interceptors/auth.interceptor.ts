@@ -10,6 +10,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) =>{
     const router = inject(Router);
     const token = auth.token;
     const isAuthLoginRequest = req.url.includes('/api/auth/login');
+    const isCredentialValidationRequest =
+      req.url.includes('/api/auth/change-password') ||
+      req.url.includes('/api/auth/verify-password');
 
     const request = token
       ? req.clone({
@@ -21,7 +24,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) =>{
 
     return next(request).pipe(
       catchError((error) => {
-        if (error.status === 401 && token && !isAuthLoginRequest) {
+        if (
+          error.status === 401 &&
+          token &&
+          !isAuthLoginRequest &&
+          !isCredentialValidationRequest
+        ) {
           auth.clearToken();
           router.navigate(['/login']);
         }

@@ -45,6 +45,8 @@ interface PasswordChecklistItem {
 })
 export class InfoUtenteComponent implements OnInit {
   private api = 'http://localhost:3000/api/auth';
+  private changePasswordMessageTimeout: ReturnType<typeof setTimeout> | null = null;
+  private changePasswordMessageHideTimeout: ReturnType<typeof setTimeout> | null = null;
 
   user: UserProfile | null = null;
   isProfilePhotoBroken = false;
@@ -84,6 +86,8 @@ export class InfoUtenteComponent implements OnInit {
   isChangingPassword = false;
   changePasswordMessage = '';
   changePasswordError = '';
+  changePasswordErrorShake = false;
+  changePasswordMessageHiding = false;
 
   isPhoneValid = true;
   selectedCountryIso2 = 'it';
@@ -141,6 +145,29 @@ export class InfoUtenteComponent implements OnInit {
     this.showCurrentPasswordChange = false;
     this.showNewPasswordChange = false;
     this.showConfirmNewPasswordChange = false;
+  }
+
+  private clearChangePasswordMessageLater(): void {
+    if (this.changePasswordMessageTimeout) {
+      clearTimeout(this.changePasswordMessageTimeout);
+    }
+
+    if (this.changePasswordMessageHideTimeout) {
+      clearTimeout(this.changePasswordMessageHideTimeout);
+    }
+
+    this.changePasswordMessageHiding = false;
+
+    this.changePasswordMessageTimeout = setTimeout(() => {
+      this.changePasswordMessageHiding = true;
+      this.cdr.detectChanges();
+
+      this.changePasswordMessageHideTimeout = setTimeout(() => {
+        this.changePasswordMessage = '';
+        this.changePasswordMessageHiding = false;
+        this.cdr.detectChanges();
+      }, 350);
+    }, 3200);
   }
 
   private computeProfileCompletionState(): void {
@@ -372,6 +399,60 @@ export class InfoUtenteComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  onChangePasswordFieldChange(): void {
+    if (this.changePasswordError) {
+      const currentValidationError = this.getChangePasswordValidationError();
+
+      if (currentValidationError) {
+        this.changePasswordError = currentValidationError;
+      } else {
+        this.changePasswordError = '';
+        this.changePasswordErrorShake = false;
+      }
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  private getChangePasswordValidationError(): string {
+    if (!this.currentPasswordChange.trim()) {
+      return 'Inserisci la password attuale.';
+    }
+
+    if (!this.newPasswordChange.trim()) {
+      return 'Inserisci una nuova password.';
+    }
+
+    if (this.newPasswordChange.trim().length < 6) {
+      return 'La nuova password deve contenere almeno 6 caratteri.';
+    }
+
+    if (!this.confirmNewPasswordChange.trim()) {
+      return 'Conferma la nuova password.';
+    }
+
+    if (this.newPasswordChange !== this.confirmNewPasswordChange) {
+      return 'Le nuove password non coincidono.';
+    }
+
+    if (this.currentPasswordChange === this.newPasswordChange) {
+      return 'La nuova password deve essere diversa da quella attuale.';
+    }
+
+    return '';
+  }
+
+  private showChangePasswordError(message: string): void {
+    this.changePasswordError = message;
+    this.changePasswordErrorShake = false;
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.changePasswordErrorShake = true;
+      this.cdr.detectChanges();
+    }, 10);
+  }
+
   changePasswordAction(): void {
     if (this.isChangingPassword) {
       return;
@@ -379,42 +460,39 @@ export class InfoUtenteComponent implements OnInit {
 
     this.changePasswordMessage = '';
     this.changePasswordError = '';
+    this.changePasswordErrorShake = false;
 
     if (!this.currentPasswordChange.trim()) {
-      this.changePasswordError = 'Inserisci la password attuale.';
-      this.cdr.detectChanges();
+      this.showChangePasswordError('Inserisci la password attuale.');
       return;
     }
 
     if (!this.newPasswordChange.trim()) {
-      this.changePasswordError = 'Inserisci una nuova password.';
-      this.cdr.detectChanges();
+      this.showChangePasswordError('Inserisci una nuova password.');
       return;
     }
 
     if (this.newPasswordChange.trim().length < 6) {
-      this.changePasswordError =
-        'La nuova password deve contenere almeno 6 caratteri.';
-      this.cdr.detectChanges();
+      this.showChangePasswordError(
+        'La nuova password deve contenere almeno 6 caratteri.'
+      );
       return;
     }
 
     if (!this.confirmNewPasswordChange.trim()) {
-      this.changePasswordError = 'Conferma la nuova password.';
-      this.cdr.detectChanges();
+      this.showChangePasswordError('Conferma la nuova password.');
       return;
     }
 
     if (this.newPasswordChange !== this.confirmNewPasswordChange) {
-      this.changePasswordError = 'Le nuove password non coincidono.';
-      this.cdr.detectChanges();
+      this.showChangePasswordError('Le nuove password non coincidono.');
       return;
     }
 
     if (this.currentPasswordChange === this.newPasswordChange) {
-      this.changePasswordError =
-        'La nuova password deve essere diversa da quella attuale.';
-      this.cdr.detectChanges();
+      this.showChangePasswordError(
+        'La nuova password deve essere diversa da quella attuale.'
+      );
       return;
     }
 
@@ -434,9 +512,11 @@ export class InfoUtenteComponent implements OnInit {
         this.changePasswordMessage =
           res?.message || 'Password aggiornata con successo.';
         this.changePasswordError = '';
+        this.changePasswordErrorShake = false;
 
         this.resetChangePasswordFields();
         this.showChangePasswordPanel = false;
+        this.clearChangePasswordMessageLater();
 
         if (this.user) {
           this.user.hasPassword = true;
@@ -450,9 +530,9 @@ export class InfoUtenteComponent implements OnInit {
         console.error('Errore modifica password:', err);
         this.isChangingPassword = false;
         this.changePasswordMessage = '';
-        this.changePasswordError =
-          err?.error?.message || 'Impossibile aggiornare la password.';
-        this.cdr.detectChanges();
+        this.showChangePasswordError(
+          err?.error?.message || 'Impossibile aggiornare la password.'
+        );
       }
     });
   }

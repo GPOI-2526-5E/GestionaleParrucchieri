@@ -30,6 +30,12 @@
       </div>
     </div>
 
+    <div *ngIf="changePasswordMessage" class="inline-status success-text success-banner-large profile-success-banner"
+      [class.hide]="changePasswordMessageHiding">
+      <span class="inline-status-icon" aria-hidden="true">✓</span>
+      <span>{{ changePasswordMessage }}</span>
+    </div>
+
     <div *ngIf="isLoading" class="state-panel">
       <div class="state-orb"></div>
       <span>Caricamento dati in corso...</span>
@@ -191,12 +197,10 @@
                   <h4>Aggiorna password</h4>
                   <p>Inserisci la password corrente e definisci una nuova combinazione sicura.</p>
 
-                  <div *ngIf="changePasswordMessage" class="inline-status success-text">
-                    {{ changePasswordMessage }}
-                  </div>
-
-                  <div *ngIf="changePasswordError" class="inline-status error-text">
-                    {{ changePasswordError }}
+                  <div *ngIf="changePasswordError" class="inline-status error-text"
+                    [class.shake]="changePasswordErrorShake">
+                    <span class="inline-status-icon" aria-hidden="true">!</span>
+                    <span>{{ changePasswordError }}</span>
                   </div>
 
                   <div class="form-group">
@@ -204,6 +208,7 @@
                     <div class="password-input-wrap">
                       <input id="currentPasswordChange" [type]="showCurrentPasswordChange ? 'text' : 'password'"
                         name="currentPasswordChange" [(ngModel)]="currentPasswordChange"
+                        (ngModelChange)="onChangePasswordFieldChange()"
                         placeholder="Inserisci la password attuale" />
 
                       <button type="button" class="toggle-password-btn"
@@ -220,6 +225,7 @@
                     <div class="password-input-wrap">
                       <input id="newPasswordChange" [type]="showNewPasswordChange ? 'text' : 'password'"
                         name="newPasswordChange" [(ngModel)]="newPasswordChange"
+                        (ngModelChange)="onChangePasswordFieldChange()"
                         placeholder="Inserisci la nuova password" />
 
                       <button type="button" class="toggle-password-btn"
@@ -236,6 +242,7 @@
                     <div class="password-input-wrap">
                       <input id="confirmNewPasswordChange" [type]="showConfirmNewPasswordChange ? 'text' : 'password'"
                         name="confirmNewPasswordChange" [(ngModel)]="confirmNewPasswordChange"
+                        (ngModelChange)="onChangePasswordFieldChange()"
                         placeholder="Conferma la nuova password" />
 
                       <button type="button" class="toggle-password-btn"

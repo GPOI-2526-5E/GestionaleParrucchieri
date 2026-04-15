@@ -630,8 +630,11 @@
   margin-top: 16px;
   padding: 24px;
   border-radius: 22px;
-  background: var(--glass-opaque-bg-strong);
-  border: 1px solid var(--glass-opaque-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 30%),
+    linear-gradient(90deg, rgba(212, 176, 106, 0.1), transparent 22%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(244, 239, 231, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.13);
   backdrop-filter: blur(18px) saturate(145%);
   -webkit-backdrop-filter: blur(18px) saturate(145%);
   box-shadow: var(--glass-opaque-shadow);
@@ -648,22 +651,97 @@
 
 .security-editor h4 {
   margin: 0 0 8px;
-  color: #fff;
+  color: #fffaf1;
   font-size: 18px;
 }
 
+.security-editor .form-group label {
+  color: rgba(255, 244, 227, 0.88);
+  font-weight: 700;
+}
+
+.security-editor p {
+  color: rgba(247, 242, 232, 0.88);
+}
+
 .inline-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 0 14px;
-  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.35s ease;
+  pointer-events: none;
+  border: 1px solid transparent;
   font-weight: 600;
+  line-height: 1.5;
+  animation: fadeSlideIn 0.25s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.inline-status-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
 }
 
 .success-text {
   color: var(--success);
+  background: rgba(73, 148, 101, 0.18);
+  border: 1px solid rgba(102, 179, 132, 0.25);
+}
+
+.success-banner-large {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 16px;
+}
+
+.success-banner-large .inline-status-icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  font-size: 13px;
+}
+
+.profile-success-banner {
+  margin: -4px 0 18px;
+  display: flex;
+  width: 100%;
+  max-width: none;
+}
+
+.inline-status.hide {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 .error-text {
-  color: var(--danger);
+  background: rgba(200, 60, 60, 0.18);
+  border: 1px solid rgba(255, 120, 120, 0.25);
+  color: #ffecec;
+}
+
+.inline-status.shake {
+  animation: shake 0.35s ease;
 }
 
 .profile-editor-shell {
@@ -771,6 +849,57 @@
 
 .form-group input::placeholder {
   color: rgba(255, 255, 255, 0.46);
+}
+
+.security-editor .form-group input {
+  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(247, 242, 235, 0.04));
+  color: #fffaf1;
+}
+
+.security-editor .form-group input::placeholder {
+  color: rgba(255, 245, 232, 0.66);
+}
+
+.security-editor .form-group input:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(248, 243, 236, 0.05));
+}
+
+.security-editor .form-group input:focus {
+  border-color: rgba(212, 176, 106, 0.42);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.12)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(248, 243, 236, 0.06));
+}
+
+.security-editor .toggle-password-btn {
+  color: rgba(212, 176, 106, 0.96);
+}
+
+.security-editor .toggle-password-btn:hover {
+  background: rgba(212, 176, 106, 0.12);
+  color: #f3dfb5;
+}
+
+.security-editor .panel-actions .mini-btn {
+  border-color: rgba(212, 176, 106, 0.34);
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.22), rgba(212, 176, 106, 0.1)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  color: #fff1d2;
+}
+
+.security-editor .panel-actions .mini-btn:hover {
+  border-color: rgba(245, 204, 112, 0.52);
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.28), rgba(212, 176, 106, 0.12)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025));
+  color: #fff7e8;
 }
 
 .form-group input:hover {
@@ -901,6 +1030,8 @@
   color: #fff1c8;
   transform: translateY(-1px);
 }
+
+
 
 .profile-footer-actions {
   margin-top: 30px;
@@ -1176,6 +1307,44 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-4px);
+  }
+
+  40% {
+    transform: translateX(4px);
+  }
+
+  60% {
+    transform: translateX(-3px);
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+
+  100% {
+    transform: translateX(0);
   }
 }
 
