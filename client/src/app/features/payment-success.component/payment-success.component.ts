@@ -10,6 +10,7 @@ import { NavbarComponent } from '../navbar.component/navbar.component';
 export class PaymentSuccessComponent implements OnInit {
 
   ngOnInit() {
+    sessionStorage.removeItem('paymentSuccessAccess');
     this.home();
   }
 

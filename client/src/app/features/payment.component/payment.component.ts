@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef, AfterViewChecked, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -55,6 +55,8 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
 
   isProcessing: boolean = false;
   paymentSuccess: boolean = false;
+  showValidationErrors = false;
+  paymentErrorMessage = '';
 
   @ViewChild('mapContainer') mapContainer!: ElementRef;
   map!: L.Map;
@@ -93,8 +95,18 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
     private auth: AuthService,
     private prodottoService: ProdottoService,
     private lockerService: LockerService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private location: Location
   ) { }
+
+  goBack(): void {
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+
+    window.location.href = '/cart';
+  }
 
   ngOnInit(): void {
     const savedCart = localStorage.getItem('cart');
@@ -173,10 +185,24 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
 
   onPhoneNumberChange(phoneNumber: string): void {
     this.phone = phoneNumber || '';
+    this.paymentErrorMessage = '';
   }
 
   onPhoneValidityChange(isValid: boolean): void {
     this.isPhoneValid = isValid;
+    this.paymentErrorMessage = '';
+  }
+
+  onExpiryInput(value: string): void {
+    const digits = value.replace(/\D/g, '').slice(0, 4);
+
+    if (digits.length <= 2) {
+      this.expiry = digits;
+    } else {
+      this.expiry = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    }
+
+    this.onFormInteraction();
   }
 
   private loadLoggedUserData(): void {
@@ -219,24 +245,37 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
     return /^[0-9]{16}$/.test(clean);
   }
 
-  isValidExpiry(): boolean {
-    if (!this.expiry) return false;
+  getExpiryErrorMessage(): string | null {
+    if (!this.expiry.trim()) return 'Inserisci la scadenza nel formato MM/AA.';
 
     const clean = this.expiry.trim();
     const match = clean.match(/^(\d{1,2})\/(\d{2})$/);
-    if (!match) return false;
+    if (!match) return 'Usa il formato MM/AA per la scadenza.';
 
-    let month = parseInt(match[1], 10);
+    const month = parseInt(match[1], 10);
     const year = 2000 + parseInt(match[2], 10);
-    if (month < 1 || month > 12) return false;
+
+    if (month < 1 || month > 12) {
+      return 'Il mese della scadenza deve essere tra 01 e 12.';
+    }
 
     const now = new Date();
-    const currentMonth = now.getMonth() + 1; 
+    const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
-    if (year < currentYear) return false;
-    if (year === currentYear && month < currentMonth) return false;
 
-    return true;
+    if (year < currentYear) {
+      return 'L\'anno della carta non e\' piu\' valido.';
+    }
+
+    if (year === currentYear && month < currentMonth) {
+      return 'La carta risulta scaduta.';
+    }
+
+    return null;
+  }
+
+  isValidExpiry(): boolean {
+    return this.getExpiryErrorMessage() === null;
   }
 
   isValidCVV(): boolean {
@@ -279,6 +318,53 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
     }
 
     return false;
+  }
+
+  hasFieldError(field: string): boolean {
+    return this.getFieldErrorMessage(field) !== null;
+  }
+
+  getFieldErrorMessage(field: string): string | null {
+    if (!this.showValidationErrors) return null;
+
+    switch (field) {
+      case 'name':
+        return this.isValidName() ? null : 'Inserisci un nome valido.';
+      case 'surname':
+        return this.isValidSurname() ? null : 'Inserisci un cognome valido.';
+      case 'email':
+        return this.isValidEmail() ? null : 'Controlla l\'indirizzo email.';
+      case 'phone':
+        return this.isValidPhone() ? null : 'Inserisci un numero di telefono valido.';
+      case 'cardName':
+        return this.isValidCardName() ? null : 'Il nome sulla carta non e\' valido.';
+      case 'cardNumber':
+        return this.isValidCardNumber() ? null : 'Il numero della carta deve avere 16 cifre.';
+      case 'expiry':
+        return this.getExpiryErrorMessage();
+      case 'cvv':
+        return this.isValidCVV() ? null : 'Il CVV deve contenere 3 o 4 cifre.';
+      case 'address':
+        if (this.shippingMethod !== 'standard' && this.shippingMethod !== 'express') return null;
+        return this.address.trim() ? null : 'Inserisci l\'indirizzo di consegna.';
+      case 'city':
+        if (this.shippingMethod !== 'standard' && this.shippingMethod !== 'express') return null;
+        return this.city.trim() ? null : 'Inserisci la citta\' di consegna.';
+      case 'zip':
+        if (this.shippingMethod !== 'standard' && this.shippingMethod !== 'express') return null;
+        if (!this.zip.trim()) return 'Inserisci il CAP.';
+        return /^[0-9]{5}$/.test(this.zip) ? null : 'Il CAP deve avere 5 cifre.';
+      case 'locker':
+        return this.shippingMethod === 'locker' && !this.selectedLocker
+          ? 'Seleziona un locker dalla mappa.'
+          : null;
+      default:
+        return null;
+    }
+  }
+
+  onFormInteraction(): void {
+    this.paymentErrorMessage = '';
   }
 
   getPayTooltip(): string {
@@ -353,6 +439,8 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
   }
 
   onShippingChange() {
+    this.onFormInteraction();
+
     switch (this.shippingMethod) {
       case 'express':
         this.shippingCost = 9.99;
@@ -387,8 +475,15 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
   }
 
   pay(): void {
+    if (this.isProcessing || this.paymentSuccess) return;
 
-    if (this.isPayDisabled() || this.isProcessing) return;
+    this.showValidationErrors = true;
+    this.paymentErrorMessage = '';
+
+    if (this.isPayDisabled()) {
+      this.cdr.detectChanges();
+      return;
+    }
 
     this.isProcessing = true;
     this.cdr.detectChanges();
@@ -401,10 +496,13 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
 
           this.paymentSuccess = true;
           this.isProcessing = false;
+          this.showValidationErrors = false;
+          this.paymentErrorMessage = '';
 
           this.cdr.detectChanges();
 
           setTimeout(() => {
+            sessionStorage.setItem('paymentSuccessAccess', 'true');
 
             localStorage.removeItem('cart');
             localStorage.removeItem('cart_total');
@@ -420,8 +518,8 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
 
         error: () => {
           this.isProcessing = false;
+          this.paymentErrorMessage = 'Pagamento non riuscito. Riprova tra qualche istante.';
           this.cdr.detectChanges();
-          alert('Errore durante il pagamento');
         }
 
       });

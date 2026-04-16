@@ -15,6 +15,7 @@ import { PasswordDimenticataComponent } from './features/password-dimenticata.co
 import { ResetPasswordComponent } from './features/reset-password.component/reset-password.component';
 import { authGuard } from './guards/auth.guard';
 import { PrenotaAppuntamentoComponent } from './features/prenota-appuntamento.component/prenota-appuntamento.component';
+import { paymentSuccessGuard } from './guards/payment-success.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -25,7 +26,7 @@ export const routes: Routes = [
     { path: 'service/:id', component: ServiceDetailsComponent },
     { path: 'cart', component: CartComponent },
     { path: 'payment', component: PaymentComponent, canActivate: [authGuard] },
-    { path: 'payment-success', component: PaymentSuccessComponent },
+    { path: 'payment-success', component: PaymentSuccessComponent, canActivate: [paymentSuccessGuard] },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'account', component: InfoUtenteComponent, canActivate: [authGuard] },
