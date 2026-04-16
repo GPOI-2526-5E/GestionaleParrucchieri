@@ -129,6 +129,10 @@ export class InfoUtenteComponent implements OnInit {
     this.loadUserData();
   }
 
+  get accessModeLabel(): string {
+    return this.user?.photoURL ? 'Google' : 'Credenziali';
+  }
+
   private resetCompletionPasswordFields(): void {
     this.password = '';
     this.confirmPassword = '';
