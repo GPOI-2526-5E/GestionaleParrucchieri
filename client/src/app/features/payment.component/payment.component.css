@@ -236,6 +236,178 @@
   font-weight: 600;
 }
 
+::ng-deep intl-tel-input .iti__arrow {
+  margin-left: 8px;
+  border-top-color: #d4b06a !important;
+}
+
+::ng-deep intl-tel-input .iti__flag-container {
+  border-radius: 10px 0 0 10px;
+  overflow: hidden;
+}
+
+::ng-deep intl-tel-input .iti__dropdown-content,
+::ng-deep intl-tel-input .iti__country-list {
+  background:
+    linear-gradient(180deg, rgba(18, 16, 13, 0.96), rgba(9, 8, 7, 0.98)),
+    radial-gradient(circle at top right, rgba(212, 176, 106, 0.1), transparent 38%) !important;
+}
+
+::ng-deep intl-tel-input .iti__dropdown-content {
+  top: calc(100% + 8px) !important;
+  bottom: auto !important;
+  border: 1px solid rgba(212, 176, 106, 0.18) !important;
+  border-radius: 24px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 52px rgba(0, 0, 0, 0.42) !important;
+  display: block !important;
+  visibility: hidden;
+  pointer-events: none;
+  clip-path: inset(0 0 100% 0 round 24px);
+  transform: perspective(900px) rotateX(-10deg) scaleY(0.94);
+  transform-origin: top center;
+  transition:
+    clip-path 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    transform 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    visibility 0s linear 0.34s;
+  overflow: hidden !important;
+  z-index: 9999 !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+::ng-deep intl-tel-input .iti--inline-dropdown .iti__dropdown-content,
+::ng-deep intl-tel-input .iti--inline-dropdown:not(.iti--container) .iti__dropdown-content {
+  top: calc(100% + 8px) !important;
+  bottom: auto !important;
+}
+
+::ng-deep intl-tel-input .iti__dropdown-content:not(.iti__hide) {
+  visibility: visible;
+  pointer-events: auto;
+  clip-path: inset(0 0 0 0 round 24px);
+  transform: perspective(900px) rotateX(0) scaleY(1);
+  transition:
+    clip-path 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    transform 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    visibility 0s linear 0s;
+}
+
+::ng-deep intl-tel-input .iti__dropdown-content.iti__hide {
+  display: block !important;
+  visibility: hidden;
+  pointer-events: none;
+  clip-path: inset(0 0 100% 0 round 24px);
+  transform: perspective(900px) rotateX(-8deg) scaleY(0.94);
+}
+
+::ng-deep intl-tel-input .iti__country-list {
+  max-height: 260px !important;
+  padding: 6px !important;
+  border-top: 1px solid rgba(212, 176, 106, 0.1) !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 176, 106, 0.65) rgba(255, 255, 255, 0.04);
+}
+
+::ng-deep intl-tel-input .iti__country-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+::ng-deep intl-tel-input .iti__country-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 176, 106, 0.65);
+  border-radius: 999px;
+}
+
+::ng-deep intl-tel-input .iti__search-input {
+  width: calc(100% - 20px) !important;
+  margin: 10px !important;
+  min-height: 48px !important;
+  padding: 12px 14px 12px 50px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(212, 176, 106, 0.16) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.035) !important;
+  color: #fffaf1 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+::ng-deep intl-tel-input .iti__search-input::placeholder {
+  color: rgba(247, 242, 232, 0.58) !important;
+}
+
+::ng-deep intl-tel-input .iti__search-input-wrapper {
+  position: relative;
+}
+
+::ng-deep intl-tel-input .iti__search-icon {
+  left: 33px !important;
+  color: rgba(247, 242, 232, 0.56) !important;
+}
+
+::ng-deep intl-tel-input .iti__search-icon-svg {
+  stroke: currentColor !important;
+  opacity: 0.9;
+}
+
+::ng-deep intl-tel-input .iti__search-clear {
+  right: 18px !important;
+}
+
+::ng-deep intl-tel-input .iti__search-input:focus {
+  border-color: rgba(212, 176, 106, 0.34) !important;
+  box-shadow: 0 0 0 4px rgba(212, 176, 106, 0.1) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03)),
+    rgba(255, 255, 255, 0.04) !important;
+}
+
+::ng-deep intl-tel-input .iti__country {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  padding: 12px 14px !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+  color: #f7f2e8 !important;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  border: 1px solid transparent !important;
+}
+
+::ng-deep intl-tel-input .iti__country:hover,
+::ng-deep intl-tel-input .iti__highlight {
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.16), rgba(212, 176, 106, 0.08)),
+    rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(212, 176, 106, 0.14) !important;
+  transform: translateY(-1px);
+}
+
+::ng-deep intl-tel-input .iti__country.iti__active,
+::ng-deep intl-tel-input .iti__country[aria-selected="true"] {
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.18), rgba(212, 176, 106, 0.1)),
+    rgba(255, 255, 255, 0.035) !important;
+  border-color: rgba(212, 176, 106, 0.2) !important;
+}
+
+::ng-deep intl-tel-input .iti__country-name,
+::ng-deep intl-tel-input .iti__dial-code {
+  color: #f7f2e8 !important;
+}
+
+::ng-deep intl-tel-input .iti__country-name {
+  font-weight: 600;
+}
+
+::ng-deep intl-tel-input .iti__dial-code {
+  color: rgba(243, 223, 181, 0.88) !important;
+}
+
 
 .payment-summary-card {
   position: sticky;
