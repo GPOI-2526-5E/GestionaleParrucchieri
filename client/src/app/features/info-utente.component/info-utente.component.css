@@ -438,6 +438,13 @@
   min-width: 188px;
 }
 
+.register-users-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .identity-stats {
   display: grid;
   gap: 16px;

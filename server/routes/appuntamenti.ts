@@ -14,6 +14,15 @@ interface Appuntamento {
 
 const router = Router();
 
+function normalizeEndDateTime(dataOraInizio: string, dataOraFine: string): string {
+  if (dataOraFine.includes("T")) {
+    return dataOraFine;
+  }
+
+  const [datePart] = dataOraInizio.split("T");
+  return datePart ? `${datePart}T${dataOraFine}` : dataOraFine;
+}
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     const idOperatoreNum = parseInt(req.query.idOperatore as string, 10);
@@ -58,13 +67,33 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
       });
     }
 
+    const normalizedEndDateTime = normalizeEndDateTime(dataOraInizio, dataOraFine);
+
+    const { data: overlappingAppointments, error: overlappingAppointmentsError } = await db
+      .from("appuntamenti")
+      .select("idAppuntamento")
+      .eq("idOperatore", idOperatore)
+      .lt("dataOraInizio", normalizedEndDateTime)
+      .gt("dataOraFine", dataOraInizio)
+      .limit(1);
+
+    if (overlappingAppointmentsError) {
+      throw overlappingAppointmentsError;
+    }
+
+    if ((overlappingAppointments || []).length > 0) {
+      return res.status(409).json({
+        message: "L'operatore non e disponibile per tutta la durata del servizio selezionato"
+      });
+    }
+
     const { data, error } = await db
       .from("appuntamenti")
       .insert({
         idCliente,
         idOperatore,
         dataOraInizio,
-        dataOraFine,
+        dataOraFine: normalizedEndDateTime,
         stato: stato || "prenotato",
         note: note || null
       })

@@ -47,6 +47,8 @@ export class AuthService {
 
   isAdmin = computed(() => this.userRole() === 'admin');
 
+  isOperatore = computed(() => this.userRole() === 'operatore' || this.userRole() === 'admin');
+
   constructor(
     private http: HttpClient,
     private router: Router

@@ -16,13 +16,15 @@ export class ServiziService {
   getServizi(): Observable<Servizio[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
       map(servizi =>
-        servizi.map(s => ({
-          idServizio: s.idServizio ?? s.id,
-          nome: s.nome,
-          descrizione: s.descrizione,
-          durata: s.durata,
-          prezzo: Number(s.prezzo)
-        }))
+        servizi.map(s => this.mapServizio(s))
+      )
+    );
+  }
+
+  getServiziPrenotabiliByOperatore(idOperatore: number): Observable<Servizio[]> {
+    return this.http.get<any[]>(`${this.apiUrl}?idOperatore=${idOperatore}`).pipe(
+      map(servizi =>
+        servizi.map(s => this.mapServizio(s))
       )
     );
   }
@@ -51,5 +53,15 @@ export class ServiziService {
 
   removeServiceFromCart(serviceId: number | string): void {
     this.cart.update(curCart => curCart.filter(service => service.idServizio != serviceId));
+  }
+
+  private mapServizio(s: any): Servizio {
+    return {
+      idServizio: s.idServizio ?? s.id,
+      nome: s.nome,
+      descrizione: s.descrizione,
+      durata: Number(s.durata),
+      prezzo: Number(s.prezzo ?? s.prezzoRivendita ?? 0)
+    };
   }
 }

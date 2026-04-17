@@ -96,6 +96,14 @@
                     <button type="button" class="edit-btn" (click)="enableEditMode()">
                       Aggiorna profilo
                     </button>
+
+                    <a
+                      *ngIf="canRegisterUsers"
+                      [routerLink]="['/register']"
+                      class="edit-btn register-users-btn"
+                    >
+                      Registra utenti
+                    </a>
                   </div>
                 </div>
               </div>

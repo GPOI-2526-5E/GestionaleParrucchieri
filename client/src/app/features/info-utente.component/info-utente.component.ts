@@ -129,6 +129,10 @@ export class InfoUtenteComponent implements OnInit {
     this.loadUserData();
   }
 
+  get canRegisterUsers(): boolean {
+    return String(this.user?.ruolo ?? '').trim().toLowerCase() === 'operatore';
+  }
+
   get accessModeLabel(): string {
     return this.user?.photoURL ? 'Google' : 'Credenziali';
   }

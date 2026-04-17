@@ -5,10 +5,12 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { NavbarComponent } from '../navbar.component/navbar.component';
 import { UtentiService } from '../../services/utentiService';
 import { AppuntamentoService } from '../../services/appuntamentoService';
+import { Appuntamento } from '../../models/appuntamento.model';
 import { Utente } from '../../models/utente.model';
 import { Servizio } from '../../models/servizio.model';
 import { AuthService } from '../../services/auth';
 import { ServiziService } from '../../services/servizio';
+import { forkJoin } from 'rxjs';
 
 interface OpeningInterval {
   start: string;
@@ -34,7 +36,10 @@ interface DailySchedule {
 export class PrenotaAppuntamentoComponent implements OnInit {
   operatori: Utente[] = [];
   servizi: Servizio[] = [];
+  appuntamentiOperatore: Appuntamento[] = [];
   minDateTime = '';
+  availabilityMessage = '';
+  private selectedServizioFromQuery: number | null = null;
   private readonly openingSchedule: Record<number, DailySchedule> = {
     0: { name: 'Domenica', intervals: [] },
     1: { name: 'Lunedi', intervals: [] },
@@ -65,58 +70,49 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   ngOnInit(): void {
     this.minDateTime = this.getCurrentDateTimeLocal();
 
+    this.route.queryParamMap.subscribe((params) => {
+      const selectedDate = params.get('data');
+      const selectedOperator = params.get('operatore');
+      const selectedServizio = params.get('servizio');
+
+      if (selectedDate) {
+        this.form.dataOraInizio = this.toDateTimeLocalValue(selectedDate);
+      }
+
+      if (selectedServizio) {
+        const parsedServizio = Number(selectedServizio);
+        this.selectedServizioFromQuery = Number.isFinite(parsedServizio) ? parsedServizio : null;
+      } else {
+        this.selectedServizioFromQuery = null;
+      }
+
+      if (selectedOperator) {
+        const parsedOperatore = Number(selectedOperator);
+        this.form.idOperatore = Number.isFinite(parsedOperatore) ? parsedOperatore : null;
+      }
+
+      if (this.operatori.length > 0) {
+        this.loadServiziDisponibili();
+        this.cdr.detectChanges();
+      }
+    });
+
     this.utentiService.getOperatori().subscribe({
       next: (operatori) => {
         this.operatori = operatori;
+        if (!this.form.idOperatore && this.operatori.length > 0) {
+          this.form.idOperatore = this.operatori[0].idUtente;
+        }
 
-        this.route.queryParamMap.subscribe((params) => {
-          const selectedDate = params.get('data');
-          const selectedOperator = params.get('operatore');
-
-          if (selectedDate) {
-            this.form.dataOraInizio = this.toDateTimeLocalValue(selectedDate);
-          }
-
-          if (selectedOperator) {
-            this.form.idOperatore = Number(selectedOperator);
-          }
-
-          // fallback se non arriva niente dai params
-          if (!this.form.idOperatore && this.operatori.length > 0) {
-            this.form.idOperatore = this.operatori[0].idUtente;
-          }
-
-          this.cdr.detectChanges();
-        });
+        this.loadServiziDisponibili();
+        this.cdr.detectChanges();
       },
       error: (err) => console.error(err)
     });
+  }
 
-    this.servizioService.getServizi().subscribe({
-      next: (servizi) => {
-        this.servizi = servizi;
-
-        this.route.queryParamMap.subscribe((params) => {
-          const selectedServizio = params.get('servizio');
-
-          if (selectedServizio) {
-            this.form.idServizio = Number(selectedServizio);
-          }
-
-          // fallback se non arriva niente dai params
-          if (!this.form.idServizio && this.servizi.length > 0) {
-            this.form.idServizio = this.servizi[0].idServizio;
-          }
-
-          if (this.form.dataOraInizio && this.form.idServizio) {
-            this.onServizioChange();
-          }
-
-          this.cdr.detectChanges();
-        });
-      },
-      error: (err) => console.error(err)
-    });
+  onOperatoreChange(): void {
+    this.loadServiziDisponibili();
   }
 
   prenotaAppuntamento(): void {
@@ -217,9 +213,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
   private validateAppointmentWindow(): string | null {
     const start = new Date(this.form.dataOraInizio);
-    const end = new Date(this.form.dataOraFine);
+    const end = this.getNormalizedEndDate();
 
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    if (Number.isNaN(start.getTime()) || !end || Number.isNaN(end.getTime())) {
       return 'Inserisci una data di inizio e una di fine valide.';
     }
 
@@ -279,19 +275,145 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
     if (!servizio) return;
 
-    const durata = servizio.durata;
-    //console.log(servizio.durata)
+    const end = this.calculateServiceEnd(servizio);
 
-    const start = new Date(this.form.dataOraInizio);
+    if (!end) return;
 
-    if (Number.isNaN(start.getTime())) return;
+    if (!this.isServiceAvailableForSelectedSlot(servizio)) {
+      this.form.idServizio = null;
+      this.form.dataOraFine = '';
+      this.availabilityMessage =
+        'Questo servizio non puo essere prenotato in questo slot perche l\'operatore ha gia un altro appuntamento in sovrapposizione.';
+      this.cdr.detectChanges();
+      return;
+    }
 
-    const end = new Date(start);
-    end.setMinutes(end.getMinutes() + durata);
-
+    this.availabilityMessage = '';
     this.form.dataOraFine = this.formatTime(end);
 
     this.cdr.detectChanges();
+  }
+
+  private loadServiziDisponibili(): void {
+    if (!this.form.idOperatore) {
+      this.servizi = [];
+      this.appuntamentiOperatore = [];
+      this.form.idServizio = null;
+      this.form.dataOraFine = '';
+      this.availabilityMessage = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    forkJoin({
+      servizi: this.servizioService.getServiziPrenotabiliByOperatore(this.form.idOperatore),
+      appuntamenti: this.appuntamentoService.getAppuntamenti(this.form.idOperatore)
+    }).subscribe({
+      next: ({ servizi, appuntamenti }) => {
+        this.appuntamentiOperatore = appuntamenti;
+        this.servizi = this.filterServiziDisponibiliPerSlot(servizi);
+
+        const queryServiceId = this.selectedServizioFromQuery;
+        const hasQueryService =
+          queryServiceId != null &&
+          this.servizi.some((servizio) => servizio.idServizio === queryServiceId);
+
+        if (hasQueryService) {
+          this.form.idServizio = queryServiceId;
+        } else if (!this.servizi.some((servizio) => servizio.idServizio === this.form.idServizio)) {
+          this.form.idServizio = this.servizi.length > 0 ? this.servizi[0].idServizio : null;
+        }
+
+        this.selectedServizioFromQuery = null;
+
+        if (this.form.dataOraInizio && this.form.idServizio) {
+          this.onServizioChange();
+        } else if (!this.form.idServizio) {
+          this.form.dataOraFine = '';
+        }
+
+        this.updateAvailabilityMessage();
+
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.servizi = [];
+        this.appuntamentiOperatore = [];
+        this.form.idServizio = null;
+        this.form.dataOraFine = '';
+        this.availabilityMessage = '';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private filterServiziDisponibiliPerSlot(servizi: Servizio[]): Servizio[] {
+    if (!this.form.dataOraInizio) {
+      return servizi;
+    }
+
+    return servizi.filter((servizio) => this.isServiceAvailableForSelectedSlot(servizio));
+  }
+
+  private isServiceAvailableForSelectedSlot(servizio: Servizio): boolean {
+    const start = new Date(this.form.dataOraInizio);
+    const end = this.calculateServiceEnd(servizio);
+
+    if (Number.isNaN(start.getTime()) || !end) {
+      return true;
+    }
+
+    return !this.appuntamentiOperatore.some((appuntamento) => {
+      const appointmentStart = new Date(appuntamento.dataOraInizio);
+      const appointmentEnd = new Date(appuntamento.dataOraFine);
+
+      if (Number.isNaN(appointmentStart.getTime()) || Number.isNaN(appointmentEnd.getTime())) {
+        return false;
+      }
+
+      return start < appointmentEnd && end > appointmentStart;
+    });
+  }
+
+  private calculateServiceEnd(servizio: Servizio): Date | null {
+    const start = new Date(this.form.dataOraInizio);
+
+    if (Number.isNaN(start.getTime())) {
+      return null;
+    }
+
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + Number(servizio.durata || 0));
+    return end;
+  }
+
+  private getNormalizedEndDate(): Date | null {
+    if (!this.form.dataOraInizio || !this.form.dataOraFine) {
+      return null;
+    }
+
+    const endValue = this.form.dataOraFine.includes('T')
+      ? this.form.dataOraFine
+      : `${this.form.dataOraInizio.split('T')[0]}T${this.form.dataOraFine}`;
+
+    const end = new Date(endValue);
+    return Number.isNaN(end.getTime()) ? null : end;
+  }
+
+  private updateAvailabilityMessage(): void {
+    if (!this.form.dataOraInizio) {
+      this.availabilityMessage = '';
+      return;
+    }
+
+    if (this.servizi.length === 0) {
+      this.availabilityMessage =
+        'Nessun servizio e disponibile in questo orario per l\'operatore selezionato.';
+      return;
+    }
+
+    this.availabilityMessage = '';
   }
 
   private formatTime(date: Date): string {

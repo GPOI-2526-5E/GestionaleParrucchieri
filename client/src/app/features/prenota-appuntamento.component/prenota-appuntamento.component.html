@@ -36,7 +36,7 @@
             <!-- OPERATORE -->
             <div class="form-group full-width">
               <label>Operatore</label>
-              <select [(ngModel)]="form.idOperatore" name="idOperatore">
+              <select [(ngModel)]="form.idOperatore" name="idOperatore" (ngModelChange)="onOperatoreChange()">
                 <option *ngFor="let op of operatori" [value]="op.idUtente">
                   {{ op.nome }} {{ op.cognome }}
                 </option>
@@ -45,11 +45,14 @@
 
             <div class="form-group full-width">
               <label>Servizi</label>
-              <select [(ngModel)]="form.idServizio" name="idServizio" (change)="onServizioChange()">
+              <select [(ngModel)]="form.idServizio" name="idServizio" (ngModelChange)="onServizioChange()">
                 <option *ngFor="let ser of servizi" [ngValue]="ser.idServizio">
                   {{ ser.nome }} | {{ ser.prezzo }} €
                 </option>
               </select>
+              <div *ngIf="availabilityMessage" class="availability-message">
+                {{ availabilityMessage }}
+              </div>
             </div>
 
             <!-- DATA INIZIO -->

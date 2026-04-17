@@ -16,6 +16,7 @@ import { ResetPasswordComponent } from './features/reset-password.component/rese
 import { authGuard } from './guards/auth.guard';
 import { PrenotaAppuntamentoComponent } from './features/prenota-appuntamento.component/prenota-appuntamento.component';
 import { paymentSuccessGuard } from './guards/payment-success.guard';
+import { registerGuard } from './guards/register.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -28,7 +29,7 @@ export const routes: Routes = [
     { path: 'payment', component: PaymentComponent, canActivate: [authGuard] },
     { path: 'payment-success', component: PaymentSuccessComponent, canActivate: [paymentSuccessGuard] },
     { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent },
+    { path: 'register', component: RegisterComponent, canActivate: [registerGuard] },
     { path: 'account', component: InfoUtenteComponent, canActivate: [authGuard] },
     { path: 'appointments', component: AppuntamentiComponent },
     { path: 'forgot-password', component: PasswordDimenticataComponent },

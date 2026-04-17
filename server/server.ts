@@ -11,6 +11,7 @@ import loginRoute from "./routes/login";
 import googleAuthRoute from "./routes/google-auth";
 import utentiRoute from "./routes/utenti";
 import appuntamentiRoute from "./routes/appuntamenti";
+import serviziRoute from "./routes/servizi";
 
 
 dotenv.config();
@@ -101,17 +102,7 @@ app.use("/api/auth", loginRoute);
 app.use("/api/auth", googleAuthRoute);
 app.use("/api/utenti", utentiRoute);
 app.use("/api/appuntamenti", appuntamentiRoute);
-
-app.get("/api/servizi", async (req, res) => {
-  try {
-    const { data, error } = await db.from("servizi").select("*");
-    if (error) throw error;
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Errore server" });
-  }
-});
+app.use("/api/servizi", serviziRoute);
 app.get("/api/prodotti", async (req, res) => {
   try {
     const { data, error } = await db
