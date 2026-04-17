@@ -36,20 +36,64 @@
             <!-- OPERATORE -->
             <div class="form-group full-width">
               <label>Operatore</label>
-              <select [(ngModel)]="form.idOperatore" name="idOperatore" (ngModelChange)="onOperatoreChange()">
-                <option *ngFor="let op of operatori" [value]="op.idUtente">
-                  {{ op.nome }} {{ op.cognome }}
-                </option>
-              </select>
+              <div class="booking-dropdown" [class.open]="isOperatoreOpen">
+                <button
+                  type="button"
+                  class="booking-dropdown-trigger"
+                  [class.open]="isOperatoreOpen"
+                  (click)="toggleOperatoreDropdown()"
+                  [attr.aria-expanded]="isOperatoreOpen"
+                >
+                  <span class="booking-dropdown-trigger-text">{{ getSelectedOperatoreLabel() }}</span>
+                  <span class="booking-dropdown-chevron"></span>
+                </button>
+
+                <div class="booking-dropdown-panel" [class.open]="isOperatoreOpen">
+                  <div class="booking-dropdown-panel-inner">
+                    <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona operatore">
+                      <li
+                        *ngFor="let op of operatori"
+                        (click)="selectOperatore(op.idUtente)"
+                        [class.active]="form.idOperatore === op.idUtente"
+                      >
+                        {{ op.nome }} {{ op.cognome }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="form-group full-width">
               <label>Servizi</label>
-              <select [(ngModel)]="form.idServizio" name="idServizio" (ngModelChange)="onServizioChange()">
-                <option *ngFor="let ser of servizi" [ngValue]="ser.idServizio">
-                  {{ ser.nome }} | {{ ser.prezzo }} €
-                </option>
-              </select>
+              <div class="booking-dropdown" [class.open]="isServizioOpen">
+                <button
+                  type="button"
+                  class="booking-dropdown-trigger"
+                  [class.open]="isServizioOpen"
+                  [disabled]="servizi.length === 0"
+                  (click)="toggleServizioDropdown()"
+                  [attr.aria-expanded]="isServizioOpen"
+                >
+                  <span class="booking-dropdown-trigger-text">{{ getSelectedServizioLabel() }}</span>
+                  <span class="booking-dropdown-chevron"></span>
+                </button>
+
+                <div class="booking-dropdown-panel" [class.open]="isServizioOpen">
+                  <div class="booking-dropdown-panel-inner">
+                    <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona servizio">
+                      <li
+                        *ngFor="let ser of servizi"
+                        (click)="selectServizio(ser.idServizio)"
+                        [class.active]="form.idServizio === ser.idServizio"
+                        [class.disabled]="isServiceDisabled(ser)"
+                      >
+                        {{ ser.nome }} | {{ ser.prezzo }} EUR
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
               <div *ngIf="availabilityMessage" class="availability-message">
                 {{ availabilityMessage }}
               </div>
@@ -86,6 +130,10 @@
       </div>
 
       <!-- BOTTONI -->
+      <div *ngIf="bookingAlertMessage" class="booking-alert" [ngClass]="bookingAlertType">
+        {{ bookingAlertMessage }}
+      </div>
+
       <div class="profile-footer-actions">
         <button type="submit" class="save-btn">
           Prenota appuntamento

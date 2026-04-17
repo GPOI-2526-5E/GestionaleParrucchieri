@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -39,6 +39,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   appuntamentiOperatore: Appuntamento[] = [];
   minDateTime = '';
   availabilityMessage = '';
+  bookingAlertMessage = '';
+  bookingAlertType: 'success' | 'error' | null = null;
+  isOperatoreOpen = false;
+  isServizioOpen = false;
   private selectedServizioFromQuery: number | null = null;
   private readonly openingSchedule: Record<number, DailySchedule> = {
     0: { name: 'Domenica', intervals: [] },
@@ -112,10 +116,78 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   }
 
   onOperatoreChange(): void {
+    this.isOperatoreOpen = false;
     this.loadServiziDisponibili();
   }
 
+  toggleOperatoreDropdown(): void {
+    this.isOperatoreOpen = !this.isOperatoreOpen;
+    if (this.isOperatoreOpen) {
+      this.isServizioOpen = false;
+    }
+  }
+
+  toggleServizioDropdown(): void {
+    if (this.servizi.length === 0) {
+      return;
+    }
+
+    this.isServizioOpen = !this.isServizioOpen;
+    if (this.isServizioOpen) {
+      this.isOperatoreOpen = false;
+    }
+  }
+
+  selectOperatore(idOperatore: number): void {
+    this.form.idOperatore = idOperatore;
+    this.onOperatoreChange();
+  }
+
+  selectServizio(idServizio: number): void {
+    const servizio = this.servizi.find((item) => item.idServizio === idServizio);
+
+    if (!servizio || this.isServiceDisabled(servizio)) {
+      return;
+    }
+
+    this.form.idServizio = idServizio;
+    this.isServizioOpen = false;
+    this.onServizioChange();
+  }
+
+  getSelectedOperatoreLabel(): string {
+    const operatore = this.operatori.find((item) => item.idUtente === this.form.idOperatore);
+    return operatore ? `${operatore.nome} ${operatore.cognome}` : 'Seleziona operatore';
+  }
+
+  getSelectedServizioLabel(): string {
+    const servizio = this.servizi.find((item) => item.idServizio === this.form.idServizio);
+    return servizio ? `${servizio.nome} | ${servizio.prezzo} €` : 'Seleziona servizio';
+  }
+
+  isServiceDisabled(servizio: Servizio): boolean {
+    return !!this.form.dataOraInizio && !this.isServiceAvailableForSelectedSlot(servizio);
+  }
+
+  getSelectedServizioNome(): string {
+    const servizio = this.servizi.find((s) => s.idServizio === this.form.idServizio);
+    return servizio?.nome ?? '';
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    if (!target.closest('.booking-dropdown')) {
+      this.isOperatoreOpen = false;
+      this.isServizioOpen = false;
+    }
+  }
+
   prenotaAppuntamento(): void {
+    this.bookingAlertMessage = '';
+    this.bookingAlertType = null;
+
     if (!this.isOraFineSuccessiva()) {
       alert('L\'orario di fine deve essere successivo all\'orario di inizio.');
       return;
@@ -131,6 +203,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
     const decodedPayload = JSON.parse(atob(payloadBase64)) as { userId?: number };
     const idCliente = decodedPayload.userId;
+    const note = this.getSelectedServizioNome();
 
     if (!idCliente) {
       alert('Impossibile identificare l\'utente. Effettua di nuovo il login.');
@@ -146,7 +219,8 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
     const payload = {
       ...this.form,
-      idCliente
+      idCliente,
+      note
     };
 
     console.log('Invio:', payload);
@@ -154,12 +228,19 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     this.appuntamentoService.creaAppuntamento(payload)
       .subscribe({
         next: () => {
-          alert('Appuntamento prenotato!');
-          this.router.navigate(['/appuntamenti']);
+          this.bookingAlertType = 'success';
+          this.bookingAlertMessage = 'Appuntamento prenotato con successo';
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.router.navigate(['/appointments']);
+          }, 1500);
         },
         error: (err: unknown) => {
           console.error(err);
-          alert('Errore prenotazione');
+          this.bookingAlertType = 'error';
+          this.bookingAlertMessage = 'Prenotazione dell\'appuntamento non riuscita';
+          this.cdr.detectChanges();
         }
       });
   }
@@ -301,6 +382,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       this.form.idServizio = null;
       this.form.dataOraFine = '';
       this.availabilityMessage = '';
+      this.isServizioOpen = false;
       this.cdr.detectChanges();
       return;
     }
@@ -311,17 +393,25 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     }).subscribe({
       next: ({ servizi, appuntamenti }) => {
         this.appuntamentiOperatore = appuntamenti;
-        this.servizi = this.filterServiziDisponibiliPerSlot(servizi);
+        this.servizi = servizi;
+        const firstAvailableService = this.servizi.find((servizio) => !this.isServiceDisabled(servizio)) ?? null;
 
         const queryServiceId = this.selectedServizioFromQuery;
         const hasQueryService =
           queryServiceId != null &&
-          this.servizi.some((servizio) => servizio.idServizio === queryServiceId);
+          this.servizi.some(
+            (servizio) => servizio.idServizio === queryServiceId && !this.isServiceDisabled(servizio)
+          );
 
         if (hasQueryService) {
           this.form.idServizio = queryServiceId;
         } else if (!this.servizi.some((servizio) => servizio.idServizio === this.form.idServizio)) {
-          this.form.idServizio = this.servizi.length > 0 ? this.servizi[0].idServizio : null;
+          this.form.idServizio = firstAvailableService?.idServizio ?? null;
+        } else {
+          const selectedService = this.servizi.find((servizio) => servizio.idServizio === this.form.idServizio);
+          if (selectedService && this.isServiceDisabled(selectedService)) {
+            this.form.idServizio = firstAvailableService?.idServizio ?? null;
+          }
         }
 
         this.selectedServizioFromQuery = null;
@@ -332,6 +422,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
           this.form.dataOraFine = '';
         }
 
+        this.isServizioOpen = false;
         this.updateAvailabilityMessage();
 
         this.cdr.detectChanges();
@@ -343,17 +434,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
         this.form.idServizio = null;
         this.form.dataOraFine = '';
         this.availabilityMessage = '';
+        this.isServizioOpen = false;
         this.cdr.detectChanges();
       }
     });
-  }
-
-  private filterServiziDisponibiliPerSlot(servizi: Servizio[]): Servizio[] {
-    if (!this.form.dataOraInizio) {
-      return servizi;
-    }
-
-    return servizi.filter((servizio) => this.isServiceAvailableForSelectedSlot(servizio));
   }
 
   private isServiceAvailableForSelectedSlot(servizio: Servizio): boolean {

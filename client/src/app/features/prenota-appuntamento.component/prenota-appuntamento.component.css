@@ -2,6 +2,10 @@
   display: block;
   --gold: #d4b06a;
   --gold-soft: #f3dfb5;
+  --border-soft: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --input-bg-hover: rgba(255, 255, 255, 0.08);
+  --input-bg-focus: rgba(255, 255, 255, 0.1);
   --ink: #0a0908;
   --paper: #f8f5ef;
   --text-main: #f7f2e8;
@@ -68,11 +72,19 @@
 .profile-editor-shell,
 .editor-main-panel {
   position: relative;
-  overflow: hidden;
   border: 1px solid var(--line-gold);
   box-shadow: var(--shadow-xl);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+}
+
+.profile-hero-card {
+  overflow: hidden;
+}
+
+.profile-editor-shell,
+.editor-main-panel {
+  overflow: visible;
 }
 
 .profile-hero-card {
@@ -229,20 +241,198 @@
   resize: vertical;
 }
 
-.form-group select {
-  appearance: none;
+.booking-dropdown {
+  position: relative;
+}
+
+.booking-dropdown-trigger {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 176, 106, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f5f5;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
   cursor: pointer;
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--gold-soft) 50%),
-    linear-gradient(135deg, var(--gold-soft) 50%, transparent 50%),
-    linear-gradient(180deg, rgba(20, 20, 20, 0.94), rgba(12, 12, 12, 0.98));
-  background-position:
-    calc(100% - 20px) calc(50% - 3px),
-    calc(100% - 14px) calc(50% - 3px),
-    0 0;
-  background-size: 6px 6px, 6px 6px, 100% 100%;
-  background-repeat: no-repeat;
-  padding-right: 40px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+}
+
+.booking-dropdown-trigger:hover,
+.booking-dropdown-trigger.open {
+  border-color: rgba(212, 176, 106, 0.32);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.booking-dropdown-trigger:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--focus-ring),
+    0 14px 28px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.booking-dropdown-trigger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.booking-dropdown-trigger-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.booking-dropdown-chevron {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 16px;
+}
+
+.booking-dropdown-chevron::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  display: block;
+  border-right: 2px solid #d4b06a;
+  border-bottom: 2px solid #d4b06a;
+  transform: rotate(45deg);
+  transition: transform 0.28s ease;
+}
+
+.booking-dropdown.open .booking-dropdown-chevron::before {
+  transform: rotate(-135deg);
+}
+
+.booking-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  z-index: 30;
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 176, 106, 0.16);
+  background: rgba(22, 22, 22, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition:
+    grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.24s ease,
+    transform 0.24s ease;
+}
+
+.booking-dropdown-panel.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.booking-dropdown-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.booking-dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.booking-dropdown-list li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #dddddd;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.booking-dropdown-list li:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #d4b06a;
+  transform: translateX(2px);
+}
+
+.booking-dropdown-list li.active {
+  background: rgba(212, 176, 106, 0.12);
+  color: #f0d79e;
+  border-color: rgba(212, 176, 106, 0.14);
+}
+
+.booking-dropdown-list li.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+}
+
+.booking-dropdown-list li.disabled:hover {
+  background: transparent;
+  color: #dddddd;
+  transform: none;
+}
+
+.booking-dropdown-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.booking-dropdown-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.booking-dropdown-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 176, 106, 0.3);
+  border-radius: 999px;
+}
+
+.booking-dropdown-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 176, 106, 0.5);
 }
 
 .form-group input::placeholder,
@@ -251,17 +441,19 @@
 }
 
 .form-group input:hover,
-.form-group select:hover,
 .form-group textarea:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  background-color: rgba(18, 18, 18, 0.98);
+  border-color: rgba(212, 176, 106, 0.32);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .form-group input:focus,
-.form-group select:focus,
 .form-group textarea:focus {
+  background-color: rgba(255, 255, 255, 0.06);
   border-color: rgba(212, 176, 106, 0.32);
-  box-shadow: var(--focus-ring);
+  box-shadow:
+    var(--focus-ring),
+    0 14px 28px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .form-group input[type="datetime-local"]::-webkit-calendar-picker-indicator {
@@ -289,6 +481,30 @@
   color: #ffe1e1;
   font-size: 13px;
   line-height: 1.5;
+}
+
+.booking-alert {
+  margin-top: 24px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.booking-alert.success {
+  color: #d9f5de;
+  background: rgba(67, 145, 92, 0.16);
+  border-color: rgba(109, 184, 132, 0.28);
+}
+
+.booking-alert.error {
+  color: #ffe1e1;
+  background: rgba(205, 84, 84, 0.16);
+  border-color: rgba(205, 84, 84, 0.24);
 }
 
 .save-btn,
@@ -364,6 +580,11 @@
 
   .profile-footer-actions button {
     width: 100%;
+  }
+
+  .booking-dropdown-panel {
+    position: static;
+    margin-top: 8px;
   }
 }
 
