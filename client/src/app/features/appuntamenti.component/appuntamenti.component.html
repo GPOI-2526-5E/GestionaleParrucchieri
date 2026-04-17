@@ -13,6 +13,11 @@
           mobile.
         </p>
 
+        <div *ngIf="serviceInfoMessage" class="appointments-alert info appointments-service-alert">
+          <div class="appointments-alert-icon">i</div>
+          <div class="appointments-alert-text">{{ serviceInfoMessage }}</div>
+        </div>
+
         <div class="appointments-hours-card">
           <div class="appointments-hours-head">
             <p class="appointments-hours-kicker">Orari salone</p>
@@ -49,6 +54,8 @@
             <ul class="appointments-select-list" role="listbox" [attr.aria-label]="'Seleziona operatore'">
               <li *ngFor="let o of availableOperators">
                 <button type="button" class="appointments-select-option"
+                  [class.is-disabled]="isOperatorDisabled(o.idUtente)"
+                  [disabled]="isOperatorDisabled(o.idUtente)"
                   [class.is-selected]="selectedOperator === o.idUtente" (click)="selectOperator(o.idUtente)">
                   {{ o.nome }} {{ o.cognome }}
                 </button>

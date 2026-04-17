@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { Servizio } from '../../../models/servizio.model';
 import { CurrencyPipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { ServiziService } from '../../../services/servizio';
+import { Router, RouterModule } from '@angular/router';
+import { Servizio } from '../../../models/servizio.model';
 
 @Component({
   selector: 'app-service-card',
@@ -14,9 +13,9 @@ import { ServiziService } from '../../../services/servizio';
 export class ServiceCardComponent {
   private readonly salonPhoneHref = 'tel:+393478085277';
 
-  constructor(private serviziService: ServiziService) { }
-  
-  @Input() service!: Servizio; 
+  @Input() service!: Servizio;
+
+  constructor(private router: Router) { }
 
   get bookingBadge(): string {
     switch (this.service.tipoPrenotazione) {
@@ -42,7 +41,7 @@ export class ServiceCardComponent {
 
   get buttonTitle(): string {
     if (this.service.tipoPrenotazione === 'consulenza') {
-      return 'Questo servizio può essere prenotato solo dopo una consulenza.';
+      return 'Questo servizio puo essere prenotato solo dopo una consulenza.';
     }
 
     if (this.service.tipoPrenotazione === 'telefono') {
@@ -52,13 +51,16 @@ export class ServiceCardComponent {
     return 'Aggiungi il servizio alla prenotazione';
   }
 
-  addToCart() {
+  addToCart(): void {
     if (this.service.tipoPrenotazione !== 'sito') {
       return;
     }
 
-    this.serviziService.addServiceToCart(this.service);
-    alert(`${this.service.nome} è stato aggiunto alla prenotazione`);
+    this.router.navigate(['/appointments'], {
+      queryParams: {
+        servizio: this.service.idServizio
+      }
+    });
   }
 
   callSalon(): void {
@@ -68,4 +70,4 @@ export class ServiceCardComponent {
   requestConsultation(): void {
     window.location.href = this.salonPhoneHref;
   }
-} 
+}

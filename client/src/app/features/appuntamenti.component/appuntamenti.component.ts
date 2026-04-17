@@ -11,7 +11,10 @@ import { UtentiService } from '../../services/utentiService';
 import { Utente } from "../../models/utente.model";
 import { AppuntamentoService } from "../../services/appuntamentoService";
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ServiziService } from '../../services/servizio';
+import { Servizio } from '../../models/servizio.model';
+import { forkJoin } from 'rxjs';
 
 interface OpeningInterval {
   start: string;
@@ -58,8 +61,11 @@ export class AppuntamentiComponent implements OnInit {
   ];
 
   selectedOperator: number | null = null;
+  selectedServiceId: number | null = null;
+  selectedServiceName = '';
   operatorSelectOpen = false;
   operatori: Utente[] = [];
+  availableServiceOperatorIds = new Set<number>();
   user: any = null;
   showError = false;
   shakeAnimation = false;
@@ -124,10 +130,27 @@ export class AppuntamentiComponent implements OnInit {
     private appuntamentoService: AppuntamentoService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
+    private serviziService: ServiziService,
+    private route: ActivatedRoute,
     private router: Router
   ) { }
 
   ngOnInit() {
+    this.route.queryParamMap.subscribe((params) => {
+      const servizio = params.get('servizio');
+      const parsedServizio = servizio ? Number(servizio) : null;
+      this.selectedServiceId = parsedServizio !== null && Number.isFinite(parsedServizio)
+        ? parsedServizio
+        : null;
+
+      if (this.selectedServiceId) {
+        this.loadSelectedServiceContext(this.selectedServiceId);
+      } else {
+        this.selectedServiceName = '';
+        this.availableServiceOperatorIds.clear();
+      }
+    });
+
     this.getLoggedUser();
 
     this.utenteService.getOperatori().subscribe({
@@ -135,8 +158,12 @@ export class AppuntamentiComponent implements OnInit {
         this.operatori = operatori;
 
         if (this.operatori.length > 0) {
-          this.selectedOperator = this.operatori[0].idUtente;
-          this.onOperatorChange(null);
+          if (this.selectedServiceId) {
+            this.loadSelectedServiceContext(this.selectedServiceId);
+          } else {
+            this.selectedOperator = this.operatori[0].idUtente;
+            this.onOperatorChange(null);
+          }
         }
 
         this.cdr.detectChanges();
@@ -156,7 +183,11 @@ export class AppuntamentiComponent implements OnInit {
     }
 
     this.router.navigate(['/prenotazione'], {
-      queryParams: { data: arg.dateStr, operatore: this.selectedOperator}
+      queryParams: {
+        data: arg.dateStr,
+        operatore: this.selectedOperator,
+        servizio: this.selectedServiceId ?? undefined
+      }
     });
   }
 
@@ -240,9 +271,13 @@ export class AppuntamentiComponent implements OnInit {
   }
 
   get availableOperators(): Utente[] {
-    return this.operatori.filter(
-      (operatore) => operatore.idUtente !== this.selectedOperator
-    );
+    return this.operatori.filter((operatore) => operatore.idUtente !== this.selectedOperator);
+  }
+
+  get serviceInfoMessage(): string {
+    return this.selectedServiceName
+      ? `Scegli l'ora e l'operatore disponibile per il servizio: ${this.selectedServiceName}`
+      : '';
   }
 
   toggleOperatorSelect(): void {
@@ -250,6 +285,10 @@ export class AppuntamentiComponent implements OnInit {
   }
 
   selectOperator(operatorId: number): void {
+    if (this.isOperatorDisabled(operatorId)) {
+      return;
+    }
+
     if (this.selectedOperator === operatorId) {
       this.closeOperatorSelect();
       return;
@@ -279,6 +318,14 @@ export class AppuntamentiComponent implements OnInit {
       event.preventDefault();
       this.operatorSelectOpen = true;
     }
+  }
+
+  isOperatorDisabled(operatorId: number): boolean {
+    if (!this.selectedServiceId) {
+      return false;
+    }
+
+    return !this.availableServiceOperatorIds.has(operatorId);
   }
 
   @HostListener('document:click', ['$event'])
@@ -311,6 +358,66 @@ export class AppuntamentiComponent implements OnInit {
       this.showError = false;
       this.cdr.detectChanges();
     }, 2600);
+  }
+
+  private loadSelectedServiceContext(serviceId: number): void {
+    this.serviziService.getServiceById(serviceId).subscribe({
+      next: (service) => {
+        this.selectedServiceName = service?.nome ?? '';
+        this.loadOperatorsAvailabilityForService(service);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.selectedServiceName = '';
+        this.availableServiceOperatorIds.clear();
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private loadOperatorsAvailabilityForService(service: Servizio | undefined): void {
+    if (!service || this.operatori.length === 0) {
+      this.availableServiceOperatorIds.clear();
+      return;
+    }
+
+    forkJoin(
+      this.operatori.map((operatore) =>
+        this.serviziService.getServiziPrenotabiliByOperatore(operatore.idUtente)
+      )
+    ).subscribe({
+      next: (servicesByOperator) => {
+        const availableIds = new Set<number>();
+
+        servicesByOperator.forEach((services, index) => {
+          const canPerformService = services.some(
+            (operatorService) => operatorService.idServizio === service.idServizio
+          );
+
+          if (canPerformService) {
+            availableIds.add(this.operatori[index].idUtente);
+          }
+        });
+
+        this.availableServiceOperatorIds = availableIds;
+
+        if (!this.selectedOperator || !this.availableServiceOperatorIds.has(this.selectedOperator)) {
+          this.selectedOperator = this.operatori.find((operatore) =>
+            this.availableServiceOperatorIds.has(operatore.idUtente)
+          )?.idUtente ?? null;
+
+          if (this.selectedOperator) {
+            this.onOperatorChange(null);
+          }
+        }
+
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.availableServiceOperatorIds.clear();
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private handleDatesSet(arg: { start: Date; end: Date }): void {

@@ -82,10 +82,25 @@
   margin: 0 auto;
 }
 
+.appointments-service-alert {
+  width: 100%;
+  max-width: 760px;
+  pointer-events: auto;
+}
+
 .appointments-alert.error {
   background: rgba(200, 60, 60, 0.18);
   border: 1px solid rgba(255, 120, 120, 0.25);
   color: #ffecec;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.appointments-alert.info {
+  background: rgba(74, 132, 200, 0.18);
+  border: 1px solid rgba(132, 184, 255, 0.25);
+  color: #edf5ff;
   box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -496,6 +511,24 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     0 10px 22px rgba(0, 0, 0, 0.1);
+}
+
+.appointments-select-option.is-disabled,
+.appointments-select-option:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.appointments-select-option.is-disabled:hover,
+.appointments-select-option:disabled:hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.03)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(245, 240, 232, 0.01));
+  border-color: rgba(255, 255, 255, 0.11);
+  color: #f4e9d4;
 }
 
 .appointments-select-option:hover::before,
