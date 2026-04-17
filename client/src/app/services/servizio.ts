@@ -13,6 +13,20 @@ export class ServiziService {
 
   constructor(private http: HttpClient) { }
 
+  private normalizeBookingType(raw: unknown): 'sito' | 'telefono' | 'consulenza' {
+    const value = String(raw ?? '')
+      .trim()
+      .toLowerCase();
+
+    if (value === 'telefono') return 'telefono';
+    if (value === 'consulenza') return 'consulenza';
+    return 'sito';
+  }
+
+  private normalizeText(raw: unknown): string {
+    return String(raw ?? '').trim();
+  }
+
   getServizi(): Observable<Servizio[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
       map(servizi =>
@@ -61,7 +75,16 @@ export class ServiziService {
       nome: s.nome,
       descrizione: s.descrizione,
       durata: Number(s.durata),
-      prezzo: Number(s.prezzo ?? s.prezzoRivendita ?? 0)
+      prezzo: Number(s.prezzo ?? s.prezzoRivendita ?? 0),
+      categoria: this.normalizeText(
+        s.categoria ?? s.Categoria
+      ),
+      sottocategoria: this.normalizeText(
+        s['sottocategoria'] ?? s.sottoCategoria ?? s.sottocategoria_nome
+      ),
+      tipoPrenotazione: this.normalizeBookingType(
+        s['tipo prenotazione'] ?? s.tipoPrenotazione ?? s.tipo_prenotazione ?? s.prenotazione
+      )
     };
   }
 }

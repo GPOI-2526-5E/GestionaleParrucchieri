@@ -3,6 +3,16 @@ import { db } from "../db_parrucchieri";
 
 const router = express.Router();
 
+function isVisibleOnSite(record: any): boolean {
+  const value =
+    record?.["visualizzazione sito"] ??
+    record?.visualizzazioneSito ??
+    record?.visualizzazione_sito ??
+    record?.visualizzazione;
+
+  return value === true || value === 1 || value === "true" || value === "t";
+}
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     const idOperatoreParam = req.query.idOperatore as string | undefined;
@@ -14,7 +24,7 @@ router.get("/", async (req: Request, res: Response) => {
         throw error;
       }
 
-      return res.json(data || []);
+      return res.json((data || []).filter(isVisibleOnSite));
     }
 
     const idOperatore = Number(idOperatoreParam);

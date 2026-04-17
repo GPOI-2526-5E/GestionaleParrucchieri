@@ -16,11 +16,21 @@ import { Observable } from 'rxjs';
 export class ServicesListComponent {
 
   servicesMD!: Observable<Servizio[]>;
+  servicesBySite: Servizio[] = [];
+  servicesByPhone: Servizio[] = [];
+  servicesByConsultation: Servizio[] = [];
+  totalServices = 0;
 
   constructor(private serviziService: ServiziService) { }
 
   ngOnInit(): void {
     this.servicesMD = this.serviziService.getServizi();
+    this.servicesMD.subscribe((services) => {
+      this.totalServices = services.length;
+      this.servicesBySite = services.filter((service) => service.tipoPrenotazione === 'sito');
+      this.servicesByPhone = services.filter((service) => service.tipoPrenotazione === 'telefono');
+      this.servicesByConsultation = services.filter((service) => service.tipoPrenotazione === 'consulenza');
+    });
   }
 
   trackById(index: number, service: Servizio) {

@@ -33,20 +33,66 @@
             <div class="services-topbar-line"></div>
 
             <div class="services-count">
-                <span class="services-count-number">{{ services.length }}</span>
+                <span class="services-count-number">{{ totalServices }}</span>
                 <span class="services-count-label">
-                    {{ services.length == 1 ? 'Servizio disponibile' : 'Servizi disponibili' }}
+                    {{ totalServices == 1 ? 'Servizio disponibile' : 'Servizi disponibili' }}
                 </span>
             </div>
         </div>
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 services-grid">
-            @for(service of services; track service.idServizio) {
-            <div class="col">
-                <app-service-card [service]="service"></app-service-card>
+        @if (servicesBySite.length > 0) {
+        <section class="services-group">
+            <div class="services-group-head">
+                <div class="services-group-line"></div>
+                <div class="services-group-title">Prenotabili Dal Sito</div>
+                <div class="services-group-subtitle">Puoi aggiungerli subito alla tua prenotazione online.</div>
             </div>
-            }
-        </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 services-grid">
+                @for(service of servicesBySite; track service.idServizio) {
+                <div class="col">
+                    <app-service-card [service]="service"></app-service-card>
+                </div>
+                }
+            </div>
+        </section>
+        }
+
+        @if (servicesByPhone.length > 0) {
+        <section class="services-group">
+            <div class="services-group-head">
+                <div class="services-group-line"></div>
+                <div class="services-group-title">Prenotabili Per Telefono</div>
+                <div class="services-group-subtitle">Per questi servizi il salone preferisce il contatto diretto.</div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 services-grid">
+                @for(service of servicesByPhone; track service.idServizio) {
+                <div class="col">
+                    <app-service-card [service]="service"></app-service-card>
+                </div>
+                }
+            </div>
+        </section>
+        }
+
+        @if (servicesByConsultation.length > 0) {
+        <section class="services-group">
+            <div class="services-group-head">
+                <div class="services-group-line"></div>
+                <div class="services-group-title">Disponibili Solo Con Consulenza</div>
+                <div class="services-group-subtitle">Vengono prenotati solo dopo una valutazione con il salone.</div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 services-grid">
+                @for(service of servicesByConsultation; track service.idServizio) {
+                <div class="col">
+                    <app-service-card [service]="service"></app-service-card>
+                </div>
+                }
+            </div>
+        </section>
+        }
 
         }
 
@@ -63,4 +109,3 @@
     </div>
 
 </div>
-

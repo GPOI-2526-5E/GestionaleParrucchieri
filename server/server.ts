@@ -68,6 +68,16 @@ function getOptionalUserIdFromRequest(req: express.Request): number | null {
     return null;
   }
 }
+
+function isVisibleOnSite(record: any): boolean {
+  const value =
+    record?.["visualizzazione sito"] ??
+    record?.visualizzazioneSito ??
+    record?.visualizzazione_sito ??
+    record?.visualizzazione;
+
+  return value === true || value === 1 || value === "true" || value === "t";
+}
 app.get("/api/imgParrucchieri", async (req, res) => {
   try {
     const result = await cloudinary.v2.search

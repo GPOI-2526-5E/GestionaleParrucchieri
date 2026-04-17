@@ -330,6 +330,7 @@
 .service-summary-row strong {
   color: #f1e5c6;
   font-weight: 700;
+  text-align: right;
 }
 
 
@@ -368,6 +369,10 @@
     0 14px 24px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(212, 176, 106, 0.08);
   transform: translateY(-1px);
+}
+
+.btn-add-cart.consultation-action {
+  background: linear-gradient(180deg, #66573a 0%, #453822 100%);
 }
 
 .btn-back {

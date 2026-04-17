@@ -4,4 +4,7 @@ export interface Servizio {
     descrizione: string;
     durata: number;
     prezzo: number;
-  }
+    categoria: string;
+    sottocategoria: string;
+    tipoPrenotazione: 'sito' | 'telefono' | 'consulenza';
+}

@@ -39,6 +39,16 @@ function safeString(value: unknown): string {
     return String(value ?? "").trim();
 }
 
+function isVisibleOnSite(record: any): boolean {
+    const value =
+        record?.["visualizzazione sito"] ??
+        record?.visualizzazioneSito ??
+        record?.visualizzazione_sito ??
+        record?.visualizzazione;
+
+    return value === true || value === 1 || value === "true" || value === "t";
+}
+
 function countMatches(text: string, terms: string[]): number {
     return terms.reduce((count, term) => count + (text.includes(term) ? 1 : 0), 0);
 }
@@ -347,13 +357,21 @@ function buildAdviceClarificationReply(lastUser: string): string {
 async function getAllServices(): Promise<ServiceCard[]> {
     const { data, error } = await db
         .from("servizi")
-        .select("idServizio, nome, descrizione, durata, prezzo");
+        .select("*");
 
     if (error) {
         throw error;
     }
 
-    return (data || []) as ServiceCard[];
+    return ((data || []) as any[])
+        .filter(isVisibleOnSite)
+        .map((service) => ({
+            idServizio: Number(service.idServizio),
+            nome: safeString(service.nome),
+            descrizione: safeString(service.descrizione),
+            durata: Number(service.durata ?? 0),
+            prezzo: Number(service.prezzo ?? 0),
+        }));
 }
 
 async function getAllProducts(): Promise<ProductCard[]> {
@@ -1494,4 +1512,3 @@ ${servicesContext}
 });
 
 export default router;
-

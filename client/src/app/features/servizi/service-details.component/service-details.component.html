@@ -2,7 +2,7 @@
 
 <div class="service-showcase">
   <div class="service-showcase-left">
-    <p class="service-kicker">Trattamento esclusivo</p>
+    <p class="service-kicker">{{ categoryLabel }}</p>
     <h1 class="service-showcase-title">{{ service?.nome }}</h1>
     <p class="service-showcase-text">{{ service?.descrizione }}</p>
 
@@ -12,8 +12,12 @@
         {{ service?.durata }} min
       </span>
       <span class="service-meta-pill">
-        <i class="bi bi-stars me-2"></i>
-        Consulenza inclusa
+        <i class="bi bi-bookmark-star me-2"></i>
+        {{ categoryLabel }}
+      </span>
+      <span class="service-meta-pill">
+        <i class="bi bi-diagram-3 me-2"></i>
+        {{ subcategoryLabel }}
       </span>
     </div>
   </div>
@@ -59,7 +63,7 @@
     <div class="service-price-card-top">
       <span class="service-price-label">Prezzo</span>
       <div class="service-price">{{ service?.prezzo | currency:'EUR' }}</div>
-      <p class="service-price-note">Servizio disponibile su appuntamento</p>
+      <p class="service-price-note">{{ bookingDescription }}</p>
     </div>
 
     <div class="service-price-divider"></div>
@@ -71,14 +75,30 @@
       </div>
       <div class="service-summary-row">
         <span>Tipologia</span>
-        <strong>Trattamento premium</strong>
+        <strong>{{ categoryLabel }}</strong>
+      </div>
+      <div class="service-summary-row">
+        <span>Sottocategoria</span>
+        <strong>{{ subcategoryLabel }}</strong>
       </div>
     </div>
 
-    <button class="btn btn-add-cart" (click)="addToCart()">
+    @if (service?.tipoPrenotazione === 'telefono') {
+    <a class="btn btn-add-cart" [href]="'tel:+393478085277'" (click)="callSalon()">
+      <i class="bi bi-telephone me-2"></i>
+      {{ actionLabel }}
+    </a>
+    } @else if (service?.tipoPrenotazione === 'consulenza') {
+    <a class="btn btn-add-cart consultation-action" [href]="'tel:+393478085277'" [title]="bookingDescription" (click)="requestConsultation()">
+      <i class="bi bi-person-lines-fill me-2"></i>
+      {{ actionLabel }}
+    </a>
+    } @else {
+    <button class="btn btn-add-cart" [title]="bookingDescription" (click)="addToCart()">
       <i class="bi bi-calendar-plus me-2"></i>
-      Aggiungi all'appuntamento
+      {{ actionLabel }}
     </button>
+    }
 
     <button [routerLink]="['/services']" class="btn btn-back">
       <i class="bi bi-arrow-left me-2"></i>
@@ -86,4 +106,3 @@
     </button>
   </div>
 </div>
-

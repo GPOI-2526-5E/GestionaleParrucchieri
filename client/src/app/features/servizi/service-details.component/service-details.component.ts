@@ -13,6 +13,7 @@ import { Servizio } from '../../../models/servizio.model';
   styleUrls: ['./service-details.component.css']
 })
 export class ServiceDetailsComponent {
+  private readonly salonPhoneHref = 'tel:+393478085277';
 
   service: Servizio | undefined;
 
@@ -42,9 +43,47 @@ export class ServiceDetailsComponent {
   }
 
   addToCart(): void {
-    if (this.service) {
+    if (this.service && this.service.tipoPrenotazione === 'sito') {
       this.serviziService.addServiceToCart(this.service);
       alert(`${this.service.nome} è stato aggiunto al carrello`);
     }
+  }
+
+  get bookingDescription(): string {
+    switch (this.service?.tipoPrenotazione) {
+      case 'telefono':
+        return 'Questo servizio si prenota telefonicamente con il salone.';
+      case 'consulenza':
+        return 'Questo servizio è disponibile solo dopo una consulenza.';
+      default:
+        return 'Servizio disponibile su appuntamento online.';
+    }
+  }
+
+  get actionLabel(): string {
+    switch (this.service?.tipoPrenotazione) {
+      case 'telefono':
+        return 'Chiama il salone';
+      case 'consulenza':
+        return 'Richiedi consulenza';
+      default:
+        return "Aggiungi all'appuntamento";
+    }
+  }
+
+  get categoryLabel(): string {
+    return this.service?.categoria || 'Servizio professionale';
+  }
+
+  get subcategoryLabel(): string {
+    return this.service?.sottocategoria || 'Definita dal salone';
+  }
+
+  callSalon(): void {
+    window.location.href = this.salonPhoneHref;
+  }
+
+  requestConsultation(): void {
+    window.location.href = this.salonPhoneHref;
   }
 }
