@@ -17,6 +17,27 @@ export class ServiceCardComponent {
 
   constructor(private router: Router) { }
 
+  get durationLabel(): string {
+    const rawDuration = this.service?.durata?.trim();
+
+    if (!rawDuration) {
+      return 'Durata su richiesta';
+    }
+
+    const normalized = rawDuration.toLowerCase();
+
+    if (
+      normalized.includes('min') ||
+      normalized.includes('ora') ||
+      normalized.includes('circa') ||
+      normalized.includes('/')
+    ) {
+      return rawDuration;
+    }
+
+    return `${rawDuration} min`;
+  }
+
   get bookingBadge(): string {
     switch (this.service.tipoPrenotazione) {
       case 'telefono':

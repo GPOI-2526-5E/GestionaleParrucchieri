@@ -2,7 +2,7 @@ export interface Servizio {
     idServizio: number;
     nome: string;
     descrizione: string;
-    durata: number;
+    durata: string | null;
     prezzo: number;
     categoria: string;
     sottocategoria: string;

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
+  HostListener,
   OnInit
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -30,6 +31,14 @@ interface PasswordChecklistItem {
   valid: boolean;
 }
 
+interface CalendarPickerDay {
+  date: Date;
+  label: number;
+  currentMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+}
+
 @Component({
   selector: 'app-info-utente',
   standalone: true,
@@ -47,6 +56,7 @@ export class InfoUtenteComponent implements OnInit {
   private api = 'http://localhost:3000/api/auth';
   private changePasswordMessageTimeout: ReturnType<typeof setTimeout> | null = null;
   private changePasswordMessageHideTimeout: ReturnType<typeof setTimeout> | null = null;
+  private birthDatePickerCloseTimeout: ReturnType<typeof setTimeout> | null = null;
 
   user: UserProfile | null = null;
   isProfilePhotoBroken = false;
@@ -91,6 +101,17 @@ export class InfoUtenteComponent implements OnInit {
 
   isPhoneValid = true;
   selectedCountryIso2 = 'it';
+  birthDatePickerOpen = false;
+  birthDatePickerClosing = false;
+  birthDatePickerOpenUpward = true;
+  birthDatePickerMonth = new Date();
+  birthDatePickerDays: CalendarPickerDay[] = [];
+
+  readonly calendarPickerWeekdays = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'];
+  readonly calendarPickerMonthFormatter = new Intl.DateTimeFormat('it-IT', {
+    month: 'long',
+    year: 'numeric'
+  });
 
   preferredCountries = ['it', 'gb', 'fr', 'de', 'es', 'us'];
 
@@ -135,6 +156,19 @@ export class InfoUtenteComponent implements OnInit {
 
   get accessModeLabel(): string {
     return this.user?.photoURL ? 'Google' : 'Credenziali';
+  }
+
+  get birthDateDisplayValue(): string {
+    const parsedDate = this.parseInputDate(this.user?.data_nascita ?? '');
+    if (!parsedDate) {
+      return 'gg/mm/aaaa';
+    }
+
+    return parsedDate.toLocaleDateString('it-IT');
+  }
+
+  get birthDatePickerMonthLabel(): string {
+    return this.calendarPickerMonthFormatter.format(this.birthDatePickerMonth);
   }
 
   private resetCompletionPasswordFields(): void {
@@ -253,6 +287,9 @@ export class InfoUtenteComponent implements OnInit {
             null
         };
         this.isProfilePhotoBroken = false;
+        this.syncBirthDatePickerMonth(
+          this.parseInputDate(this.user.data_nascita) ?? new Date()
+        );
 
         this.computeProfileCompletionState();
         this.isEditMode = this.showCompletionWarning;
@@ -319,6 +356,103 @@ export class InfoUtenteComponent implements OnInit {
   onFieldChange(): void {
     this.computeProfileCompletionState();
     this.cdr.detectChanges();
+  }
+
+  toggleBirthDatePicker(): void {
+    if (this.birthDatePickerClosing) {
+      return;
+    }
+
+    if (this.birthDatePickerCloseTimeout) {
+      clearTimeout(this.birthDatePickerCloseTimeout);
+      this.birthDatePickerCloseTimeout = null;
+    }
+
+    if (this.birthDatePickerOpen) {
+      this.closeBirthDatePicker();
+      return;
+    }
+
+    this.birthDatePickerMonth =
+      this.parseInputDate(this.user?.data_nascita ?? '') ?? new Date();
+    this.birthDatePickerDays = this.buildCalendarPickerDays(
+      this.birthDatePickerMonth
+    );
+    this.updateBirthDatePickerDirection();
+    this.birthDatePickerOpen = true;
+    this.birthDatePickerClosing = false;
+    this.cdr.detectChanges();
+    this.ensureBirthDatePickerVisibleSoon();
+  }
+
+  closeBirthDatePicker(): void {
+    if (!this.birthDatePickerOpen || this.birthDatePickerClosing) {
+      return;
+    }
+
+    this.birthDatePickerClosing = true;
+    this.cdr.detectChanges();
+
+    this.birthDatePickerCloseTimeout = setTimeout(() => {
+      this.birthDatePickerOpen = false;
+      this.birthDatePickerClosing = false;
+      this.birthDatePickerCloseTimeout = null;
+      this.cdr.detectChanges();
+    }, 220);
+  }
+
+  previousBirthDatePickerMonth(): void {
+    this.birthDatePickerMonth = new Date(
+      this.birthDatePickerMonth.getFullYear(),
+      this.birthDatePickerMonth.getMonth() - 1,
+      1
+    );
+    this.birthDatePickerDays = this.buildCalendarPickerDays(
+      this.birthDatePickerMonth
+    );
+    this.cdr.detectChanges();
+  }
+
+  nextBirthDatePickerMonth(): void {
+    this.birthDatePickerMonth = new Date(
+      this.birthDatePickerMonth.getFullYear(),
+      this.birthDatePickerMonth.getMonth() + 1,
+      1
+    );
+    this.birthDatePickerDays = this.buildCalendarPickerDays(
+      this.birthDatePickerMonth
+    );
+    this.cdr.detectChanges();
+  }
+
+  selectBirthDatePickerDay(day: CalendarPickerDay): void {
+    if (!this.user) {
+      return;
+    }
+
+    this.user.data_nascita = this.formatDateForInput(day.date);
+    this.syncBirthDatePickerMonth(day.date);
+    this.onFieldChange();
+    this.closeBirthDatePicker();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target?.closest('.profile-birthdate-picker')) {
+      this.closeBirthDatePicker();
+    }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    if (!this.birthDatePickerOpen) {
+      return;
+    }
+
+    this.updateBirthDatePickerDirection();
+    this.cdr.detectChanges();
+    this.ensureBirthDatePickerVisibleSoon();
   }
 
   onCompletionPasswordChange(): void {
@@ -638,6 +772,152 @@ export class InfoUtenteComponent implements OnInit {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  private syncBirthDatePickerMonth(baseDate: Date): void {
+    this.birthDatePickerMonth = new Date(
+      baseDate.getFullYear(),
+      baseDate.getMonth(),
+      1
+    );
+    this.birthDatePickerDays = this.buildCalendarPickerDays(
+      this.birthDatePickerMonth
+    );
+  }
+
+  private updateBirthDatePickerDirection(): void {
+    if (typeof window === 'undefined') {
+      this.birthDatePickerOpenUpward = true;
+      return;
+    }
+
+    const pickerTrigger = document.querySelector(
+      '.profile-birthdate-picker .profile-date-trigger'
+    ) as HTMLElement | null;
+
+    if (!pickerTrigger) {
+      this.birthDatePickerOpenUpward = true;
+      return;
+    }
+
+    const triggerRect = pickerTrigger.getBoundingClientRect();
+    const estimatedPanelHeight = 360;
+    const viewportPadding = 20;
+    const spaceAbove = triggerRect.top - viewportPadding;
+    const spaceBelow = window.innerHeight - triggerRect.bottom - viewportPadding;
+
+    if (spaceBelow >= estimatedPanelHeight) {
+      this.birthDatePickerOpenUpward = false;
+      return;
+    }
+
+    if (spaceAbove >= estimatedPanelHeight) {
+      this.birthDatePickerOpenUpward = true;
+      return;
+    }
+
+    this.birthDatePickerOpenUpward = spaceAbove > spaceBelow;
+  }
+
+  private ensureBirthDatePickerVisibleSoon(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        this.ensureBirthDatePickerFullyVisible();
+      });
+    });
+  }
+
+  private ensureBirthDatePickerFullyVisible(): void {
+    const panel = document.querySelector(
+      '.profile-birthdate-picker .profile-date-picker-panel'
+    ) as HTMLElement | null;
+
+    if (!panel) {
+      return;
+    }
+
+    const viewportPadding = 16;
+    const panelRect = panel.getBoundingClientRect();
+    const overflowTop = viewportPadding - panelRect.top;
+    const overflowBottom = panelRect.bottom - (window.innerHeight - viewportPadding);
+
+    if (overflowTop > 0) {
+      window.scrollBy({
+        top: -overflowTop,
+        behavior: 'smooth'
+      });
+      return;
+    }
+
+    if (overflowBottom > 0) {
+      window.scrollBy({
+        top: overflowBottom,
+        behavior: 'smooth'
+      });
+    }
+  }
+
+  private buildCalendarPickerDays(monthDate: Date): CalendarPickerDay[] {
+    const monthStart = new Date(
+      monthDate.getFullYear(),
+      monthDate.getMonth(),
+      1
+    );
+    const gridStart = new Date(monthStart);
+    const startOffset = (monthStart.getDay() + 6) % 7;
+    gridStart.setDate(monthStart.getDate() - startOffset);
+
+    const today = new Date();
+    const selectedDate = this.parseInputDate(this.user?.data_nascita ?? '');
+
+    return Array.from({ length: 42 }, (_, index) => {
+      const date = new Date(gridStart);
+      date.setDate(gridStart.getDate() + index);
+
+      return {
+        date,
+        label: date.getDate(),
+        currentMonth: date.getMonth() === monthDate.getMonth(),
+        isToday: date.toDateString() === today.toDateString(),
+        isSelected: !!selectedDate && date.toDateString() === selectedDate.toDateString()
+      };
+    });
+  }
+
+  private parseInputDate(value: string): Date | null {
+    const normalizedValue = String(value ?? '').trim();
+    if (!normalizedValue) {
+      return null;
+    }
+
+    const parts = normalizedValue.split('-').map((part) => Number(part));
+    if (parts.length !== 3 || parts.some((part) => Number.isNaN(part))) {
+      return null;
+    }
+
+    const [year, month, day] = parts;
+    const parsedDate = new Date(year, month - 1, day);
+
+    if (
+      parsedDate.getFullYear() !== year ||
+      parsedDate.getMonth() !== month - 1 ||
+      parsedDate.getDate() !== day
+    ) {
+      return null;
+    }
+
+    return parsedDate;
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   formatDate(date: string | null): string {

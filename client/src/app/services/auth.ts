@@ -132,6 +132,28 @@ export class AuthService {
     });
   }
 
+  getUserEmailFromToken(): string | null {
+    const token = this._token();
+
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payloadBase64 = token.split('.')[1];
+
+      if (!payloadBase64) {
+        return null;
+      }
+
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      return typeof decodedPayload.email === 'string' ? decodedPayload.email : null;
+    } catch (e) {
+      console.error('Errore decodifica email dal token', e);
+      return null;
+    }
+  }
+
   resetPassword(
     token: string,
     newPassword: string,

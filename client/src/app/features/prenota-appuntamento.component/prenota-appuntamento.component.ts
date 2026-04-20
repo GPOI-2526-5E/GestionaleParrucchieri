@@ -31,7 +31,7 @@ interface DailySchedule {
     NavbarComponent
   ],
   templateUrl: './prenota-appuntamento.component.html',
-  styleUrl: './prenota-appuntamento.component.css',
+  styleUrls: ['./prenota-appuntamento.component.css'],
 })
 export class PrenotaAppuntamentoComponent implements OnInit {
   operatori: Utente[] = [];
@@ -39,6 +39,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   appuntamentiOperatore: Appuntamento[] = [];
   minDateTime = '';
   availabilityMessage = '';
+  bookingAlertTitle = '';
   bookingAlertMessage = '';
   bookingAlertType: 'success' | 'error' | null = null;
   isLoadingData = true;
@@ -76,6 +77,14 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
   ngOnInit(): void {
     this.minDateTime = this.getCurrentDateTimeLocal();
+
+    if (!this.authService.isLoggedIn()) {
+      this.showBookingAlert(
+        'Effettua il login prima di prenotare un appuntamento.',
+        'error',
+        'Login richiesto'
+      );
+    }
 
     this.route.queryParamMap.subscribe((params) => {
       const selectedDate = params.get('data');
@@ -245,6 +254,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     return this.getSelectedServizioLabel();
   }
 
+  get isLoginAlert(): boolean {
+    return this.bookingAlertTitle === 'Login richiesto';
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -261,11 +274,23 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       return;
     }
 
-    this.bookingAlertMessage = '';
-    this.bookingAlertType = null;
+    this.clearBookingAlert();
+
+    if (!this.authService.isLoggedIn()) {
+      this.showBookingAlert(
+        'Effettua il login prima di prenotare un appuntamento.',
+        'error',
+        'Login richiesto'
+      );
+      this.scrollToBookingAlert();
+      return;
+    }
 
     if (!this.isOraFineSuccessiva()) {
-      alert('L\'orario di fine deve essere successivo all\'orario di inizio.');
+      this.showBookingAlert(
+        'L\'orario di fine deve essere successivo all\'orario di inizio.',
+        'error'
+      );
       return;
     }
 
@@ -273,7 +298,11 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     const payloadBase64 = token?.split('.')[1];
 
     if (!payloadBase64) {
-      alert('Sessione non valida. Effettua di nuovo il login.');
+      this.showBookingAlert(
+        'Sessione non valida. Effettua di nuovo il login.',
+        'error',
+        'Login richiesto'
+      );
       return;
     }
 
@@ -282,14 +311,18 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     const note = this.getSelectedServizioNome();
 
     if (!idCliente) {
-      alert('Impossibile identificare l\'utente. Effettua di nuovo il login.');
+      this.showBookingAlert(
+        'Impossibile identificare l\'utente. Effettua di nuovo il login.',
+        'error',
+        'Login richiesto'
+      );
       return;
     }
 
     const validationMessage = this.validateAppointmentWindow();
 
     if (validationMessage) {
-      alert(validationMessage);
+      this.showBookingAlert(validationMessage, 'error');
       return;
     }
 
@@ -306,8 +339,11 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isSubmitting = false;
-          this.bookingAlertType = 'success';
-          this.bookingAlertMessage = 'Appuntamento prenotato con successo';
+          this.showBookingAlert(
+            'Appuntamento prenotato con successo',
+            'success',
+            'Prenotazione completata'
+          );
           this.cdr.detectChanges();
 
           setTimeout(() => {
@@ -317,8 +353,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
         error: (err: unknown) => {
           console.error(err);
           this.isSubmitting = false;
-          this.bookingAlertType = 'error';
-          this.bookingAlertMessage = 'Prenotazione dell\'appuntamento non riuscita';
+          this.showBookingAlert(
+            'Prenotazione dell\'appuntamento non riuscita',
+            'error'
+          );
           this.cdr.detectChanges();
         }
       });
@@ -594,5 +632,50 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
   private resetServiceSearchTerm(): void {
     this.serviceSearchTerm = '';
+  }
+
+  private clearBookingAlert(): void {
+    this.bookingAlertTitle = '';
+    this.bookingAlertMessage = '';
+    this.bookingAlertType = null;
+  }
+
+  private showBookingAlert(
+    message: string,
+    type: 'success' | 'error',
+    title?: string
+  ): void {
+    this.bookingAlertType = type;
+    this.bookingAlertTitle = title ?? (type === 'success' ? 'Prenotazione completata' : 'Prenotazione non riuscita');
+    this.bookingAlertMessage = message;
+  }
+
+  private scrollToBookingAlert(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      const alertElement = document.querySelector('.booking-alert');
+
+      if (alertElement instanceof HTMLElement) {
+        alertElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }
+
+  goToLoginFromAlert(): void {
+    if (!this.isLoginAlert) {
+      return;
+    }
+
+    const currentUrl = this.router.url;
+
+    if (currentUrl && currentUrl !== '/login') {
+      localStorage.setItem('loginBackUrl', currentUrl);
+      localStorage.setItem('postLoginRedirect', currentUrl);
+    }
+
+    this.router.navigate(['/login']);
   }
 }

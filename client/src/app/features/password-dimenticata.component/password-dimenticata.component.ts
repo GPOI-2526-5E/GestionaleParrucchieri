@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -13,7 +13,7 @@ type AlertType = 'success' | 'error' | 'warning';
   templateUrl: './password-dimenticata.component.html',
   styleUrls: ['./password-dimenticata.component.css']
 })
-export class PasswordDimenticataComponent {
+export class PasswordDimenticataComponent implements OnInit {
   email: string = '';
   isLoading: boolean = false;
   formSubmitted: boolean = false;
@@ -26,6 +26,19 @@ export class PasswordDimenticataComponent {
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
+
+  ngOnInit(): void {
+    if (!this.auth.isLoggedIn()) {
+      return;
+    }
+
+    const loggedEmail = this.auth.getUserEmailFromToken();
+
+    if (loggedEmail) {
+      this.email = loggedEmail;
+      this.cdr.detectChanges();
+    }
+  }
 
   showAlert(message: string, type: AlertType = 'error'): void {
     this.alertMessage = message;

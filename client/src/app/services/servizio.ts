@@ -27,6 +27,15 @@ export class ServiziService {
     return String(raw ?? '').trim();
   }
 
+  private normalizeDuration(raw: unknown): string | null {
+    if (raw === null || raw === undefined) {
+      return null;
+    }
+
+    const value = String(raw).trim();
+    return value ? value : null;
+  }
+
   getServizi(): Observable<Servizio[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
       map(servizi =>
@@ -74,7 +83,7 @@ export class ServiziService {
       idServizio: s.idServizio ?? s.id,
       nome: s.nome,
       descrizione: s.descrizione,
-      durata: Number(s.durata),
+      durata: this.normalizeDuration(s.durata),
       prezzo: Number(s.prezzo ?? s.prezzoRivendita ?? 0),
       categoria: this.normalizeText(
         s.categoria ?? s.Categoria

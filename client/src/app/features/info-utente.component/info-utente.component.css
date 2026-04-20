@@ -1,5 +1,6 @@
 :host {
   display: block;
+  min-height: 100vh;
   --gold: #d4b06a;
   --gold-soft: #f3dfb5;
   --gold-deep: #8f6a31;
@@ -30,6 +31,14 @@
   --glass-opaque-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.24),
     0 18px 34px rgba(0, 0, 0, 0.1);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(212, 176, 106, 0.16), transparent 28%),
+    radial-gradient(circle at 85% 15%, rgba(255, 245, 221, 0.08), transparent 20%),
+    linear-gradient(135deg, rgba(9, 8, 7, 0.54), rgba(6, 6, 6, 0.42)),
+    url("https://res.cloudinary.com/duimlq34k/image/upload/v1773655635/imgSaloneParrucchieri_cqmzs2.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 *,
@@ -41,14 +50,7 @@
 .profile-page {
   position: relative;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 15% 20%, rgba(212, 176, 106, 0.16), transparent 28%),
-    radial-gradient(circle at 85% 15%, rgba(255, 245, 221, 0.08), transparent 20%),
-    linear-gradient(135deg, rgba(9, 8, 7, 0.54), rgba(6, 6, 6, 0.42)),
-    url("https://res.cloudinary.com/duimlq34k/image/upload/v1773655635/imgSaloneParrucchieri_cqmzs2.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background: transparent;
   isolation: isolate;
 }
 
@@ -87,11 +89,24 @@
 .content-panel,
 .profile-editor-shell {
   position: relative;
-  overflow: hidden;
   border: 1px solid rgba(212, 176, 106, 0.06);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+.profile-hero-card,
+.identity-panel,
+.content-panel {
+  overflow: hidden;
+}
+
+.profile-editor-shell,
+.editor-main-panel,
+.editor-form-grid,
+.form-group,
+.profile-date-input-wrap {
+  overflow: visible;
 }
 
 .profile-hero-card {
@@ -935,6 +950,262 @@
   filter: brightness(0) saturate(100%) invert(74%) sepia(18%) saturate(903%) hue-rotate(354deg) brightness(96%) contrast(92%);
 }
 
+.profile-date-input-wrap {
+  position: relative;
+}
+
+.profile-date-trigger {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(245, 240, 232, 0.03));
+  color: rgba(255, 248, 236, 0.68);
+  font-size: 14px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  outline: none;
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.profile-date-trigger.has-value {
+  color: #fffaf1;
+}
+
+.profile-date-trigger i {
+  font-size: 19px;
+  color: #f1cb7a;
+  flex: 0 0 auto;
+}
+
+.profile-date-trigger:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(247, 242, 235, 0.04));
+}
+
+.profile-date-trigger:focus,
+.profile-date-trigger[aria-expanded="true"] {
+  border-color: rgba(212, 176, 106, 0.38);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.1)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(248, 243, 236, 0.06));
+  box-shadow: var(--focus-ring);
+  color: #fffaf1;
+}
+
+.profile-date-picker-panel {
+  position: absolute;
+  left: 0;
+  right: auto;
+  bottom: calc(100% - 26px);
+  z-index: 40;
+  width: calc(100% - 58px);
+  min-width: 0;
+  max-width: 340px;
+  max-height: min(360px, calc(100vh - 40px));
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 245, 224, 0.22);
+  background:
+    linear-gradient(180deg, rgba(84, 78, 69, 0.74), rgba(58, 54, 48, 0.68)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(244, 239, 231, 0.04)),
+    radial-gradient(circle at top right, rgba(212, 176, 106, 0.2), transparent 42%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 24px 44px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(24px) saturate(145%);
+  -webkit-backdrop-filter: blur(24px) saturate(145%);
+  transform-origin: bottom center;
+  animation: profileDatePickerPanelIn 0.22s ease forwards;
+}
+
+.profile-date-picker-scroll {
+  max-height: inherit;
+  padding: 16px 10px 15px 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 176, 106, 0.45) transparent;
+}
+
+.profile-date-picker-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profile-date-picker-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-date-picker-scroll::-webkit-scrollbar-thumb {
+  background: rgba(212, 176, 106, 0.45);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.profile-date-picker-panel.opens-down {
+  top: calc(100% - 12px);
+  bottom: auto;
+  transform-origin: top center;
+  animation-name: profileDatePickerPanelInDown;
+}
+
+.profile-date-picker-panel.is-closing {
+  animation: profileDatePickerPanelOut 0.22s ease forwards;
+  pointer-events: none;
+}
+
+.profile-date-picker-panel.opens-down.is-closing {
+  animation-name: profileDatePickerPanelOutDown;
+}
+
+.profile-date-picker-panel-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.profile-date-picker-month {
+  text-align: center;
+  color: #fffdf8;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.32);
+}
+
+.profile-date-picker-nav {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 248, 232, 0.18);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)),
+    rgba(255, 255, 255, 0.06);
+  color: #ffe3a0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.profile-date-picker-nav:hover {
+  transform: translateY(-1px);
+  border-color: rgba(212, 176, 106, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)),
+    rgba(212, 176, 106, 0.08);
+  color: #fff1d2;
+}
+
+.profile-date-picker-nav:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(212, 176, 106, 0.16);
+}
+
+.profile-date-picker-weekdays,
+.profile-date-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profile-date-picker-weekdays {
+  margin-bottom: 10px;
+}
+
+.profile-date-picker-weekdays span {
+  text-align: center;
+  color: rgba(255, 251, 243, 0.98);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+}
+
+.profile-date-picker-day {
+  min-height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #fffdf8;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.profile-date-picker-day:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 245, 225, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06)),
+    rgba(212, 176, 106, 0.1);
+  color: #ffffff;
+}
+
+.profile-date-picker-day.is-outside {
+  color: rgba(255, 247, 232, 0.62);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.profile-date-picker-day.is-today {
+  border: 1px dashed rgba(212, 176, 106, 0.72);
+  color: #ffe2a6;
+  background: rgba(212, 176, 106, 0.12);
+}
+
+.profile-date-picker-day.is-selected {
+  border-color: rgba(212, 176, 106, 0.72);
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.34), rgba(212, 176, 106, 0.14)),
+    rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.profile-date-picker-day:focus-visible {
+  outline: none;
+  border-color: rgba(212, 176, 106, 0.52);
+  box-shadow: 0 0 0 3px rgba(212, 176, 106, 0.14);
+}
+
 .password-input-wrap {
   position: relative;
   display: flex;
@@ -1490,6 +1761,54 @@
   }
 }
 
+@keyframes profileDatePickerPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes profileDatePickerPanelOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+
+@keyframes profileDatePickerPanelInDown {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes profileDatePickerPanelOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
 @media (max-width: 1080px) {
   .identity-panel,
   .profile-content-grid,
@@ -1534,6 +1853,10 @@
   .detail-grid,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .profile-date-picker-panel {
+    max-width: none;
   }
 
   .profile-footer-actions {
@@ -1587,6 +1910,10 @@
   .cancel-btn,
   .mini-btn {
     width: 100%;
+  }
+
+  .profile-date-picker-panel {
+    width: min(100vw - 40px, 100%);
   }
 
   ::ng-deep intl-tel-input .iti--allow-dropdown .iti__tel-input,

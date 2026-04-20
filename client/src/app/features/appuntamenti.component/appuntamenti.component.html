@@ -23,7 +23,7 @@
               <span class="appointments-hours-day">{{ day.name }}</span>
               <span class="appointments-hours-value" *ngIf="day.intervals.length; else closedDay">
                 <ng-container *ngFor="let interval of day.intervals; let last = last">
-                  {{ interval.start }} - {{ interval.end }}<span *ngIf="!last"> â€¢ </span>
+                  {{ interval.start }} - {{ interval.end }}<span *ngIf="!last" aria-hidden="true"> &bull; </span>
                 </ng-container>
               </span>
               <ng-template #closedDay>

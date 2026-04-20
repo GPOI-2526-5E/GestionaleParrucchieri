@@ -53,26 +53,6 @@
         </div>
       </div>
 
-      <div
-        *ngIf="bookingAlertMessage"
-        class="appointments-alert booking-alert"
-        [ngClass]="bookingAlertType"
-        [class.is-clickable]="isLoginAlert"
-        [attr.role]="isLoginAlert ? 'button' : null"
-        [attr.tabindex]="isLoginAlert ? '0' : null"
-        (click)="goToLoginFromAlert()"
-        (keydown.enter)="goToLoginFromAlert()"
-        (keydown.space)="goToLoginFromAlert(); $event.preventDefault()"
-      >
-        <div class="appointments-alert-icon">
-          {{ bookingAlertType === 'success' ? 'OK' : '!' }}
-        </div>
-
-        <div class="appointments-alert-text">
-          {{ bookingAlertType === 'success' && bookingAlertTitle ? bookingAlertTitle + ': ' : '' }}{{ bookingAlertMessage }}
-        </div>
-      </div>
-
       <div class="booking-form-grid">
         <div class="form-grid">
           <div class="form-group full-width">
@@ -175,6 +155,33 @@
         <div *ngIf="availabilityMessage" class="appointments-alert info booking-inline-alert">
           <div class="appointments-alert-icon">i</div>
           <div class="appointments-alert-text">{{ availabilityMessage }}</div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="bookingAlertMessage"
+        class="appointments-alert booking-alert"
+        [ngClass]="bookingAlertType"
+        [class.is-clickable]="isLoginAlert"
+        [attr.role]="isLoginAlert ? 'button' : null"
+        [attr.tabindex]="isLoginAlert ? '0' : null"
+        (click)="goToLoginFromAlert()"
+        (keydown.enter)="goToLoginFromAlert()"
+        (keydown.space)="goToLoginFromAlert(); $event.preventDefault()"
+      >
+        <div class="appointments-alert-icon">
+          @if (bookingAlertType === 'success') {
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
+          } @else {
+            !
+          }
+        </div>
+
+        <div class="appointments-alert-copy">
+          <strong class="appointments-alert-title">
+            {{ bookingAlertType === 'success' ? (bookingAlertTitle || 'Prenotazione completata') : 'Prenotazione non riuscita' }}
+          </strong>
+          <div class="appointments-alert-text">{{ bookingAlertMessage }}</div>
         </div>
       </div>
 

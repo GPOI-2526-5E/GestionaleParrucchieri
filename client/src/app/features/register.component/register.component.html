@@ -20,7 +20,7 @@
                 </p>
 
                 <div class="login-visual-signature">
-                    Un’esperienza professionale firmata I Parrucchieri
+                    Un'esperienza professionale firmata I Parrucchieri
                 </div>
             </div>
         </div>
@@ -122,10 +122,51 @@
                     <div class="col-6 mb-2">
                         <label class="form-label">Data Nascita</label>
 
-                        <div class="date-input-wrap">
-                            <input [(ngModel)]="userData.data_nascita" name="data_nascita" type="date"
-                                class="clean-input" />
-                            <i class="bi bi-calendar date-icon"></i>
+                        <div class="date-input-wrap birthdate-picker">
+                            <button
+                                type="button"
+                                class="clean-input birthdate-trigger"
+                                [class.open]="birthDatePickerOpen"
+                                (click)="toggleBirthDatePicker()">
+                                <span [class.is-placeholder]="!userData.data_nascita">{{ birthDateDisplayValue }}</span>
+                                <i class="bi bi-calendar-date date-icon"></i>
+                            </button>
+
+                            <div
+                                *ngIf="birthDatePickerOpen || birthDatePickerClosing"
+                                class="register-date-picker-panel"
+                                [class.is-closing]="birthDatePickerClosing"
+                                role="dialog"
+                                aria-label="Calendario selezione data di nascita">
+                                <div class="register-date-picker-panel-header">
+                                    <button type="button" class="register-date-picker-nav" (click)="previousBirthDatePickerMonth()">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </button>
+
+                                    <strong class="register-date-picker-month">{{ birthDatePickerMonthLabel }}</strong>
+
+                                    <button type="button" class="register-date-picker-nav" (click)="nextBirthDatePickerMonth()">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>
+                                </div>
+
+                                <div class="register-date-picker-weekdays">
+                                    <span *ngFor="let weekday of calendarPickerWeekdays">{{ weekday }}</span>
+                                </div>
+
+                                <div class="register-date-picker-grid">
+                                    <button
+                                        *ngFor="let day of birthDatePickerDays"
+                                        type="button"
+                                        class="register-date-picker-day"
+                                        [class.is-outside]="!day.currentMonth"
+                                        [class.is-today]="day.isToday"
+                                        [class.is-selected]="day.isSelected"
+                                        (click)="selectBirthDatePickerDay(day)">
+                                        {{ day.label }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -150,8 +191,7 @@
 
                 <div *ngIf="isSuccess" class="custom-alert success" role="alert" aria-live="polite">
                     <span class="alert-icon">✓</span>
-                    <span>Registrazione avvenuta con successo! Stai per essere reindirizzato alla pagina di
-                        login...</span>
+                    <span>Registrazione avvenuta con successo! Accesso effettuato, stai per essere reindirizzato alla home...</span>
                 </div>
             </form>
         </div>

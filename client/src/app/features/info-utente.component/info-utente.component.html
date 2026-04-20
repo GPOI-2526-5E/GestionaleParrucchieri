@@ -345,8 +345,72 @@
 
                 <div class="form-group">
                   <label for="data_nascita">Data di nascita</label>
-                  <input id="data_nascita" type="date" name="data_nascita" [(ngModel)]="user.data_nascita"
-                    (ngModelChange)="onFieldChange()" />
+                  <div class="profile-date-input-wrap profile-birthdate-picker">
+                    <button
+                      id="data_nascita"
+                      type="button"
+                      name="data_nascita"
+                      class="profile-date-trigger"
+                      [class.has-value]="!!user.data_nascita"
+                      [attr.aria-expanded]="birthDatePickerOpen"
+                      [attr.aria-label]="user.data_nascita ? 'Modifica data di nascita' : 'Seleziona data di nascita'"
+                      (click)="toggleBirthDatePicker()"
+                    >
+                      <span>{{ birthDateDisplayValue }}</span>
+                      <i class="bi bi-calendar-date" aria-hidden="true"></i>
+                    </button>
+
+                    <div
+                      *ngIf="birthDatePickerOpen"
+                      class="profile-date-picker-panel"
+                      [class.opens-down]="!birthDatePickerOpenUpward"
+                      [class.is-closing]="birthDatePickerClosing"
+                    >
+                      <div class="profile-date-picker-scroll">
+                        <div class="profile-date-picker-panel-header">
+                          <button
+                            type="button"
+                            class="profile-date-picker-nav"
+                            aria-label="Mese precedente"
+                            (click)="previousBirthDatePickerMonth()"
+                          >
+                            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                          </button>
+
+                          <div class="profile-date-picker-month">
+                            {{ birthDatePickerMonthLabel }}
+                          </div>
+
+                          <button
+                            type="button"
+                            class="profile-date-picker-nav"
+                            aria-label="Mese successivo"
+                            (click)="nextBirthDatePickerMonth()"
+                          >
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                          </button>
+                        </div>
+
+                        <div class="profile-date-picker-weekdays">
+                          <span *ngFor="let weekday of calendarPickerWeekdays">{{ weekday }}</span>
+                        </div>
+
+                        <div class="profile-date-picker-grid">
+                          <button
+                            *ngFor="let day of birthDatePickerDays"
+                            type="button"
+                            class="profile-date-picker-day"
+                            [class.is-outside]="!day.currentMonth"
+                            [class.is-today]="day.isToday"
+                            [class.is-selected]="day.isSelected"
+                            (click)="selectBirthDatePickerDay(day)"
+                          >
+                            {{ day.label }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="form-group full-width compact-readonly">

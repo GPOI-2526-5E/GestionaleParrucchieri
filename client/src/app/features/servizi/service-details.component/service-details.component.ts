@@ -79,6 +79,27 @@ export class ServiceDetailsComponent {
     return this.service?.sottocategoria || 'Definita dal salone';
   }
 
+  get durationLabel(): string {
+    const rawDuration = this.service?.durata?.trim();
+
+    if (!rawDuration) {
+      return 'Durata su richiesta';
+    }
+
+    const normalized = rawDuration.toLowerCase();
+
+    if (
+      normalized.includes('min') ||
+      normalized.includes('ora') ||
+      normalized.includes('circa') ||
+      normalized.includes('/')
+    ) {
+      return rawDuration;
+    }
+
+    return `${rawDuration} min`;
+  }
+
   callSalon(): void {
     window.location.href = this.salonPhoneHref;
   }
