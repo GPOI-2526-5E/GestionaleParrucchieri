@@ -1,23 +1,10 @@
 <app-navbar></app-navbar>
 
-<div class="profile-page">
-  <div class="profile-backdrop"></div>
-  <div class="profile-noise"></div>
+<div class="appointments-page booking-page">
+  <div class="appointments-overlay"></div>
 
-  <div class="profile-shell">
-
-    <div class="profile-hero-card">
-      <div class="profile-hero-copy">
-        <p class="profile-kicker">Prenotazione</p>
-        <h1>Prenota il tuo appuntamento</h1>
-        <p class="profile-hero-text">
-          Scegli operatore, orario e aggiungi eventuali note.
-          In pochi secondi puoi fissare il tuo prossimo appuntamento.
-        </p>
-      </div>
-    </div>
-
-    <form class="profile-editor-shell" (ngSubmit)="prenotaAppuntamento()">
+  <div class="appointments-section booking-section">
+    <form class="booking-form-card" (ngSubmit)="prenotaAppuntamento()">
       <div *ngIf="isLoadingData" class="booking-loading-overlay" aria-live="polite">
         <div class="booking-loading-card">
           <span class="booking-loading-spinner"></span>
@@ -26,136 +13,173 @@
         </div>
       </div>
 
-      <div class="editor-form-grid">
-        <div class="editor-main-panel">
-          <div class="panel-heading">
-            <span class="panel-tag">Dettagli</span>
-            <h3>Dati appuntamento</h3>
-            <p>Compila le informazioni per completare la prenotazione.</p>
+      <div class="booking-form-head">
+        <div>
+          <p class="appointments-hours-kicker">Dettagli appuntamento</p>
+          <h2 class="booking-form-title">Conferma i dati prima di inviare la richiesta</h2>
+          <p class="booking-form-subtitle">
+            Lo slot selezionato arriva dalla schermata appuntamenti. Qui puoi solo rifinire i dettagli finali.
+          </p>
+        </div>
+      </div>
+
+      <div class="appointments-select-wrapper booking-summary-card booking-summary-inline">
+        <label>Riepilogo appuntamento</label>
+        <div class="booking-summary-stack">
+          <div class="booking-summary-item">
+            <span class="booking-summary-label">Operatore</span>
+            <strong class="booking-summary-value">{{ getSelectedOperatoreLabel() }}</strong>
           </div>
 
-          <div class="form-grid">
-            <div class="form-group full-width">
-              <label>Operatore</label>
-              <div class="booking-dropdown" [class.open]="isOperatoreOpen">
-                <button
-                  type="button"
-                  class="booking-dropdown-trigger"
-                  [class.open]="isOperatoreOpen"
-                  [disabled]="isLoadingData || isSubmitting"
-                  (click)="toggleOperatoreDropdown()"
-                  [attr.aria-expanded]="isOperatoreOpen"
-                >
-                  <span class="booking-dropdown-trigger-text">{{ getSelectedOperatoreLabel() }}</span>
-                  <span class="booking-dropdown-chevron"></span>
-                </button>
+          <div class="booking-summary-item">
+            <span class="booking-summary-label">Servizio</span>
+            <strong class="booking-summary-value">{{ getSelectedServizioNome() || 'Da selezionare' }}</strong>
+          </div>
 
-                <div class="booking-dropdown-panel" [class.open]="isOperatoreOpen">
-                  <div class="booking-dropdown-panel-inner">
-                    <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona operatore">
-                      <li
-                        *ngFor="let op of operatori"
-                        (click)="selectOperatore(op.idUtente)"
-                        [class.active]="form.idOperatore === op.idUtente"
-                      >
-                        {{ op.nome }} {{ op.cognome }}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="booking-summary-item">
+            <span class="booking-summary-label">Inizio</span>
+            @if (form.dataOraInizio) {
+              <strong class="booking-summary-value">{{ form.dataOraInizio.split('T')[0] }}</strong>
+              <span class="booking-summary-meta">{{ form.dataOraInizio.split('T')[1] }}</span>
+            } @else {
+              <strong class="booking-summary-value">Seleziona dallo slot scelto</strong>
+            }
+          </div>
 
-            <div class="form-group full-width">
-              <label>Servizi</label>
-              <div class="booking-dropdown" [class.open]="isServizioOpen">
-                <button
-                  type="button"
-                  class="booking-dropdown-trigger"
-                  [class.open]="isServizioOpen"
-                  [disabled]="isLoadingData || servizi.length === 0 || isSubmitting"
-                  (click)="toggleServizioDropdown()"
-                  (keydown)="onServizioTriggerKeydown($event)"
-                  [attr.aria-expanded]="isServizioOpen"
-                >
-                  <span class="booking-dropdown-trigger-text">{{ servizioTriggerLabel }}</span>
-                  <span class="booking-dropdown-chevron"></span>
-                </button>
-
-                <div class="booking-dropdown-panel" [class.open]="isServizioOpen">
-                  <div class="booking-dropdown-panel-inner">
-                    <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona servizio">
-                      <li
-                        *ngFor="let ser of filteredServizi"
-                        (click)="selectServizio(ser.idServizio)"
-                        [class.active]="form.idServizio === ser.idServizio"
-                        [class.disabled]="isServiceDisabled(ser)"
-                      >
-                        {{ ser.nome }} | {{ ser.prezzo }} EUR
-                      </li>
-                      <li *ngIf="filteredServizi.length === 0" class="booking-dropdown-empty">
-                        Nessun servizio trovato
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="availabilityMessage" class="availability-message">
-                {{ availabilityMessage }}
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Data e ora inizio</label>
-              <input
-                type="datetime-local"
-                [(ngModel)]="form.dataOraInizio"
-                name="dataOraInizio"
-                [min]="minDateTime"
-                (change)="onServizioChange()"
-                [disabled]="true"
-              />
-            </div>
-
-            <div class="form-group">
-              <label>ora fine</label>
-              <input
-                type="time"
-                [(ngModel)]="form.dataOraFine"
-                name="dataOraFine"
-                [min]="minDateTime"
-                [disabled]="true"
-              />
-            </div>
+          <div class="booking-summary-item">
+            <span class="booking-summary-label">Fine</span>
+            <strong class="booking-summary-value">{{ form.dataOraFine || 'Calcolata automaticamente' }}</strong>
           </div>
         </div>
       </div>
 
       <div
         *ngIf="bookingAlertMessage"
-        class="booking-alert"
+        class="appointments-alert booking-alert"
         [ngClass]="bookingAlertType"
+        [class.is-clickable]="isLoginAlert"
+        [attr.role]="isLoginAlert ? 'button' : null"
+        [attr.tabindex]="isLoginAlert ? '0' : null"
+        (click)="goToLoginFromAlert()"
+        (keydown.enter)="goToLoginFromAlert()"
+        (keydown.space)="goToLoginFromAlert(); $event.preventDefault()"
       >
-        <div class="booking-alert-icon" [class.is-error]="bookingAlertType === 'error'">
-          {{ bookingAlertType === 'success' ? '✓' : '!' }}
+        <div class="appointments-alert-icon">
+          {{ bookingAlertType === 'success' ? 'OK' : '!' }}
         </div>
 
-        <div class="booking-alert-content">
-          <strong class="booking-alert-title">
-            {{ bookingAlertType === 'success' ? 'Prenotazione completata' : 'Prenotazione non riuscita' }}
-          </strong>
-          <p class="booking-alert-text">
-            {{
-              bookingAlertType === 'success'
-                ? 'Appuntamento confermato con successo'
-                : bookingAlertMessage
-            }}
-          </p>
+        <div class="appointments-alert-text">
+          {{ bookingAlertType === 'success' && bookingAlertTitle ? bookingAlertTitle + ': ' : '' }}{{ bookingAlertMessage }}
         </div>
       </div>
 
-      <div class="profile-footer-actions">
-        <button type="submit" class="save-btn" [disabled]="isLoadingData || isSubmitting">
+      <div class="booking-form-grid">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Operatore</label>
+            <div class="booking-dropdown" [class.open]="isOperatoreOpen">
+              <button
+                type="button"
+                class="booking-dropdown-trigger"
+                [class.open]="isOperatoreOpen"
+                [disabled]="isLoadingData || isSubmitting"
+                (click)="toggleOperatoreDropdown()"
+                [attr.aria-expanded]="isOperatoreOpen"
+              >
+                <span class="booking-dropdown-trigger-text">
+                  <span class="booking-trigger-kicker">Selezionato</span>
+                  <span class="booking-trigger-value">{{ getSelectedOperatoreLabel() }}</span>
+                </span>
+                <span class="booking-dropdown-chevron"></span>
+              </button>
+
+              <div class="booking-dropdown-panel" [class.open]="isOperatoreOpen">
+                <div class="booking-dropdown-panel-inner">
+                  <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona operatore">
+                    <li
+                      *ngFor="let op of operatori"
+                      (click)="selectOperatore(op.idUtente)"
+                      [class.active]="form.idOperatore === op.idUtente"
+                    >
+                      {{ op.nome }} {{ op.cognome }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group full-width form-group-separated">
+            <label>Servizi</label>
+            <div class="booking-dropdown" [class.open]="isServizioOpen">
+              <button
+                type="button"
+                class="booking-dropdown-trigger"
+                [class.open]="isServizioOpen"
+                [disabled]="isLoadingData || servizi.length === 0 || isSubmitting"
+                (click)="toggleServizioDropdown()"
+                (keydown)="onServizioTriggerKeydown($event)"
+                [attr.aria-expanded]="isServizioOpen"
+              >
+                <span class="booking-dropdown-trigger-text">
+                  <span class="booking-trigger-kicker">Disponibili nello slot</span>
+                  <span class="booking-trigger-value">{{ servizioTriggerLabel }}</span>
+                </span>
+                <span class="booking-dropdown-chevron"></span>
+              </button>
+
+              <div class="booking-dropdown-panel" [class.open]="isServizioOpen">
+                <div class="booking-dropdown-panel-inner">
+                  <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona servizio">
+                    <li
+                      *ngFor="let ser of filteredServizi"
+                      (click)="selectServizio(ser.idServizio)"
+                      [class.active]="form.idServizio === ser.idServizio"
+                      [class.disabled]="isServiceDisabled(ser)"
+                    >
+                      {{ ser.nome }} | {{ ser.prezzo }} EUR
+                    </li>
+                    <li *ngIf="filteredServizi.length === 0" class="booking-dropdown-empty">
+                      Nessun servizio trovato
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group form-group-separated">
+            <label>Data e ora inizio</label>
+            <input
+              type="datetime-local"
+              [(ngModel)]="form.dataOraInizio"
+              name="dataOraInizio"
+              [min]="minDateTime"
+              (change)="onServizioChange()"
+              [disabled]="true"
+            />
+          </div>
+
+          <div class="form-group form-group-separated">
+            <label>Ora fine</label>
+            <input
+              type="time"
+              [(ngModel)]="form.dataOraFine"
+              name="dataOraFine"
+              [min]="minDateTime"
+              [disabled]="true"
+            />
+          </div>
+        </div>
+
+        <div *ngIf="availabilityMessage" class="appointments-alert info booking-inline-alert">
+          <div class="appointments-alert-icon">i</div>
+          <div class="appointments-alert-text">{{ availabilityMessage }}</div>
+        </div>
+      </div>
+
+      <div class="booking-actions">
+        <button type="submit" class="booking-primary-action" [disabled]="isLoadingData || isSubmitting">
           {{
             isLoadingData
               ? 'Sto caricando...'
@@ -163,12 +187,15 @@
           }}
         </button>
 
-        <button type="button" class="cancel-btn" [routerLink]="['/appointments']" [disabled]="isLoadingData || isSubmitting">
+        <button
+          type="button"
+          class="booking-secondary-action"
+          [routerLink]="['/appointments']"
+          [disabled]="isLoadingData || isSubmitting"
+        >
           Annulla
         </button>
       </div>
-
     </form>
-
   </div>
 </div>
