@@ -6,7 +6,6 @@
 
   <div class="profile-shell">
 
-    <!-- HERO -->
     <div class="profile-hero-card">
       <div class="profile-hero-copy">
         <p class="profile-kicker">Prenotazione</p>
@@ -18,12 +17,16 @@
       </div>
     </div>
 
-    <!-- FORM -->
     <form class="profile-editor-shell" (ngSubmit)="prenotaAppuntamento()">
+      <div *ngIf="isLoadingData" class="booking-loading-overlay" aria-live="polite">
+        <div class="booking-loading-card">
+          <span class="booking-loading-spinner"></span>
+          <strong>Sto caricando la prenotazione...</strong>
+          <p>Attendi un momento, sto preparando operatori e servizi disponibili.</p>
+        </div>
+      </div>
 
       <div class="editor-form-grid">
-
-        <!-- COLONNA PRINCIPALE -->
         <div class="editor-main-panel">
           <div class="panel-heading">
             <span class="panel-tag">Dettagli</span>
@@ -32,8 +35,6 @@
           </div>
 
           <div class="form-grid">
-
-            <!-- OPERATORE -->
             <div class="form-group full-width">
               <label>Operatore</label>
               <div class="booking-dropdown" [class.open]="isOperatoreOpen">
@@ -41,6 +42,7 @@
                   type="button"
                   class="booking-dropdown-trigger"
                   [class.open]="isOperatoreOpen"
+                  [disabled]="isLoadingData || isSubmitting"
                   (click)="toggleOperatoreDropdown()"
                   [attr.aria-expanded]="isOperatoreOpen"
                 >
@@ -71,11 +73,12 @@
                   type="button"
                   class="booking-dropdown-trigger"
                   [class.open]="isServizioOpen"
-                  [disabled]="servizi.length === 0"
+                  [disabled]="isLoadingData || servizi.length === 0 || isSubmitting"
                   (click)="toggleServizioDropdown()"
+                  (keydown)="onServizioTriggerKeydown($event)"
                   [attr.aria-expanded]="isServizioOpen"
                 >
-                  <span class="booking-dropdown-trigger-text">{{ getSelectedServizioLabel() }}</span>
+                  <span class="booking-dropdown-trigger-text">{{ servizioTriggerLabel }}</span>
                   <span class="booking-dropdown-chevron"></span>
                 </button>
 
@@ -83,12 +86,15 @@
                   <div class="booking-dropdown-panel-inner">
                     <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona servizio">
                       <li
-                        *ngFor="let ser of servizi"
+                        *ngFor="let ser of filteredServizi"
                         (click)="selectServizio(ser.idServizio)"
                         [class.active]="form.idServizio === ser.idServizio"
                         [class.disabled]="isServiceDisabled(ser)"
                       >
                         {{ ser.nome }} | {{ ser.prezzo }} EUR
+                      </li>
+                      <li *ngIf="filteredServizi.length === 0" class="booking-dropdown-empty">
+                        Nessun servizio trovato
                       </li>
                     </ul>
                   </div>
@@ -99,7 +105,6 @@
               </div>
             </div>
 
-            <!-- DATA INIZIO -->
             <div class="form-group">
               <label>Data e ora inizio</label>
               <input
@@ -108,11 +113,10 @@
                 name="dataOraInizio"
                 [min]="minDateTime"
                 (change)="onServizioChange()"
-                disabled="true"
+                [disabled]="true"
               />
             </div>
 
-            <!-- DATA FINE -->
             <div class="form-group">
               <label>ora fine</label>
               <input
@@ -120,26 +124,46 @@
                 [(ngModel)]="form.dataOraFine"
                 name="dataOraFine"
                 [min]="minDateTime"
-                disabled="true"
+                [disabled]="true"
               />
             </div>
-
           </div>
         </div>
-
       </div>
 
-      <!-- BOTTONI -->
-      <div *ngIf="bookingAlertMessage" class="booking-alert" [ngClass]="bookingAlertType">
-        {{ bookingAlertMessage }}
+      <div
+        *ngIf="bookingAlertMessage"
+        class="booking-alert"
+        [ngClass]="bookingAlertType"
+      >
+        <div class="booking-alert-icon" [class.is-error]="bookingAlertType === 'error'">
+          {{ bookingAlertType === 'success' ? '✓' : '!' }}
+        </div>
+
+        <div class="booking-alert-content">
+          <strong class="booking-alert-title">
+            {{ bookingAlertType === 'success' ? 'Prenotazione completata' : 'Prenotazione non riuscita' }}
+          </strong>
+          <p class="booking-alert-text">
+            {{
+              bookingAlertType === 'success'
+                ? 'Appuntamento confermato con successo'
+                : bookingAlertMessage
+            }}
+          </p>
+        </div>
       </div>
 
       <div class="profile-footer-actions">
-        <button type="submit" class="save-btn">
-          Prenota appuntamento
+        <button type="submit" class="save-btn" [disabled]="isLoadingData || isSubmitting">
+          {{
+            isLoadingData
+              ? 'Sto caricando...'
+              : (isSubmitting ? 'Prenotazione inviata...' : 'Prenota appuntamento')
+          }}
         </button>
 
-        <button type="button" class="cancel-btn" [routerLink]="['/appointments']">
+        <button type="button" class="cancel-btn" [routerLink]="['/appointments']" [disabled]="isLoadingData || isSubmitting">
           Annulla
         </button>
       </div>

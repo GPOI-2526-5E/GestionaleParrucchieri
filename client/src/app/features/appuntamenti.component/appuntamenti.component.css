@@ -82,12 +82,6 @@
   margin: 0 auto;
 }
 
-.appointments-service-alert {
-  width: 100%;
-  max-width: 760px;
-  pointer-events: auto;
-}
-
 .appointments-alert.error {
   background: rgba(200, 60, 60, 0.18);
   border: 1px solid rgba(255, 120, 120, 0.25);
@@ -95,6 +89,12 @@
   box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.appointments-service-alert {
+  width: min(760px, calc(100% - 20px));
+  margin: 0 auto 16px;
+  pointer-events: auto;
 }
 
 .appointments-alert.info {
@@ -553,12 +553,53 @@
   cursor: default;
 }
 
+.appointments-calendar-meta {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 0 2px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.appointments-calendar-meta-item {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(244, 239, 231, 0.015));
+}
+
+.appointments-calendar-operator-label {
+  color: rgba(217, 186, 122, 0.82);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.appointments-calendar-operator-value {
+  color: #fff3d2;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
 .appointments-date-picker-panel {
   position: absolute;
   top: 92px;
   left: 50%;
   z-index: 12;
-  width: min(100vw - 32px, 318px);
+  width: 318px;
+  max-width: calc(100% - 32px);
   padding: 16px;
   border-radius: 24px;
   border: 1px solid rgba(212, 176, 106, 0.22);
@@ -762,12 +803,11 @@
   gap: 8px;
 }
 
-:host ::ng-deep .fc .fc-button {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06)),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(244, 239, 231, 0.03));
-  border: 1px solid rgba(212, 176, 106, 0.28);
-  color: #f4ddac;
+:host ::ng-deep .fc .fc-button,
+:host ::ng-deep .fc .fc-button-primary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 244, 221, 0.82);
   border-radius: 14px;
   padding: 10px 15px;
   font-size: 0.8rem;
@@ -775,29 +815,66 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 14px 28px rgba(0, 0, 0, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 22px rgba(0, 0, 0, 0.12);
   transition: transform .28s cubic-bezier(.22,1,.36,1), border-color .2s ease, background .2s ease, box-shadow .2s ease, color .2s ease;
 }
 
-:host ::ng-deep .fc .fc-button:hover {
+:host ::ng-deep .fc .fc-button:hover,
+:host ::ng-deep .fc .fc-button-primary:hover {
   transform: translateY(-2px);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(247, 242, 235, 0.04));
+  background: transparent;
   border-color: #d4b06a;
   color: #fff0cb;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    0 18px 32px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 14px 28px rgba(0, 0, 0, 0.16);
 }
 
-:host ::ng-deep .fc .fc-button-active {
-  background:
-    linear-gradient(90deg, rgba(212, 176, 106, 0.14), transparent 32%),
-    var(--glass-inner-bg-strong);
+:host ::ng-deep .fc .fc-button-active,
+:host ::ng-deep .fc .fc-button-primary.fc-button-active,
+:host ::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: transparent;
   border-color: #d4b06a;
-  color: #fff0cb;
+  color: #d4b06a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 221, 0.12),
+    0 0 0 1px rgba(212, 176, 106, 0.16);
+}
+
+:host ::ng-deep .fc .fc-button:focus,
+:host ::ng-deep .fc .fc-button-primary:focus,
+:host ::ng-deep .fc .fc-button:active,
+:host ::ng-deep .fc .fc-button-primary:active {
+  background: transparent;
+  border-color: #d4b06a;
+  color: #d4b06a;
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 221, 0.12),
+    0 0 0 1px rgba(212, 176, 106, 0.2),
+    0 0 0 3px rgba(212, 176, 106, 0.16);
+}
+
+:host ::ng-deep .fc .fc-button:focus-visible,
+:host ::ng-deep .fc .fc-button-primary:focus-visible {
+  outline: none;
+  border-color: #d4b06a;
+  color: #d4b06a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 221, 0.12),
+    0 0 0 1px rgba(212, 176, 106, 0.2),
+    0 0 0 3px rgba(212, 176, 106, 0.16);
+}
+
+:host ::ng-deep .fc .fc-today-button,
+:host ::ng-deep .fc .fc-today-button:disabled,
+:host ::ng-deep .fc .fc-button-primary.fc-today-button,
+:host ::ng-deep .fc .fc-button-primary.fc-today-button:disabled {
+  background: transparent;
+  border-color: #d4b06a;
+  border-style: dashed;
+  color: #d4b06a;
 }
 
 :host ::ng-deep .fc-col-header-cell {
@@ -915,19 +992,25 @@
 :host ::ng-deep .fc-timegrid-event .fc-event-main {
   height: 100% !important;
   padding: 0 !important;
+  overflow: hidden;
 }
 
 :host ::ng-deep .fc-timegrid-event.fc-timegrid-event-short .fc-event-main-frame {
   height: 100% !important;
   min-height: 100%;
-  padding: 8px !important;
-  justify-content: center;
+  padding: 6px 8px !important;
+  justify-content: flex-start;
+  gap: 2px;
+  overflow: hidden;
 }
 
 :host ::ng-deep .fc-timegrid-event .fc-event-main-frame {
   height: 100% !important;
   min-height: 100% !important;
-  padding: 8px !important;
+  padding: 6px 8px !important;
+  justify-content: flex-start;
+  gap: 2px;
+  overflow: hidden;
 }
 
 :host ::ng-deep .fc-v-event:hover {
@@ -939,9 +1022,26 @@
   color: #fff;
 }
 
-:host ::ng-deep .fc-event-title {
-  font-size: 13px;
+:host ::ng-deep .fc-event-time {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 11px;
   font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .fc-event-title {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+:host ::ng-deep .fc-timegrid-event.fc-timegrid-event-short .fc-event-title {
+  font-size: 11px;
 }
 
 :host ::ng-deep .fc-event.my-appointment {
@@ -998,6 +1098,19 @@
     font-size: 30px;
   }
 
+  .appointments-calendar-meta {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .appointments-calendar-meta-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
   :host ::ng-deep .fc .fc-toolbar {
     flex-direction: column;
     align-items: stretch;
@@ -1010,8 +1123,7 @@
   }
 
   .appointments-date-picker-panel {
-    top: 136px;
-    width: min(100%, 320px);
+    max-width: calc(100% - 24px);
   }
 
   :host ::ng-deep .fc-timegrid-slot {

@@ -85,6 +85,7 @@ export class AppuntamentiComponent implements OnInit {
   calendarPickerClosing = false;
   calendarPickerMonth = new Date();
   calendarPickerDays: CalendarPickerDay[] = [];
+  calendarPickerPanelStyle: Record<string, string> = {};
   readonly calendarPickerWeekdays = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'];
   readonly calendarPickerMonthFormatter = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' });
   private alertTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -126,8 +127,8 @@ export class AppuntamentiComponent implements OnInit {
     eventClick: this.handleEventClick.bind(this),
     eventOverlap: false,
     slotEventOverlap: false,
-    eventMinHeight: 44,
-    eventShortHeight: 0,
+    eventMinHeight: 52,
+    eventShortHeight: 40,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
@@ -197,6 +198,7 @@ export class AppuntamentiComponent implements OnInit {
   @HostListener('window:resize')
   onWindowResize(): void {
     this.syncCalendarResponsiveMode();
+    this.updateCalendarPickerPosition();
   }
 
   handleDateClick(arg: any) {
@@ -459,6 +461,7 @@ export class AppuntamentiComponent implements OnInit {
     this.visibleRangeEnd = arg.end;
     this.syncDatePickerValue(arg.start);
     this.syncCalendarTitleState();
+    this.updateCalendarPickerPosition();
     this.refreshCalendarEvents();
   }
 
@@ -478,6 +481,7 @@ export class AppuntamentiComponent implements OnInit {
     this.syncCalendarPickerMonth(this.parseInputDate(this.calendarDatePickerValue) ?? new Date());
     this.syncCalendarTitleState();
     this.cdr.detectChanges();
+    this.updateCalendarPickerPosition();
   }
 
   closeCalendarPicker(): void {
@@ -645,6 +649,35 @@ export class AppuntamentiComponent implements OnInit {
     }
 
     title.classList.toggle('is-picker-open', this.calendarPickerOpen && !this.calendarPickerClosing);
+  }
+
+  private updateCalendarPickerPosition(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const wrapper = document.querySelector('.calendar-wrapper') as HTMLElement | null;
+    const title = document.querySelector('.fc-toolbar-title') as HTMLElement | null;
+
+    if (!wrapper || !title) {
+      this.calendarPickerPanelStyle = {};
+      return;
+    }
+
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const titleRect = title.getBoundingClientRect();
+    const panelWidth = Math.min(Math.max(wrapperRect.width - 32, 260), 318);
+    const minLeft = 16 + panelWidth / 2;
+    const maxLeft = Math.max(minLeft, wrapperRect.width - 16 - panelWidth / 2);
+    const centeredLeft = titleRect.left - wrapperRect.left + titleRect.width / 2;
+    const left = Math.min(Math.max(centeredLeft, minLeft), maxLeft);
+    const top = Math.max(titleRect.bottom - wrapperRect.top + 14, 92);
+
+    this.calendarPickerPanelStyle = {
+      top: `${top}px`,
+      left: `${left}px`,
+      width: `${panelWidth}px`
+    };
   }
 
   private refreshCalendarEvents(): void {

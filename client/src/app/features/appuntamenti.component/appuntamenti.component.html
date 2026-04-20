@@ -13,11 +13,6 @@
           mobile.
         </p>
 
-        <div *ngIf="serviceInfoMessage" class="appointments-alert info appointments-service-alert">
-          <div class="appointments-alert-icon">i</div>
-          <div class="appointments-alert-text">{{ serviceInfoMessage }}</div>
-        </div>
-
         <div class="appointments-hours-card">
           <div class="appointments-hours-head">
             <p class="appointments-hours-kicker">Orari salone</p>
@@ -28,7 +23,7 @@
               <span class="appointments-hours-day">{{ day.name }}</span>
               <span class="appointments-hours-value" *ngIf="day.intervals.length; else closedDay">
                 <ng-container *ngFor="let interval of day.intervals; let last = last">
-                  {{ interval.start }} - {{ interval.end }}<span *ngIf="!last"> • </span>
+                  {{ interval.start }} - {{ interval.end }}<span *ngIf="!last"> â€¢ </span>
                 </ng-container>
               </span>
               <ng-template #closedDay>
@@ -73,10 +68,23 @@
         <div class="appointments-alert-text">{{ errorMessage }}</div>
       </div>
 
+      <div class="appointments-calendar-meta">
+        <div class="appointments-calendar-meta-item">
+          <span class="appointments-calendar-operator-label">Operatore selezionato</span>
+          <strong class="appointments-calendar-operator-value">{{ selectedOperatorLabel }}</strong>
+        </div>
+      </div>
+
+      <div *ngIf="serviceInfoMessage" class="appointments-alert info appointments-service-alert">
+        <div class="appointments-alert-icon">i</div>
+        <div class="appointments-alert-text">{{ serviceInfoMessage }}</div>
+      </div>
+
       <div
         *ngIf="calendarPickerOpen || calendarPickerClosing"
         class="appointments-date-picker-panel"
         [class.is-closing]="calendarPickerClosing"
+        [ngStyle]="calendarPickerPanelStyle"
         role="dialog"
         aria-label="Calendario selezione giorno"
       >

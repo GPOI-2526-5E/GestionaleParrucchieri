@@ -32,8 +32,27 @@ body {
 }
 
 
+.navbar .container {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0;
+  padding: 0;
+  line-height: 0;
+}
+
 .navbar-brand img {
+  display: block;
   height: 60px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
   transition: 0.3s ease;
 }
 
@@ -123,6 +142,10 @@ body {
 
 
 @media (max-width: 768px) {
+  .navbar .container {
+    justify-content: space-between;
+  }
+
   .navbar-nav .nav-link {
     margin-right: 15px;
     font-size: 13px;

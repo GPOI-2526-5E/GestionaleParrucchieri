@@ -41,6 +41,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   availabilityMessage = '';
   bookingAlertMessage = '';
   bookingAlertType: 'success' | 'error' | null = null;
+  isLoadingData = true;
+  isSubmitting = false;
+  serviceSearchTerm = '';
   isOperatoreOpen = false;
   isServizioOpen = false;
   private selectedServizioFromQuery: number | null = null;
@@ -121,6 +124,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   }
 
   toggleOperatoreDropdown(): void {
+    if (this.isLoadingData || this.isSubmitting) {
+      return;
+    }
+
     this.isOperatoreOpen = !this.isOperatoreOpen;
     if (this.isOperatoreOpen) {
       this.isServizioOpen = false;
@@ -128,22 +135,69 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   }
 
   toggleServizioDropdown(): void {
-    if (this.servizi.length === 0) {
+    if (this.isLoadingData || this.isSubmitting || this.servizi.length === 0) {
       return;
     }
 
     this.isServizioOpen = !this.isServizioOpen;
     if (this.isServizioOpen) {
       this.isOperatoreOpen = false;
+      return;
+    }
+
+    this.resetServiceSearchTerm();
+  }
+
+  onServizioTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.isServizioOpen = false;
+      this.resetServiceSearchTerm();
+      return;
+    }
+
+    if (event.key === 'ArrowDown' && !this.isServizioOpen) {
+      event.preventDefault();
+      this.isServizioOpen = true;
+      this.isOperatoreOpen = false;
+      return;
+    }
+
+    if (event.key.length !== 1 || event.ctrlKey || event.metaKey || event.altKey) {
+      return;
+    }
+
+    event.preventDefault();
+    this.isServizioOpen = true;
+    this.isOperatoreOpen = false;
+    const nextSearchTerm = event.key.trim().toLowerCase();
+
+    if (!nextSearchTerm) {
+      return;
+    }
+
+    const hasMatchingServices = this.servizi.some((servizio) =>
+      servizio.nome.toLowerCase().startsWith(nextSearchTerm)
+    );
+
+    if (hasMatchingServices) {
+      this.serviceSearchTerm = nextSearchTerm;
     }
   }
 
   selectOperatore(idOperatore: number): void {
+    if (this.isLoadingData || this.isSubmitting) {
+      return;
+    }
+
     this.form.idOperatore = idOperatore;
     this.onOperatoreChange();
   }
 
   selectServizio(idServizio: number): void {
+    if (this.isLoadingData || this.isSubmitting) {
+      return;
+    }
+
     const servizio = this.servizi.find((item) => item.idServizio === idServizio);
 
     if (!servizio || this.isServiceDisabled(servizio)) {
@@ -152,6 +206,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
     this.form.idServizio = idServizio;
     this.isServizioOpen = false;
+    this.resetServiceSearchTerm();
     this.onServizioChange();
   }
 
@@ -174,6 +229,22 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     return servizio?.nome ?? '';
   }
 
+  get filteredServizi(): Servizio[] {
+    const search = this.serviceSearchTerm.trim().toLowerCase();
+
+    if (!search) {
+      return this.servizi;
+    }
+
+    return this.servizi.filter((servizio) =>
+      servizio.nome.toLowerCase().startsWith(search)
+    );
+  }
+
+  get servizioTriggerLabel(): string {
+    return this.getSelectedServizioLabel();
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -181,10 +252,15 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     if (!target.closest('.booking-dropdown')) {
       this.isOperatoreOpen = false;
       this.isServizioOpen = false;
+      this.resetServiceSearchTerm();
     }
   }
 
   prenotaAppuntamento(): void {
+    if (this.isSubmitting || this.isLoadingData) {
+      return;
+    }
+
     this.bookingAlertMessage = '';
     this.bookingAlertType = null;
 
@@ -224,10 +300,12 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     };
 
     console.log('Invio:', payload);
+    this.isSubmitting = true;
 
     this.appuntamentoService.creaAppuntamento(payload)
       .subscribe({
         next: () => {
+          this.isSubmitting = false;
           this.bookingAlertType = 'success';
           this.bookingAlertMessage = 'Appuntamento prenotato con successo';
           this.cdr.detectChanges();
@@ -238,6 +316,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
         },
         error: (err: unknown) => {
           console.error(err);
+          this.isSubmitting = false;
           this.bookingAlertType = 'error';
           this.bookingAlertMessage = 'Prenotazione dell\'appuntamento non riuscita';
           this.cdr.detectChanges();
@@ -376,13 +455,17 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   }
 
   private loadServiziDisponibili(): void {
+    this.isLoadingData = true;
+
     if (!this.form.idOperatore) {
       this.servizi = [];
       this.appuntamentiOperatore = [];
       this.form.idServizio = null;
       this.form.dataOraFine = '';
       this.availabilityMessage = '';
+      this.resetServiceSearchTerm();
       this.isServizioOpen = false;
+      this.isLoadingData = false;
       this.cdr.detectChanges();
       return;
     }
@@ -423,7 +506,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
         }
 
         this.isServizioOpen = false;
+        this.resetServiceSearchTerm();
         this.updateAvailabilityMessage();
+        this.isLoadingData = false;
 
         this.cdr.detectChanges();
       },
@@ -434,7 +519,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
         this.form.idServizio = null;
         this.form.dataOraFine = '';
         this.availabilityMessage = '';
+        this.resetServiceSearchTerm();
         this.isServizioOpen = false;
+        this.isLoadingData = false;
         this.cdr.detectChanges();
       }
     });
@@ -503,5 +590,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   private formatTime(date: Date): string {
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  private resetServiceSearchTerm(): void {
+    this.serviceSearchTerm = '';
   }
 }
