@@ -553,6 +553,156 @@
   cursor: default;
 }
 
+.appointments-date-picker-panel {
+  position: absolute;
+  top: 92px;
+  left: 50%;
+  z-index: 12;
+  width: min(100vw - 32px, 318px);
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(212, 176, 106, 0.22);
+  background:
+    linear-gradient(180deg, rgba(8, 8, 8, 0.92), rgba(10, 10, 10, 0.84)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(244, 239, 231, 0.02));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 22px 46px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  animation: appointmentsDatePickerPanelIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(-50%);
+  transform-origin: top center;
+}
+
+.appointments-date-picker-panel.is-closing {
+  animation: appointmentsDatePickerPanelOut 0.18s ease forwards;
+}
+
+.appointments-date-picker-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.appointments-date-picker-month {
+  color: #f4ddac;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.appointments-date-picker-nav {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(212, 176, 106, 0.2);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(244, 239, 231, 0.02));
+  color: #d4b06a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.appointments-date-picker-nav:hover {
+  transform: translateY(-1px);
+  border-color: #d4b06a;
+  color: #f3dfb5;
+}
+
+.appointments-date-picker-weekdays,
+.appointments-date-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.appointments-date-picker-weekdays {
+  margin-bottom: 10px;
+}
+
+.appointments-date-picker-weekdays span {
+  color: rgba(244, 221, 172, 0.74);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.appointments-date-picker-grid {
+  gap: 7px;
+}
+
+.appointments-date-picker-day {
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #fff3d2;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.appointments-date-picker-day:hover {
+  transform: translateY(-1px);
+  border-color: rgba(212, 176, 106, 0.32);
+  background: rgba(212, 176, 106, 0.12);
+}
+
+.appointments-date-picker-day.is-outside {
+  color: rgba(255, 243, 210, 0.34);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.appointments-date-picker-day.is-today {
+  border-color: rgba(212, 176, 106, 0.34);
+  color: #f4ddac;
+}
+
+.appointments-date-picker-day.is-selected {
+  border-color: #d4b06a;
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.26), rgba(142, 108, 42, 0.3)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(244, 239, 231, 0.02));
+  color: #fff7e3;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 20px rgba(0, 0, 0, 0.14);
+}
+
+@keyframes appointmentsDatePickerPanelIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes appointmentsDatePickerPanelOut {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.98);
+  }
+}
+
 :host ::ng-deep .fc {
   --fc-border-color: rgba(212, 176, 106, 0.12);
   --fc-page-bg-color: transparent;
@@ -583,6 +733,29 @@
   color: #d4b06a;
   font-size: clamp(24px, 2.3vw, 42px);
   font-weight: 800;
+  cursor: pointer;
+  transition: color 0.22s ease, transform 0.22s ease, text-shadow 0.22s ease;
+}
+
+:host ::ng-deep .fc-toolbar-title::after {
+  content: "\f282";
+  font-family: "bootstrap-icons";
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 0.48em;
+  vertical-align: middle;
+  color: rgba(212, 176, 106, 0.9);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), color 0.22s ease;
+}
+
+:host ::ng-deep .fc-toolbar-title:hover {
+  color: #e6c786;
+  transform: translateY(-1px);
+}
+
+:host ::ng-deep .fc-toolbar-title.is-picker-open::after {
+  transform: rotate(180deg);
+  color: #e6c786;
 }
 
 :host ::ng-deep .fc .fc-button-group {
@@ -834,6 +1007,11 @@
   :host ::ng-deep .fc-toolbar-title {
     font-size: 34px;
     text-align: center;
+  }
+
+  .appointments-date-picker-panel {
+    top: 136px;
+    width: min(100%, 320px);
   }
 
   :host ::ng-deep .fc-timegrid-slot {

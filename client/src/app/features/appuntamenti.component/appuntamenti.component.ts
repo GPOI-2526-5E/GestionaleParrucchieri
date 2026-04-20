@@ -26,6 +26,14 @@ interface DailySchedule {
   intervals: OpeningInterval[];
 }
 
+interface CalendarPickerDay {
+  date: Date;
+  label: number;
+  currentMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+}
+
 @Component({
   selector: 'app-appuntamenti',
   standalone: true,
@@ -39,6 +47,7 @@ interface DailySchedule {
   styleUrls: ['./appuntamenti.component.css']
 })
 export class AppuntamentiComponent implements OnInit {
+  private readonly mobileBreakpoint = 768;
 
   private api = 'http://localhost:3000/api/auth';
   private readonly openingSchedule: Record<number, DailySchedule> = {
@@ -70,7 +79,16 @@ export class AppuntamentiComponent implements OnInit {
   showError = false;
   shakeAnimation = false;
   errorMessage = '';
+  isMobileCalendar = false;
+  calendarDatePickerValue = '';
+  calendarPickerOpen = false;
+  calendarPickerClosing = false;
+  calendarPickerMonth = new Date();
+  calendarPickerDays: CalendarPickerDay[] = [];
+  readonly calendarPickerWeekdays = ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'];
+  readonly calendarPickerMonthFormatter = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' });
   private alertTimeout: ReturnType<typeof setTimeout> | null = null;
+  private calendarPickerCloseTimeout: ReturnType<typeof setTimeout> | null = null;
 
   events: EventInput[] = [];
   private availabilityMaskEvents: EventInput[] = [];
@@ -81,7 +99,7 @@ export class AppuntamentiComponent implements OnInit {
 
   calendarOptions: CalendarOptions = {
     plugins: [timeGridPlugin, interactionPlugin],
-    initialView: 'timeGridWeek',
+    initialView: this.getResponsiveCalendarView(),
     locale: itLocale,
     firstDay: 1,
     allDaySlot: false,
@@ -113,7 +131,7 @@ export class AppuntamentiComponent implements OnInit {
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'timeGridWeek,timeGridDay'
+      right: this.getResponsiveToolbarRight()
     },
     buttonText: {
       today: 'Oggi',
@@ -150,7 +168,9 @@ export class AppuntamentiComponent implements OnInit {
         this.availableServiceOperatorIds.clear();
       }
     });
-
+    this.syncCalendarResponsiveMode();
+    this.calendarDatePickerValue = this.formatDateForInput(new Date());
+    this.syncCalendarPickerMonth(new Date());
     this.getLoggedUser();
 
     this.utenteService.getOperatori().subscribe({
@@ -172,6 +192,11 @@ export class AppuntamentiComponent implements OnInit {
     });
 
 
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncCalendarResponsiveMode();
   }
 
   handleDateClick(arg: any) {
@@ -336,6 +361,15 @@ export class AppuntamentiComponent implements OnInit {
       return;
     }
 
+    if (target?.closest('.fc-toolbar-title')) {
+      this.toggleCalendarPicker();
+      return;
+    }
+
+    if (!target?.closest('.appointments-date-picker-panel')) {
+      this.closeCalendarPicker();
+    }
+
     this.closeOperatorSelect();
   }
 
@@ -423,7 +457,194 @@ export class AppuntamentiComponent implements OnInit {
   private handleDatesSet(arg: { start: Date; end: Date }): void {
     this.visibleRangeStart = arg.start;
     this.visibleRangeEnd = arg.end;
+    this.syncDatePickerValue(arg.start);
+    this.syncCalendarTitleState();
     this.refreshCalendarEvents();
+  }
+
+  toggleCalendarPicker(): void {
+    if (this.calendarPickerOpen) {
+      this.closeCalendarPicker();
+      return;
+    }
+
+    if (this.calendarPickerCloseTimeout) {
+      clearTimeout(this.calendarPickerCloseTimeout);
+      this.calendarPickerCloseTimeout = null;
+    }
+
+    this.calendarPickerClosing = false;
+    this.calendarPickerOpen = true;
+    this.syncCalendarPickerMonth(this.parseInputDate(this.calendarDatePickerValue) ?? new Date());
+    this.syncCalendarTitleState();
+    this.cdr.detectChanges();
+  }
+
+  closeCalendarPicker(): void {
+    if (!this.calendarPickerOpen || this.calendarPickerClosing) {
+      return;
+    }
+
+    this.calendarPickerClosing = true;
+    this.syncCalendarTitleState();
+    this.calendarPickerCloseTimeout = setTimeout(() => {
+      this.calendarPickerOpen = false;
+      this.calendarPickerClosing = false;
+      this.calendarPickerCloseTimeout = null;
+      this.syncCalendarTitleState();
+      this.cdr.detectChanges();
+    }, 180);
+  }
+
+  previousCalendarPickerMonth(): void {
+    const next = new Date(this.calendarPickerMonth);
+    next.setMonth(next.getMonth() - 1, 1);
+    this.syncCalendarPickerMonth(next);
+  }
+
+  nextCalendarPickerMonth(): void {
+    const next = new Date(this.calendarPickerMonth);
+    next.setMonth(next.getMonth() + 1, 1);
+    this.syncCalendarPickerMonth(next);
+  }
+
+  selectCalendarPickerDay(day: CalendarPickerDay): void {
+    this.calendarDatePickerValue = this.formatDateForInput(day.date);
+
+    if (!this.calendarComponent) {
+      this.closeCalendarPicker();
+      return;
+    }
+
+    const calendarApi = this.calendarComponent.getApi();
+    const value = this.calendarDatePickerValue;
+    calendarApi.gotoDate(value);
+
+    if (this.isMobileCalendar) {
+      calendarApi.changeView('timeGridDay', value);
+    }
+
+    this.syncCalendarPickerMonth(day.date);
+    this.closeCalendarPicker();
+  }
+
+  get calendarPickerMonthLabel(): string {
+    const label = this.calendarPickerMonthFormatter.format(this.calendarPickerMonth);
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  private syncCalendarResponsiveMode(): void {
+    const nextIsMobile = typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
+
+    if (this.isMobileCalendar === nextIsMobile && this.calendarComponent) {
+      return;
+    }
+
+    this.isMobileCalendar = nextIsMobile;
+    const nextView = this.getResponsiveCalendarView();
+    const nextToolbarRight = this.getResponsiveToolbarRight();
+
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      initialView: nextView,
+      headerToolbar: {
+        ...this.calendarOptions.headerToolbar,
+        left: 'prev,next today',
+        center: 'title',
+        right: nextToolbarRight
+      }
+    };
+
+    if (this.calendarComponent) {
+      const calendarApi = this.calendarComponent.getApi();
+      calendarApi.setOption('headerToolbar', {
+        left: 'prev,next today',
+        center: 'title',
+        right: nextToolbarRight
+      });
+      calendarApi.changeView(nextView);
+    }
+
+    this.cdr.detectChanges();
+  }
+
+  private getResponsiveCalendarView(): 'timeGridWeek' | 'timeGridDay' {
+    return this.isMobileCalendar ? 'timeGridDay' : 'timeGridWeek';
+  }
+
+  private getResponsiveToolbarRight(): string {
+    return this.isMobileCalendar ? '' : 'timeGridWeek,timeGridDay';
+  }
+
+  private syncDatePickerValue(fallbackDate: Date): void {
+    const activeDate = this.calendarComponent
+      ? this.calendarComponent.getApi().getDate()
+      : fallbackDate;
+
+    this.calendarDatePickerValue = this.formatDateForInput(activeDate);
+    this.syncCalendarPickerMonth(activeDate);
+  }
+
+  private formatDateForInput(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private parseInputDate(value: string): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const date = new Date(`${value}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private syncCalendarPickerMonth(baseDate: Date): void {
+    this.calendarPickerMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+    this.calendarPickerDays = this.buildCalendarPickerDays(this.calendarPickerMonth);
+  }
+
+  private buildCalendarPickerDays(monthDate: Date): CalendarPickerDay[] {
+    const firstDayOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+    const start = new Date(firstDayOfMonth);
+    const firstWeekday = (firstDayOfMonth.getDay() + 6) % 7;
+    start.setDate(start.getDate() - firstWeekday);
+
+    const selectedValue = this.calendarDatePickerValue;
+    const todayValue = this.formatDateForInput(new Date());
+    const days: CalendarPickerDay[] = [];
+
+    for (let i = 0; i < 42; i++) {
+      const current = new Date(start);
+      current.setDate(start.getDate() + i);
+      const currentValue = this.formatDateForInput(current);
+
+      days.push({
+        date: current,
+        label: current.getDate(),
+        currentMonth: current.getMonth() === monthDate.getMonth(),
+        isToday: currentValue === todayValue,
+        isSelected: currentValue === selectedValue
+      });
+    }
+
+    return days;
+  }
+
+  private syncCalendarTitleState(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const title = document.querySelector('.fc-toolbar-title');
+
+    if (!title) {
+      return;
+    }
+
+    title.classList.toggle('is-picker-open', this.calendarPickerOpen && !this.calendarPickerClosing);
   }
 
   private refreshCalendarEvents(): void {
