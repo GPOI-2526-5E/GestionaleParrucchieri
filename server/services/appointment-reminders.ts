@@ -28,6 +28,7 @@ const REMINDER_WINDOW_MS = 15 * 60 * 1000;
 
 let reminderJobStarted = false;
 let reminderJobRunning = false;
+let lastReminderCheckAt: Date | null = null;
 
 function toIsoLocalString(date: Date): string {
   const pad = (value: number) => value.toString().padStart(2, "0");
@@ -154,8 +155,11 @@ async function runReminderJob(): Promise<void> {
 
   try {
     const now = new Date();
-    const windowStart = new Date(now.getTime() + REMINDER_LOOKAHEAD_MS);
-    const windowEnd = new Date(windowStart.getTime() + REMINDER_WINDOW_MS);
+    const checkStart = lastReminderCheckAt
+      ? new Date(lastReminderCheckAt)
+      : new Date(now.getTime() - REMINDER_WINDOW_MS);
+    const windowStart = new Date(checkStart.getTime() + REMINDER_LOOKAHEAD_MS);
+    const windowEnd = new Date(now.getTime() + REMINDER_LOOKAHEAD_MS);
 
     const { data, error } = await db
       .from("appuntamenti")
@@ -183,6 +187,7 @@ async function runReminderJob(): Promise<void> {
   } catch (error) {
     console.error("Errore job reminder appuntamenti:", error);
   } finally {
+    lastReminderCheckAt = new Date();
     reminderJobRunning = false;
   }
 }

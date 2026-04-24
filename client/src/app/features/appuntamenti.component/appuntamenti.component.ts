@@ -175,8 +175,8 @@ export class AppuntamentiComponent implements OnInit {
     eventContent: this.renderAppointmentEvent.bind(this),
     eventOverlap: false,
     slotEventOverlap: false,
-    eventMinHeight: 86,
-    eventShortHeight: 86,
+    eventMinHeight: 0,
+    eventShortHeight: 0,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',

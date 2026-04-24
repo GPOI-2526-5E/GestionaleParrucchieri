@@ -254,6 +254,54 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     return this.getSelectedServizioLabel();
   }
 
+  get summaryStartDateLabel(): string {
+    const value = this.form.dataOraInizio;
+    if (!value) {
+      return 'Seleziona dallo slot scelto';
+    }
+
+    const [datePart] = value.split('T');
+    return datePart || 'Seleziona dallo slot scelto';
+  }
+
+  get summaryStartTimeLabel(): string {
+    const value = this.form.dataOraInizio;
+    if (!value) {
+      return '';
+    }
+
+    const [, timePart] = value.split('T');
+    return (timePart || '').slice(0, 5);
+  }
+
+  get summaryEndTimeLabel(): string {
+    return this.form.dataOraFine ? this.form.dataOraFine.slice(0, 5) : '';
+  }
+
+  get startDateTimeDisplayLabel(): string {
+    if (!this.form.dataOraInizio) {
+      return 'Non disponibile';
+    }
+
+    const date = new Date(this.form.dataOraInizio);
+
+    if (Number.isNaN(date.getTime())) {
+      return this.form.dataOraInizio;
+    }
+
+    return new Intl.DateTimeFormat('it-IT', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  }
+
+  get endTimeDisplayLabel(): string {
+    return this.summaryEndTimeLabel || 'Calcolata automaticamente';
+  }
+
   get isLoginAlert(): boolean {
     return this.bookingAlertTitle === 'Login richiesto';
   }

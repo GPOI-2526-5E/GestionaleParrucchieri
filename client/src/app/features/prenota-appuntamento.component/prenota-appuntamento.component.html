@@ -39,8 +39,8 @@
           <div class="booking-summary-item">
             <span class="booking-summary-label">Inizio</span>
             @if (form.dataOraInizio) {
-              <strong class="booking-summary-value">{{ form.dataOraInizio.split('T')[0] }}</strong>
-              <span class="booking-summary-meta">{{ form.dataOraInizio.split('T')[1] }}</span>
+              <strong class="booking-summary-value">{{ summaryStartDateLabel }}</strong>
+              <span class="booking-summary-meta">{{ summaryStartTimeLabel }}</span>
             } @else {
               <strong class="booking-summary-value">Seleziona dallo slot scelto</strong>
             }
@@ -48,7 +48,10 @@
 
           <div class="booking-summary-item">
             <span class="booking-summary-label">Fine</span>
-            <strong class="booking-summary-value">{{ form.dataOraFine || 'Calcolata automaticamente' }}</strong>
+            <strong class="booking-summary-value">{{ summaryEndTimeLabel || 'Calcolata automaticamente' }}</strong>
+            @if (summaryEndTimeLabel) {
+              <span class="booking-summary-meta">Orario finale del servizio</span>
+            }
           </div>
         </div>
       </div>
@@ -130,25 +133,18 @@
 
           <div class="form-group form-group-separated">
             <label>Data e ora inizio</label>
-            <input
-              type="datetime-local"
-              [(ngModel)]="form.dataOraInizio"
-              name="dataOraInizio"
-              [min]="minDateTime"
-              (change)="onServizioChange()"
-              [disabled]="true"
-            />
+            <div class="booking-readonly-control">
+              <i class="bi bi-calendar-date booking-readonly-icon" aria-hidden="true"></i>
+              <span class="booking-readonly-value">{{ startDateTimeDisplayLabel }}</span>
+            </div>
           </div>
 
           <div class="form-group form-group-separated">
             <label>Ora fine</label>
-            <input
-              type="time"
-              [(ngModel)]="form.dataOraFine"
-              name="dataOraFine"
-              [min]="minDateTime"
-              [disabled]="true"
-            />
+            <div class="booking-readonly-control">
+              <i class="bi bi-clock booking-readonly-icon" aria-hidden="true"></i>
+              <span class="booking-readonly-value">{{ endTimeDisplayLabel }}</span>
+            </div>
           </div>
         </div>
 
