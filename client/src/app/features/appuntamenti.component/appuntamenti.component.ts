@@ -196,6 +196,7 @@ export class AppuntamentiComponent implements OnInit {
 
   ngOnInit() {
     this.route.queryParamMap.subscribe((params) => {
+      this.hideAlert();
       const servizio = params.get('servizio');
       const operatore = params.get('operatore');
       const requestedDate = params.get('data');
@@ -255,7 +256,9 @@ export class AppuntamentiComponent implements OnInit {
     const clickedDate = arg.date instanceof Date ? arg.date : new Date(arg.date);
 
     if (!this.isBookableDateTime(clickedDate)) {
-      this.showAlert(this.getInvalidSlotMessage(clickedDate));
+      if (this.isTrustedUserInteraction(arg?.jsEvent)) {
+        this.showAlert(this.getInvalidSlotMessage(clickedDate));
+      }
       return;
     }
 
@@ -274,7 +277,9 @@ export class AppuntamentiComponent implements OnInit {
         ? arg.event.start
         : new Date(arg.event.start);
 
-      this.showAlert(this.getInvalidSlotMessage(startDate));
+      if (this.isTrustedUserInteraction(arg?.jsEvent)) {
+        this.showAlert(this.getInvalidSlotMessage(startDate));
+      }
       return;
     }
 
@@ -295,7 +300,9 @@ export class AppuntamentiComponent implements OnInit {
     }
 
     if (!this.canUserViewAppointment(appointment)) {
-      this.showAlert('Questo slot e gia prenotato.');
+      if (this.isTrustedUserInteraction(arg?.jsEvent)) {
+        this.showAlert('Questo slot e gia prenotato.');
+      }
       return;
     }
 
@@ -1223,6 +1230,21 @@ export class AppuntamentiComponent implements OnInit {
       this.showError = false;
       this.cdr.detectChanges();
     }, 2600);
+  }
+
+  private hideAlert(): void {
+    if (this.alertTimeout) {
+      clearTimeout(this.alertTimeout);
+      this.alertTimeout = null;
+    }
+
+    this.showError = false;
+    this.shakeAnimation = false;
+    this.errorMessage = '';
+  }
+
+  private isTrustedUserInteraction(event: Event | null | undefined): boolean {
+    return Boolean(event && (event as Event).isTrusted);
   }
 
   private loadSelectedServiceContext(serviceId: number): void {

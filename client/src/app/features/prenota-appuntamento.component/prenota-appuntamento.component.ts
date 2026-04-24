@@ -350,8 +350,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
             this.router.navigate(['/appointments'], {
               queryParams: {
                 operatore: this.form.idOperatore ?? undefined,
-                data: this.form.dataOraInizio || undefined,
-                servizio: this.form.idServizio ?? undefined
+                data: this.form.dataOraInizio || undefined
               }
             });
           }, 1500);
