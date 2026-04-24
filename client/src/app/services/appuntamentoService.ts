@@ -48,4 +48,10 @@ export class AppuntamentoService {
   eliminaAppuntamento(idAppuntamento: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.api}/${idAppuntamento}`);
   }
+
+  getAppuntamentiCount(data: string): Observable<number> {
+    return this.http
+      .get<{ totale: number }>(`${this.api}/count?data=${encodeURIComponent(data)}`)
+      .pipe(map((res) => res.totale));
+  }
 }

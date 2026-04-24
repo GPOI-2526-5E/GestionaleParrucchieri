@@ -1,0 +1,32 @@
+<div class="management-layout" [class.is-sidenav-collapsed]="isSidenavCollapsed">
+  <button
+    type="button"
+    class="management-layout__toggle"
+    (click)="toggleSidenav()"
+    [class.is-collapsed]="isSidenavCollapsed"
+    [attr.aria-label]="isSidenavCollapsed ? 'Apri navigazione gestionale' : 'Chiudi navigazione gestionale'"
+    [attr.aria-expanded]="!isSidenavCollapsed"
+  >
+    <span class="management-layout__toggle-shell" aria-hidden="true">
+      <span class="management-layout__toggle-pane management-layout__toggle-pane--rail"></span>
+      <span class="management-layout__toggle-pane management-layout__toggle-pane--body"></span>
+    </span>
+  </button>
+
+  <div class="management-layout__sidebar">
+    <app-sidenav
+      [isCollapsed]="isSidenavCollapsed"
+      (collapsedChange)="isSidenavCollapsed = $event"
+    ></app-sidenav>
+  </div>
+
+  <main class="management-layout__content">
+    <section class="management-page">
+      <p class="management-page__eyebrow">Gestionale</p>
+      <h1>Cassa</h1>
+      <p class="management-page__copy">
+        Modulo pronto per ospitare scontrino, pagamenti e chiusura giornaliera con la stessa shell della home.
+      </p>
+    </section>
+  </main>
+</div>

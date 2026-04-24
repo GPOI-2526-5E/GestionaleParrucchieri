@@ -19,6 +19,9 @@ import { paymentSuccessGuard } from './guards/payment-success.guard';
 import { registerGuard } from './guards/register.guard';
 import { managementGuard } from './guards/management.guard';
 import { HomeComponent } from './gestionale/home.component/home.component';
+import { AppuntamentiGestionaleComponent } from './gestionale/appuntamenti-gestionale.component/appuntamenti-gestionale.component';
+import { CassaComponent } from './gestionale/cassa.component/cassa.component';
+import { ClientiComponent } from './gestionale/clienti.component/clienti.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -38,5 +41,8 @@ export const routes: Routes = [
     { path: 'reset-password', component: ResetPasswordComponent },
     { path: 'prenotazione', component: PrenotaAppuntamentoComponent},
     { path: 'gestionale', component: HomeComponent, canActivate: [managementGuard] },
+    { path: 'gestionale/appuntamenti', component: AppuntamentiGestionaleComponent},
+    { path: 'gestionale/cassa', component: CassaComponent},
+    { path: 'gestionale/clienti', component: ClientiComponent},
     { path: '**', redirectTo: '/home' }
 ];

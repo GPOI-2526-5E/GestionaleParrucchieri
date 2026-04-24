@@ -3,20 +3,10 @@
     <div class="management-sidenav__brand">
       <div class="management-sidenav__brand-mark">GP</div>
       <div class="management-sidenav__brand-copy">
-      <p class="management-sidenav__eyebrow">Gestionale</p>
-      <h2>I Parrucchieri</h2>
+        <p class="management-sidenav__eyebrow">Gestionale</p>
+        <h2>I Parrucchieri</h2>
       </div>
     </div>
-
-    <button
-      type="button"
-      class="management-sidenav__toggle"
-      (click)="toggleCollapsed()"
-      [attr.aria-label]="isCollapsed ? 'Espandi sidenav' : 'Comprimi sidenav'"
-      [attr.aria-expanded]="!isCollapsed"
-    >
-      {{ isCollapsed ? '>' : '<' }}
-    </button>
   </div>
 
   <div class="management-sidenav__status">
@@ -37,11 +27,11 @@
         [routerLink]="item.href"
         routerLinkActive="is-active"
         [routerLinkActiveOptions]="{ exact: item.href === '/gestionale' }"
+        [attr.title]="isCollapsed ? item.label : null"
       >
         <div class="management-sidenav__link-copy">
           <div class="management-sidenav__link-head">
             <span>{{ item.label }}</span>
-            <small *ngIf="item.badge">{{ item.badge }}</small>
           </div>
           <p>{{ item.description }}</p>
         </div>

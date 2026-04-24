@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface SideNavItem {
@@ -7,7 +7,6 @@ interface SideNavItem {
   href: string;
   description: string;
   badge?: string;
-  active?: boolean;
 }
 
 interface SideNavSection {
@@ -23,7 +22,8 @@ interface SideNavSection {
   styleUrl: './sidenav.component.css',
 })
 export class SidenavComponent {
-  isCollapsed = false;
+  @Input() isCollapsed = false;
+  @Output() collapsedChange = new EventEmitter<boolean>();
 
   readonly sections: SideNavSection[] = [
     {
@@ -32,23 +32,23 @@ export class SidenavComponent {
         {
           label: 'Dashboard',
           href: '/gestionale',
-          description: 'Panoramica della giornata'
+          description: 'Panoramica della giornata',
         },
         {
           label: 'Appuntamenti',
-          href: '/gestionale/appointments',
+          href: '/gestionale/appuntamenti',
           description: 'Agenda, conferme e check-in',
-          badge: 'Oggi'
+          badge: 'Oggi',
         },
         {
           label: 'Cassa',
           href: '/gestionale/cassa',
-          description: 'Incassi, pagamenti e chiusura'
+          description: 'Incassi, pagamenti e chiusura',
         },
         {
           label: 'Clienti',
           href: '/gestionale/clienti',
-          description: 'Schede cliente e storico'
+          description: 'Schede cliente e storico',
         }
       ]
     },
@@ -58,23 +58,23 @@ export class SidenavComponent {
         {
           label: 'Report',
           href: '/gestionale/report',
-          description: 'Vendite, performance e KPI'
+          description: 'Vendite, performance e KPI',
         },
         {
           label: 'Magazzino',
           href: '/gestionale/magazzino',
           description: 'Scorte, movimenti e riordino',
-          badge: 'Stock'
+          badge: 'Stock',
         },
         {
           label: 'Servizi',
           href: '/gestionale/servizi',
-          description: 'Listino, durate e disponibilita'
+          description: 'Listino, durate e disponibilita',
         },
         {
           label: 'Fornitori',
           href: '/gestionale/fornitori',
-          description: 'Anagrafica e ordini acquisto'
+          description: 'Anagrafica e ordini acquisto',
         }
       ]
     },
@@ -84,17 +84,17 @@ export class SidenavComponent {
         {
           label: 'Staff',
           href: '/gestionale/staff',
-          description: 'Operatori, turni e permessi'
+          description: 'Operatori, turni e permessi',
         },
         {
           label: 'Promozioni',
           href: '/gestionale/promozioni',
-          description: 'Coupon, pacchetti e offerte'
+          description: 'Coupon, pacchetti e offerte',
         },
         {
           label: 'Impostazioni',
           href: '/gestionale/impostazioni',
-          description: 'Parametri salone e preferenze'
+          description: 'Parametri salone e preferenze',
         }
       ]
     }
@@ -102,5 +102,6 @@ export class SidenavComponent {
 
   toggleCollapsed(): void {
     this.isCollapsed = !this.isCollapsed;
+    this.collapsedChange.emit(this.isCollapsed);
   }
 }

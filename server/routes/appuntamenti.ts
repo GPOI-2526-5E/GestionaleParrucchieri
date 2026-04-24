@@ -38,6 +38,34 @@ function startOfDay(date: Date): Date {
   return value;
 }
 
+router.get("/count", async (req: Request, res: Response) => {
+  try {
+    const data = (req.query.data as string)?.trim();
+
+    if (!data) {
+      return res.status(400).json({ message: "La data e obbligatoria" });
+    }
+
+    const startOfDay = `${data}T00:00:00`;
+    const endOfDay = `${data}T23:59:59`;
+
+    const { count, error } = await db
+      .from("appuntamenti")
+      .select("idAppuntamento", { count: "exact", head: true })
+      .gte("dataOraInizio", startOfDay)
+      .lte("dataOraInizio", endOfDay);
+
+    if (error) {
+      throw error;
+    }
+
+    return res.json({ totale: count ?? 0 });
+  } catch (err: any) {
+    console.error("Errore GET /appuntamenti/count:", err);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     const idOperatoreNum = parseInt(req.query.idOperatore as string, 10);
