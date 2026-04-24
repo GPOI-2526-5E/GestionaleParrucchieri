@@ -98,6 +98,7 @@ export class AppuntamentiComponent implements OnInit {
   readonly calendarPickerMonthFormatter = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' });
   private alertTimeout: ReturnType<typeof setTimeout> | null = null;
   private calendarPickerCloseTimeout: ReturnType<typeof setTimeout> | null = null;
+  private calendarScrollTimeout: ReturnType<typeof setTimeout> | null = null;
   private requestedOperatorId: number | null = null;
   private requestedCalendarDate: string | null = null;
   private appointmentDetailCloseTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -152,6 +153,8 @@ export class AppuntamentiComponent implements OnInit {
     slotMaxTime: '21:30:00',
     slotDuration: '00:30:00',
     slotLabelInterval: '00:30',
+    scrollTime: '07:00:00',
+    scrollTimeReset: false,
     displayEventTime: true,
     displayEventEnd: true,
     expandRows: false,
@@ -1346,6 +1349,7 @@ export class AppuntamentiComponent implements OnInit {
     this.syncCalendarTitleState();
     this.updateCalendarPickerPosition();
     this.refreshCalendarEvents();
+    this.scrollCalendarToCurrentTimeIfNeeded(arg.start, arg.end);
   }
 
   toggleCalendarPicker(): void {
@@ -1560,6 +1564,42 @@ export class AppuntamentiComponent implements OnInit {
     this.calendarDatePickerValue = this.formatDateForInput(activeDate);
     this.syncCalendarPickerMonth(activeDate);
     this.requestedCalendarDate = null;
+  }
+
+  private scrollCalendarToCurrentTimeIfNeeded(rangeStart: Date, rangeEnd: Date): void {
+    if (!this.calendarComponent) {
+      return;
+    }
+
+    const now = new Date();
+    if (now < rangeStart || now >= rangeEnd) {
+      return;
+    }
+
+    if (this.calendarScrollTimeout) {
+      clearTimeout(this.calendarScrollTimeout);
+    }
+
+    this.calendarScrollTimeout = setTimeout(() => {
+      if (!this.calendarComponent) {
+        return;
+      }
+
+      const calendarApi = this.calendarComponent.getApi();
+      calendarApi.scrollToTime(this.getCalendarScrollTimeForNow());
+    }, 60);
+  }
+
+  private getCalendarScrollTimeForNow(): string {
+    const now = new Date();
+    const minutesNow = now.getHours() * 60 + now.getMinutes();
+    const minMinutes = 7 * 60;
+    const maxMinutes = 21 * 60;
+    const targetMinutes = Math.max(minMinutes, Math.min(maxMinutes, minutesNow - 30));
+    const hours = `${Math.floor(targetMinutes / 60)}`.padStart(2, '0');
+    const minutes = `${targetMinutes % 60}`.padStart(2, '0');
+
+    return `${hours}:${minutes}:00`;
   }
 
   private formatDateForInput(date: Date): string {
