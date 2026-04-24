@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FullCalendarModule, FullCalendarComponent } from '@fullcalendar/angular';
-import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import { CalendarOptions, EventInput, EventContentArg } from '@fullcalendar/core';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import itLocale from '@fullcalendar/core/locales/it';
@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { UtentiService } from '../../services/utentiService';
 import { Utente } from "../../models/utente.model";
 import { AppuntamentoService } from "../../services/appuntamentoService";
+import { Appuntamento } from '../../models/appuntamento.model';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ServiziService } from '../../services/servizio';
@@ -32,6 +33,12 @@ interface CalendarPickerDay {
   currentMonth: boolean;
   isToday: boolean;
   isSelected: boolean;
+}
+
+interface AppointmentEditForm {
+  dataOraInizio: string;
+  dataOraFine: string;
+  idServizio: number | null;
 }
 
 @Component({
@@ -79,6 +86,7 @@ export class AppuntamentiComponent implements OnInit {
   showError = false;
   shakeAnimation = false;
   errorMessage = '';
+  alertVariant: 'error' | 'success' = 'error';
   isMobileCalendar = false;
   calendarDatePickerValue = '';
   calendarPickerOpen = false;
@@ -92,11 +100,40 @@ export class AppuntamentiComponent implements OnInit {
   private calendarPickerCloseTimeout: ReturnType<typeof setTimeout> | null = null;
   private requestedOperatorId: number | null = null;
   private requestedCalendarDate: string | null = null;
+  private appointmentDetailCloseTimeout: ReturnType<typeof setTimeout> | null = null;
 
   events: EventInput[] = [];
+  private loadedAppointments: Appuntamento[] = [];
+  private serviceDescriptionByName = new Map<string, string>();
   private availabilityMaskEvents: EventInput[] = [];
   private visibleRangeStart: Date | null = null;
   private visibleRangeEnd: Date | null = null;
+  selectedAppointment: Appuntamento | null = null;
+  selectedAppointmentLabel = '';
+  isAppointmentDetailOpen = false;
+  isAppointmentDetailClosing = false;
+  appointmentDetailToneClass = 'tone-other';
+  isEditingAppointment = false;
+  isAppointmentActionLoading = false;
+  isEditFormLoading = false;
+  appointmentActionError = '';
+  isDeleteConfirmOpen = false;
+  deleteConfirmAppointment: Appuntamento | null = null;
+  deleteConfirmKeepDetailOpen = false;
+  editableServices: Servizio[] = [];
+  appointmentEditForm: AppointmentEditForm = {
+    dataOraInizio: '',
+    dataOraFine: '',
+    idServizio: null
+  };
+  editStartDate = '';
+  editStartTime = '';
+  editDatePickerOpen = false;
+  editDatePickerClosing = false;
+  editDatePickerMonth = new Date();
+  editDatePickerDays: CalendarPickerDay[] = [];
+  editServicesOpen = false;
+  private editDatePickerCloseTimeout: ReturnType<typeof setTimeout> | null = null;
 
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
@@ -113,7 +150,7 @@ export class AppuntamentiComponent implements OnInit {
     displayEventTime: true,
     displayEventEnd: true,
     expandRows: false,
-    height: '72vh',
+    height: '82vh',
     nowIndicator: true,
     stickyHeaderDates: true,
     selectable: true,
@@ -127,10 +164,11 @@ export class AppuntamentiComponent implements OnInit {
     datesSet: this.handleDatesSet.bind(this),
     dateClick: this.handleDateClick.bind(this),
     eventClick: this.handleEventClick.bind(this),
+    eventContent: this.renderAppointmentEvent.bind(this),
     eventOverlap: false,
     slotEventOverlap: false,
-    eventMinHeight: 52,
-    eventShortHeight: 40,
+    eventMinHeight: 86,
+    eventShortHeight: 86,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
@@ -240,12 +278,45 @@ export class AppuntamentiComponent implements OnInit {
       return;
     }
 
-    this.router.navigate(['/dettaglio-appuntamento'], {
-      queryParams: {
-        start: arg.event.start?.toISOString(),
-        end: arg.event.end?.toISOString()
+    const clickedAppointmentId = Number(
+      arg.event?.id ?? arg.event?.extendedProps?.idAppuntamento
+    );
+
+    if (!Number.isFinite(clickedAppointmentId)) {
+      return;
+    }
+
+    const appointment = this.loadedAppointments.find(
+      (item) => item.idAppuntamento === clickedAppointmentId
+    );
+
+    if (!appointment) {
+      return;
+    }
+
+    if (!this.canUserViewAppointment(appointment)) {
+      this.showAlert('Questo slot e gia prenotato.');
+      return;
+    }
+
+    const clickedElement = arg.jsEvent?.target as HTMLElement | null;
+    if (clickedElement?.closest('.appointment-icon-btn.edit')) {
+      if (!arg.event.extendedProps?.canModify) {
+        return;
       }
-    })
+      this.openAppointmentDetail(appointment, true);
+      return;
+    }
+
+    if (clickedElement?.closest('.appointment-icon-btn.delete')) {
+      if (!arg.event.extendedProps?.canDelete) {
+        return;
+      }
+      this.openDeleteConfirmation(appointment, false);
+      return;
+    }
+
+    this.openAppointmentDetail(appointment);
   }
 
   getLoggedUser() {
@@ -280,21 +351,756 @@ export class AppuntamentiComponent implements OnInit {
       .subscribe({
         next: (eventi) => {
           console.log(eventi);
-          // Mostriamo il titolo solo per gli appuntamenti del cliente loggato:
-          // gli altri slot restano prenotati ma senza dettagli sensibili.
-          this.events = eventi.map(a => {
-            const isMyAppointment = a.idCliente && this.user?.idUtente && a.idCliente === this.user.idUtente;
-            return {
-              title: isMyAppointment ? `${a.note}` : '',
-              start: a.dataOraInizio,
-              end: a.dataOraFine,
-              classNames: [isMyAppointment ? 'my-appointment' : 'other-appointment']
-            };
-          });
-          this.refreshCalendarEvents();
+          this.loadedAppointments = eventi;
+          this.loadServiceDetailsForOperator(this.selectedOperator!);
+          this.closeAppointmentDetail();
+          this.rebuildCalendarEvents();
         },
         error: (err) => console.error("Errore caricando appuntamenti:", err)
       });
+  }
+
+  private loadServiceDetailsForOperator(operatorId: number): void {
+    this.serviziService.getServiziPrenotabiliByOperatore(operatorId).subscribe({
+      next: (services) => {
+        this.serviceDescriptionByName = new Map(
+          services.map((service) => [
+            (service.nome || '').trim().toLowerCase(),
+            (service.descrizione || '').trim()
+          ])
+        );
+        this.rebuildCalendarEvents();
+      },
+      error: () => {
+        this.serviceDescriptionByName.clear();
+      }
+    });
+  }
+
+  private rebuildCalendarEvents(): void {
+    const nowTimestamp = Date.now();
+    this.events = this.loadedAppointments.map((a) => {
+      const normalizedStart = this.normalizeDateTimeForCalendar(a.dataOraInizio);
+      const normalizedEnd = this.normalizeDateTimeForCalendar(a.dataOraFine);
+      const isMyAppointment = this.isCustomerOwnAppointment(a.idCliente);
+      const appointmentEnd = new Date(normalizedEnd);
+      const isPastAppointment =
+        !Number.isNaN(appointmentEnd.getTime()) &&
+        appointmentEnd.getTime() < nowTimestamp;
+      const canManage = this.canUserManageAppointment(a);
+      const canModify = this.isUntilDayBefore(a.dataOraInizio);
+      const canDelete = this.isUntilDayBefore(a.dataOraInizio);
+      const isVisible = this.canUserViewAppointment(a);
+      const serviceName = (a.note || '').trim();
+      const normalizedServiceName = serviceName.toLowerCase();
+      const serviceDescription = this.serviceDescriptionByName.get(normalizedServiceName) || '';
+      const displayTitle = isVisible
+        ? (serviceName || 'Servizio prenotato')
+        : 'Appuntamento prenotato';
+
+      return {
+        id: `${a.idAppuntamento}`,
+        title: displayTitle,
+        start: normalizedStart,
+        end: normalizedEnd,
+        extendedProps: {
+          idAppuntamento: a.idAppuntamento,
+          canManage,
+          canModify,
+          canDelete,
+          isVisible,
+          displayTitle,
+          serviceName,
+          serviceDescription,
+          operatorName: this.selectedOperatorLabel
+        },
+        classNames: [
+          isPastAppointment ? 'past-appointment' : (isMyAppointment ? 'my-appointment' : 'other-appointment'),
+          !isVisible ? 'masked-appointment' : ''
+        ].filter(Boolean)
+      } as EventInput;
+    });
+    this.refreshCalendarEvents();
+  }
+
+  private normalizeDateTimeForCalendar(value: string): string {
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+      return value;
+    }
+
+    parsed.setSeconds(0, 0);
+    return this.toLocalDateTimeInput(parsed.toISOString());
+  }
+
+  private isCustomerOwnAppointment(appointmentCustomerId: number | null | undefined): boolean {
+    if (!this.user) {
+      return false;
+    }
+
+    if (this.user.ruolo === 'admin' || this.user.ruolo === 'operatore') {
+      return true;
+    }
+
+    if (!appointmentCustomerId || !this.user.idUtente) {
+      return false;
+    }
+
+    return this.user.ruolo === 'cliente' && appointmentCustomerId === this.user.idUtente;
+  }
+
+  private openAppointmentDetail(appointment: Appuntamento, startInEditMode = false): void {
+    if (this.appointmentDetailCloseTimeout) {
+      clearTimeout(this.appointmentDetailCloseTimeout);
+      this.appointmentDetailCloseTimeout = null;
+    }
+
+    this.selectedAppointment = appointment;
+    this.selectedAppointmentLabel = this.buildAppointmentLabel(appointment);
+    this.appointmentActionError = '';
+    this.isEditingAppointment = false;
+    this.isAppointmentDetailClosing = false;
+    this.isAppointmentDetailOpen = true;
+    this.appointmentDetailToneClass = this.getAppointmentToneClass(appointment);
+    this.appointmentEditForm = {
+      dataOraInizio: this.toLocalDateTimeInput(appointment.dataOraInizio),
+      dataOraFine: this.toLocalDateTimeInput(appointment.dataOraFine),
+      idServizio: null
+    };
+    this.syncEditStartPartsFromForm();
+    this.closeEditDatePicker(true);
+    this.closeEditServicesPicker();
+    this.editableServices = [];
+    this.loadEditableServicesForSelectedAppointment();
+
+    if (startInEditMode) {
+      if (!this.canModifySelectedAppointment) {
+        this.appointmentActionError = "Puoi modificare l'appuntamento solo fino al giorno prima.";
+      } else {
+        this.isEditingAppointment = true;
+      }
+    }
+  }
+
+  closeAppointmentDetail(): void {
+    if (!this.isAppointmentDetailOpen || this.isAppointmentDetailClosing) {
+      return;
+    }
+
+    this.isAppointmentDetailClosing = true;
+    this.appointmentDetailCloseTimeout = setTimeout(() => {
+      this.isAppointmentDetailOpen = false;
+      this.isAppointmentDetailClosing = false;
+      this.isEditingAppointment = false;
+      this.isAppointmentActionLoading = false;
+      this.isEditFormLoading = false;
+      this.appointmentActionError = '';
+      this.isDeleteConfirmOpen = false;
+      this.deleteConfirmAppointment = null;
+      this.deleteConfirmKeepDetailOpen = false;
+      this.selectedAppointment = null;
+      this.selectedAppointmentLabel = '';
+      this.editableServices = [];
+      this.appointmentEditForm = {
+        dataOraInizio: '',
+        dataOraFine: '',
+        idServizio: null
+      };
+      this.editStartDate = '';
+      this.editStartTime = '';
+      this.closeEditDatePicker(true);
+      this.closeEditServicesPicker();
+      this.appointmentDetailCloseTimeout = null;
+      this.cdr.detectChanges();
+    }, 220);
+  }
+
+  beginAppointmentEdit(): void {
+    if (!this.selectedAppointment) {
+      return;
+    }
+
+    if (!this.canModifySelectedAppointment) {
+      this.appointmentActionError = "Puoi modificare l'appuntamento solo fino al giorno prima.";
+      return;
+    }
+
+    if (this.isEditFormLoading) {
+      return;
+    }
+
+    this.isEditingAppointment = true;
+    this.appointmentActionError = '';
+    this.syncEditStartPartsFromForm();
+    this.closeEditDatePicker(true);
+    this.closeEditServicesPicker();
+    this.refreshEditEndFromSelectedService();
+    this.forceViewRefresh();
+  }
+
+  cancelAppointmentEdit(): void {
+    if (!this.selectedAppointment) {
+      return;
+    }
+
+    this.isEditingAppointment = false;
+    this.appointmentActionError = '';
+    this.appointmentEditForm = {
+      dataOraInizio: this.toLocalDateTimeInput(this.selectedAppointment.dataOraInizio),
+      dataOraFine: this.toLocalDateTimeInput(this.selectedAppointment.dataOraFine),
+      idServizio: this.appointmentEditForm.idServizio
+    };
+    this.syncEditStartPartsFromForm();
+    this.closeEditDatePicker(true);
+    this.closeEditServicesPicker();
+    this.refreshEditEndFromSelectedService();
+    this.forceViewRefresh();
+  }
+
+  onEditStartChange(): void {
+    this.appointmentActionError = '';
+    this.syncEditStartPartsFromForm();
+    this.refreshEditEndFromSelectedService();
+    this.forceViewRefresh();
+  }
+
+  onEditServiceChange(): void {
+    this.appointmentActionError = '';
+    this.refreshEditEndFromSelectedService();
+    this.forceViewRefresh();
+  }
+
+  selectEditService(service: Servizio): void {
+    if (!this.canEditServiceInCurrentSlot(service)) {
+      return;
+    }
+
+    this.appointmentEditForm.idServizio = service.idServizio;
+    this.closeEditServicesPicker();
+    this.onEditServiceChange();
+    this.forceViewRefresh();
+  }
+
+  toggleEditServicesPicker(): void {
+    if (!this.isEditingAppointment || this.isEditFormLoading || this.editableServices.length === 0) {
+      return;
+    }
+
+    this.editServicesOpen = !this.editServicesOpen;
+    this.forceViewRefresh();
+  }
+
+  closeEditServicesPicker(): void {
+    this.editServicesOpen = false;
+    this.forceViewRefresh();
+  }
+
+  get selectedEditServiceLabel(): string {
+    const selectedService = this.editableServices.find(
+      (service) => service.idServizio === this.appointmentEditForm.idServizio
+    );
+
+    if (!selectedService) {
+      return 'Seleziona servizio';
+    }
+
+    return `${selectedService.nome} | ${selectedService.prezzo} EUR`;
+  }
+
+  saveAppointmentEdit(): void {
+    if (!this.selectedAppointment || this.isAppointmentActionLoading || this.isEditFormLoading) {
+      return;
+    }
+
+    this.closeEditServicesPicker();
+
+    if (!this.canModifySelectedAppointment) {
+      this.appointmentActionError = "Puoi modificare l'appuntamento solo fino al giorno prima.";
+      return;
+    }
+
+    const range = this.buildEditedRangeFromSelectedService();
+
+    if (!range) {
+      this.appointmentActionError = "Seleziona orario e servizio validi.";
+      return;
+    }
+
+    if (!this.isWithinOpeningHoursRange(range.start, range.end)) {
+      this.appointmentActionError = "Il servizio scelto non rientra negli orari di apertura.";
+      return;
+    }
+
+    if (this.hasOverlapForEditedRange(range.start, range.end)) {
+      this.appointmentActionError = "Il servizio scelto si sovrappone a un altro appuntamento.";
+      return;
+    }
+
+    this.isAppointmentActionLoading = true;
+    this.appointmentActionError = '';
+    this.forceViewRefresh();
+
+    this.appuntamentoService.aggiornaAppuntamento(this.selectedAppointment.idAppuntamento, {
+      dataOraInizio: this.appointmentEditForm.dataOraInizio,
+      dataOraFine: this.appointmentEditForm.dataOraFine,
+      note: range.service.nome
+    }).subscribe({
+      next: () => {
+        this.isAppointmentActionLoading = false;
+        this.isEditingAppointment = false;
+        this.showAlert('Appuntamento modificato con successo.', 'success');
+        this.forceViewRefresh(true);
+        this.onOperatorChange(null);
+      },
+      error: (err) => {
+        this.isAppointmentActionLoading = false;
+        this.appointmentActionError = err?.error?.message || "Modifica non riuscita.";
+        this.forceViewRefresh();
+      }
+    });
+  }
+
+  deleteSelectedAppointment(): void {
+    if (!this.selectedAppointment || this.isAppointmentActionLoading) {
+      return;
+    }
+
+    this.openDeleteConfirmation(this.selectedAppointment, true);
+  }
+
+  openDeleteConfirmation(appointment: Appuntamento, keepDetailOpen: boolean): void {
+    if (this.isAppointmentActionLoading) {
+      return;
+    }
+
+    if (!this.canUserManageAppointment(appointment)) {
+      return;
+    }
+
+    if (!this.isUntilDayBefore(appointment.dataOraInizio)) {
+      const message = "Puoi eliminare l'appuntamento solo fino al giorno prima.";
+      if (keepDetailOpen) {
+        this.appointmentActionError = message;
+      } else {
+        this.showAlert(message);
+      }
+      return;
+    }
+
+    this.appointmentActionError = '';
+    this.deleteConfirmAppointment = appointment;
+    this.deleteConfirmKeepDetailOpen = keepDetailOpen;
+    this.isDeleteConfirmOpen = true;
+    this.forceViewRefresh();
+  }
+
+  cancelDeleteConfirmation(): void {
+    this.isDeleteConfirmOpen = false;
+    this.deleteConfirmAppointment = null;
+    this.deleteConfirmKeepDetailOpen = false;
+    this.forceViewRefresh();
+  }
+
+  confirmDeleteAppointment(): void {
+    if (!this.deleteConfirmAppointment || this.isAppointmentActionLoading) {
+      return;
+    }
+
+    const appointmentToDelete = this.deleteConfirmAppointment;
+    const keepDetailOpen = this.deleteConfirmKeepDetailOpen;
+    this.isAppointmentActionLoading = true;
+    this.appointmentActionError = '';
+    this.forceViewRefresh();
+
+    this.appuntamentoService.eliminaAppuntamento(appointmentToDelete.idAppuntamento)
+      .subscribe({
+        next: () => {
+          this.isAppointmentActionLoading = false;
+          this.cancelDeleteConfirmation();
+          this.closeAppointmentDetail();
+          this.forceViewRefresh(true);
+          this.onOperatorChange(null);
+        },
+        error: (err) => {
+          this.isAppointmentActionLoading = false;
+          const message = err?.error?.message || 'Eliminazione non riuscita.';
+          if (keepDetailOpen) {
+            this.appointmentActionError = message;
+          } else {
+            this.showAlert(message);
+          }
+          this.forceViewRefresh();
+        }
+      });
+  }
+
+  get canManageSelectedAppointment(): boolean {
+    if (!this.selectedAppointment || !this.user) {
+      return false;
+    }
+
+    if (this.user.ruolo === 'admin' || this.user.ruolo === 'operatore') {
+      return true;
+    }
+
+    return this.user.ruolo === 'cliente' && this.selectedAppointment.idCliente === this.user.idUtente;
+  }
+
+  get canModifySelectedAppointment(): boolean {
+    if (!this.selectedAppointment) {
+      return false;
+    }
+
+    return this.isUntilDayBefore(this.selectedAppointment.dataOraInizio);
+  }
+
+  private canUserViewAppointment(appointment: Appuntamento): boolean {
+    if (!this.user) {
+      return false;
+    }
+
+    if (this.user.ruolo === 'admin' || this.user.ruolo === 'operatore') {
+      return true;
+    }
+
+    return this.user.ruolo === 'cliente' && appointment.idCliente === this.user.idUtente;
+  }
+
+  private canUserManageAppointment(appointment: Appuntamento): boolean {
+    if (!this.user) {
+      return false;
+    }
+
+    if (this.user.ruolo === 'admin' || this.user.ruolo === 'operatore') {
+      return true;
+    }
+
+    return this.user.ruolo === 'cliente' && appointment.idCliente === this.user.idUtente;
+  }
+
+  get canDeleteSelectedAppointment(): boolean {
+    if (!this.selectedAppointment) {
+      return false;
+    }
+
+    return this.isUntilDayBefore(this.selectedAppointment.dataOraInizio);
+  }
+
+  onAppointmentModalOverlayClick(event: MouseEvent): void {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    this.closeAppointmentDetail();
+  }
+
+  onDeleteConfirmOverlayClick(event: MouseEvent): void {
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    this.cancelDeleteConfirmation();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapePressed(): void {
+    if (this.isDeleteConfirmOpen) {
+      this.cancelDeleteConfirmation();
+      return;
+    }
+
+    if (this.editServicesOpen) {
+      this.closeEditServicesPicker();
+      return;
+    }
+
+    if (this.isAppointmentDetailOpen) {
+      this.closeEditDatePicker();
+      this.closeAppointmentDetail();
+      return;
+    }
+
+    this.closeCalendarPicker();
+    this.closeOperatorSelect();
+  }
+
+  private toLocalDateTimeInput(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    const hours = `${date.getHours()}`.padStart(2, '0');
+    const minutes = `${date.getMinutes()}`.padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  private loadEditableServicesForSelectedAppointment(): void {
+    if (!this.selectedAppointment) {
+      this.editableServices = [];
+      this.isEditFormLoading = false;
+      this.forceViewRefresh();
+      return;
+    }
+
+    this.isEditFormLoading = true;
+    this.forceViewRefresh();
+    this.serviziService.getServiziPrenotabiliByOperatore(this.selectedAppointment.idOperatore)
+      .subscribe({
+        next: (services) => {
+          if (
+            !this.selectedAppointment ||
+            services.length === 0
+          ) {
+            this.editableServices = [];
+            this.appointmentEditForm.idServizio = null;
+            this.appointmentEditForm.dataOraFine = '';
+            this.isEditFormLoading = false;
+            this.forceViewRefresh();
+            return;
+          }
+
+          this.editableServices = services;
+          const matchedService = services.find((service) => service.nome === (this.selectedAppointment?.note ?? ''));
+          const firstAvailableService = services.find((service) => this.canEditServiceInCurrentSlot(service));
+
+          this.appointmentEditForm.idServizio = matchedService?.idServizio ?? firstAvailableService?.idServizio ?? null;
+          this.refreshEditEndFromSelectedService();
+          this.isEditFormLoading = false;
+          this.forceViewRefresh();
+        },
+        error: () => {
+          this.editableServices = [];
+          this.appointmentEditForm.idServizio = null;
+          this.appointmentEditForm.dataOraFine = '';
+          this.isEditFormLoading = false;
+          this.forceViewRefresh();
+        }
+      });
+  }
+
+  canEditServiceInCurrentSlot(service: Servizio): boolean {
+    const range = this.buildEditedRangeFromService(service);
+
+    if (!range) {
+      return false;
+    }
+
+    return this.isWithinOpeningHoursRange(range.start, range.end) && !this.hasOverlapForEditedRange(range.start, range.end);
+  }
+
+  private refreshEditEndFromSelectedService(): void {
+    const selectedService = this.editableServices.find(
+      (service) => service.idServizio === this.appointmentEditForm.idServizio
+    );
+
+    if (!selectedService) {
+      this.appointmentEditForm.dataOraFine = '';
+      return;
+    }
+
+    const range = this.buildEditedRangeFromService(selectedService);
+
+    if (!range) {
+      this.appointmentEditForm.dataOraFine = '';
+      return;
+    }
+
+    if (!this.canEditServiceInCurrentSlot(selectedService)) {
+      this.appointmentEditForm.idServizio = null;
+      this.appointmentEditForm.dataOraFine = '';
+      return;
+    }
+
+    this.appointmentEditForm.dataOraFine = this.toLocalDateTimeInput(range.end.toISOString());
+  }
+
+  private buildEditedRangeFromSelectedService():
+    | { start: Date; end: Date; service: Servizio }
+    | null {
+    const selectedService = this.editableServices.find(
+      (service) => service.idServizio === this.appointmentEditForm.idServizio
+    );
+
+    if (!selectedService) {
+      return null;
+    }
+
+    const range = this.buildEditedRangeFromService(selectedService);
+
+    if (!range) {
+      return null;
+    }
+
+    return { ...range, service: selectedService };
+  }
+
+  private buildEditedRangeFromService(service: Servizio): { start: Date; end: Date } | null {
+    const start = new Date(this.appointmentEditForm.dataOraInizio);
+    const durationMinutes = Number(service.durata || 0);
+
+    if (Number.isNaN(start.getTime()) || !Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+      return null;
+    }
+
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + durationMinutes);
+
+    return { start, end };
+  }
+
+  private isWithinOpeningHoursRange(start: Date, end: Date): boolean {
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+      return false;
+    }
+
+    if (start.toDateString() !== end.toDateString()) {
+      return false;
+    }
+
+    const daySchedule = this.openingSchedule[start.getDay()];
+
+    if (!daySchedule || daySchedule.intervals.length === 0) {
+      return false;
+    }
+
+    const startMinutes = start.getHours() * 60 + start.getMinutes();
+    const endMinutes = end.getHours() * 60 + end.getMinutes();
+
+    return daySchedule.intervals.some((interval) => {
+      const intervalStart = this.timeToMinutes(interval.start);
+      const intervalEnd = this.timeToMinutes(interval.end);
+      return startMinutes >= intervalStart && endMinutes <= intervalEnd;
+    });
+  }
+
+  private hasOverlapForEditedRange(start: Date, end: Date): boolean {
+    if (!this.selectedAppointment) {
+      return false;
+    }
+
+    return this.loadedAppointments.some((appointment) => {
+      if (appointment.idAppuntamento === this.selectedAppointment?.idAppuntamento) {
+        return false;
+      }
+
+      const appointmentStart = new Date(appointment.dataOraInizio);
+      const appointmentEnd = new Date(appointment.dataOraFine);
+
+      if (Number.isNaN(appointmentStart.getTime()) || Number.isNaN(appointmentEnd.getTime())) {
+        return false;
+      }
+
+      return start < appointmentEnd && end > appointmentStart;
+    });
+  }
+
+  private isUntilDayBefore(dateString: string): boolean {
+    const appointmentDate = new Date(dateString);
+
+    if (Number.isNaN(appointmentDate.getTime())) {
+      return false;
+    }
+
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const appointmentDayStart = new Date(
+      appointmentDate.getFullYear(),
+      appointmentDate.getMonth(),
+      appointmentDate.getDate()
+    );
+
+    return appointmentDayStart > todayStart;
+  }
+
+  private renderAppointmentEvent(arg: EventContentArg): { html: string } {
+    if (arg.event.display === 'background') {
+      return { html: '' };
+    }
+
+    const title = this.escapeHtml(String(arg.event.extendedProps['displayTitle'] ?? arg.event.title ?? '').trim());
+    const serviceName = this.escapeHtml(String(arg.event.extendedProps['serviceName'] ?? '').trim());
+    const serviceDescription = this.escapeHtml(String(arg.event.extendedProps['serviceDescription'] ?? '').trim());
+    const operatorName = this.escapeHtml(String(arg.event.extendedProps['operatorName'] ?? '').trim());
+    const canManage = Boolean(arg.event.extendedProps['canManage']);
+    const canModify = Boolean(arg.event.extendedProps['canModify']);
+    const canDelete = Boolean(arg.event.extendedProps['canDelete']);
+    const editStateClass = !canManage ? 'is-hidden' : (canModify ? '' : 'is-disabled');
+    const deleteStateClass = !canManage ? 'is-hidden' : (canDelete ? '' : 'is-disabled');
+    const icons = `
+      <div class="appointment-event-actions">
+        <button type="button" class="appointment-icon-btn edit ${editStateClass}" title="Modifica">
+          <i class="bi bi-pencil-square"></i>
+        </button>
+        <button type="button" class="appointment-icon-btn delete ${deleteStateClass}" title="Elimina">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </div>
+    `;
+
+    return {
+      html: `
+        <div class="appointment-event-shell">
+          <div class="appointment-event-head">
+            <span class="appointment-event-title">${title || 'Appuntamento'}</span>
+          </div>
+          <div class="appointment-event-expand">
+            <span class="appointment-event-time">${this.escapeHtml(arg.timeText || '')}</span>
+            ${serviceName ? `<span class="appointment-event-info"><strong>Servizio:</strong> ${serviceName}</span>` : ''}
+            ${serviceDescription ? `<span class="appointment-event-info"><strong>Descrizione:</strong> ${serviceDescription}</span>` : ''}
+            ${operatorName ? `<span class="appointment-event-info"><strong>Operatore:</strong> ${operatorName}</span>` : ''}
+          </div>
+          ${icons}
+        </div>
+      `
+    };
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private getAppointmentToneClass(appointment: Appuntamento): string {
+    const appointmentEnd = new Date(appointment.dataOraFine);
+    const isPast = !Number.isNaN(appointmentEnd.getTime()) && appointmentEnd.getTime() < Date.now();
+
+    if (isPast) {
+      return 'tone-past';
+    }
+
+    return this.canUserManageAppointment(appointment) ? 'tone-my' : 'tone-other';
+  }
+
+  private buildAppointmentLabel(appointment: Appuntamento): string {
+    const start = new Date(appointment.dataOraInizio);
+    const end = new Date(appointment.dataOraFine);
+    const dateFormatter = new Intl.DateTimeFormat('it-IT', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const timeFormatter = new Intl.DateTimeFormat('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      return 'Dettaglio appuntamento';
+    }
+
+    return `${dateFormatter.format(start)} - ${timeFormatter.format(end)}`;
   }
 
   get selectedOperatorLabel(): string {
@@ -384,19 +1190,30 @@ export class AppuntamentiComponent implements OnInit {
       this.closeCalendarPicker();
     }
 
+    if (!target?.closest('.appointment-edit-date-wrap')) {
+      this.closeEditDatePicker();
+    }
+
+    if (!target?.closest('.appointment-services-picker-wrap')) {
+      this.closeEditServicesPicker();
+    }
+
     this.closeOperatorSelect();
   }
 
-  private showAlert(message: string): void {
+  private showAlert(message: string, variant: 'error' | 'success' = 'error'): void {
+    this.alertVariant = variant;
     this.errorMessage = message;
     this.showError = true;
     this.shakeAnimation = false;
     this.cdr.detectChanges();
 
-    setTimeout(() => {
-      this.shakeAnimation = true;
-      this.cdr.detectChanges();
-    }, 10);
+    if (variant === 'error') {
+      setTimeout(() => {
+        this.shakeAnimation = true;
+        this.cdr.detectChanges();
+      }, 10);
+    }
 
     if (this.alertTimeout) {
       clearTimeout(this.alertTimeout);
@@ -549,6 +1366,95 @@ export class AppuntamentiComponent implements OnInit {
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
 
+  get editDatePickerMonthLabel(): string {
+    const label = this.calendarPickerMonthFormatter.format(this.editDatePickerMonth);
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+
+  get editDateLabel(): string {
+    const date = this.parseInputDate(this.editStartDate);
+    if (!date) {
+      return 'Seleziona data';
+    }
+    return new Intl.DateTimeFormat('it-IT', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    }).format(date);
+  }
+
+  toggleEditDatePicker(): void {
+    if (!this.isEditingAppointment || this.isEditFormLoading) {
+      return;
+    }
+
+    if (this.editDatePickerOpen) {
+      this.closeEditDatePicker();
+      return;
+    }
+
+    if (this.editDatePickerCloseTimeout) {
+      clearTimeout(this.editDatePickerCloseTimeout);
+      this.editDatePickerCloseTimeout = null;
+    }
+
+    this.editDatePickerClosing = false;
+    this.editDatePickerOpen = true;
+    this.syncEditDatePickerMonthFromStart();
+    this.forceViewRefresh();
+  }
+
+  closeEditDatePicker(immediate = false): void {
+    if (!this.editDatePickerOpen || this.editDatePickerClosing) {
+      return;
+    }
+
+    if (immediate) {
+      if (this.editDatePickerCloseTimeout) {
+        clearTimeout(this.editDatePickerCloseTimeout);
+        this.editDatePickerCloseTimeout = null;
+      }
+      this.editDatePickerOpen = false;
+      this.editDatePickerClosing = false;
+      this.forceViewRefresh();
+      return;
+    }
+
+    this.editDatePickerClosing = true;
+    this.editDatePickerCloseTimeout = setTimeout(() => {
+      this.editDatePickerOpen = false;
+      this.editDatePickerClosing = false;
+      this.editDatePickerCloseTimeout = null;
+      this.forceViewRefresh();
+    }, 180);
+  }
+
+  previousEditDatePickerMonth(): void {
+    const next = new Date(this.editDatePickerMonth);
+    next.setMonth(next.getMonth() - 1, 1);
+    this.editDatePickerMonth = next;
+    this.editDatePickerDays = this.buildCalendarPickerDays(next, this.editStartDate);
+  }
+
+  nextEditDatePickerMonth(): void {
+    const next = new Date(this.editDatePickerMonth);
+    next.setMonth(next.getMonth() + 1, 1);
+    this.editDatePickerMonth = next;
+    this.editDatePickerDays = this.buildCalendarPickerDays(next, this.editStartDate);
+  }
+
+  selectEditDatePickerDay(day: CalendarPickerDay): void {
+    this.editStartDate = this.formatDateForInput(day.date);
+    this.applyEditStartParts();
+    this.syncEditDatePickerMonthFromStart();
+    this.closeEditDatePicker();
+  }
+
+  onEditTimeChange(): void {
+    this.applyEditStartParts();
+  }
+
   private syncCalendarResponsiveMode(): void {
     const nextIsMobile = typeof window !== 'undefined' && window.innerWidth <= this.mobileBreakpoint;
 
@@ -627,18 +1533,54 @@ export class AppuntamentiComponent implements OnInit {
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  private syncCalendarPickerMonth(baseDate: Date): void {
-    this.calendarPickerMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
-    this.calendarPickerDays = this.buildCalendarPickerDays(this.calendarPickerMonth);
+  private syncEditStartPartsFromForm(): void {
+    const value = this.appointmentEditForm.dataOraInizio;
+    if (!value || !value.includes('T')) {
+      this.editStartDate = '';
+      this.editStartTime = '';
+      return;
+    }
+
+    const [datePart, timePartRaw] = value.split('T');
+    const timePart = (timePartRaw || '').slice(0, 5);
+    this.editStartDate = datePart || '';
+    this.editStartTime = timePart || '08:00';
+    this.syncEditDatePickerMonthFromStart();
   }
 
-  private buildCalendarPickerDays(monthDate: Date): CalendarPickerDay[] {
+  private syncEditDatePickerMonthFromStart(): void {
+    const base = this.parseInputDate(this.editStartDate) ?? new Date();
+    this.editDatePickerMonth = new Date(base.getFullYear(), base.getMonth(), 1);
+    this.editDatePickerDays = this.buildCalendarPickerDays(this.editDatePickerMonth, this.editStartDate);
+  }
+
+  private applyEditStartParts(): void {
+    if (!this.editStartDate) {
+      this.appointmentEditForm.dataOraInizio = '';
+      this.onEditStartChange();
+      return;
+    }
+
+    const normalizedTime = this.editStartTime && this.editStartTime.length >= 4
+      ? this.editStartTime.slice(0, 5)
+      : '08:00';
+
+    this.editStartTime = normalizedTime;
+    this.appointmentEditForm.dataOraInizio = `${this.editStartDate}T${normalizedTime}`;
+    this.onEditStartChange();
+  }
+
+  private syncCalendarPickerMonth(baseDate: Date): void {
+    this.calendarPickerMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+    this.calendarPickerDays = this.buildCalendarPickerDays(this.calendarPickerMonth, this.calendarDatePickerValue);
+  }
+
+  private buildCalendarPickerDays(monthDate: Date, selectedValue: string): CalendarPickerDay[] {
     const firstDayOfMonth = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
     const start = new Date(firstDayOfMonth);
     const firstWeekday = (firstDayOfMonth.getDay() + 6) % 7;
     start.setDate(start.getDate() - firstWeekday);
 
-    const selectedValue = this.calendarDatePickerValue;
     const todayValue = this.formatDateForInput(new Date());
     const days: CalendarPickerDay[] = [];
 
@@ -688,7 +1630,7 @@ export class AppuntamentiComponent implements OnInit {
 
     const wrapperRect = wrapper.getBoundingClientRect();
     const titleRect = title.getBoundingClientRect();
-    const panelWidth = Math.min(Math.max(wrapperRect.width - 32, 260), 318);
+    const panelWidth = Math.min(Math.max(wrapperRect.width - 32, 280), 394);
     const minLeft = 16 + panelWidth / 2;
     const maxLeft = Math.max(minLeft, wrapperRect.width - 16 - panelWidth / 2);
     const centeredLeft = titleRect.left - wrapperRect.left + titleRect.width / 2;
@@ -715,6 +1657,15 @@ export class AppuntamentiComponent implements OnInit {
       ...this.availabilityMaskEvents,
       ...this.events
     ]);
+    this.forceViewRefresh(true);
+  }
+
+  private forceViewRefresh(resizeCalendar = false): void {
+    this.cdr.detectChanges();
+
+    if (resizeCalendar && this.calendarComponent) {
+      this.calendarComponent.getApi().updateSize();
+    }
   }
 
   private isBookableDateTime(date: Date): boolean {

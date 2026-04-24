@@ -10,6 +10,14 @@ export interface CreaAppuntamentoPayload {
   idServizio: number | null;
   dataOraInizio: string;
   dataOraFine: string;
+  note?: string | null;
+}
+
+export interface AggiornaAppuntamentoPayload {
+  dataOraInizio: string;
+  dataOraFine: string;
+  note?: string | null;
+  stato?: string;
 }
 
 @Injectable({
@@ -28,5 +36,16 @@ export class AppuntamentoService {
 
   creaAppuntamento(appuntamento: CreaAppuntamentoPayload): Observable<Appuntamento> {
     return this.http.post<Appuntamento>(this.api, appuntamento);
+  }
+
+  aggiornaAppuntamento(
+    idAppuntamento: number,
+    payload: AggiornaAppuntamentoPayload
+  ): Observable<Appuntamento> {
+    return this.http.put<Appuntamento>(`${this.api}/${idAppuntamento}`, payload);
+  }
+
+  eliminaAppuntamento(idAppuntamento: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.api}/${idAppuntamento}`);
   }
 }
