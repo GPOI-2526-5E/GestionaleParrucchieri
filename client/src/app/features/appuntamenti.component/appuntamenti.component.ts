@@ -1065,6 +1065,9 @@ export class AppuntamentiComponent implements OnInit {
       return { html: '' };
     }
 
+    const durationMinutes = this.getEventDurationMinutes(arg);
+    const isCompactEvent = durationMinutes > 0 && durationMinutes <= 20;
+    const isTinyEvent = durationMinutes > 0 && durationMinutes <= 12;
     const title = this.escapeHtml(String(arg.event.extendedProps['displayTitle'] ?? arg.event.title ?? '').trim());
     const serviceName = this.escapeHtml(String(arg.event.extendedProps['serviceName'] ?? '').trim());
     const serviceDescription = this.escapeHtml(String(arg.event.extendedProps['serviceDescription'] ?? '').trim());
@@ -1084,23 +1087,45 @@ export class AppuntamentiComponent implements OnInit {
         </button>
       </div>
     `;
+    const compactRow = `
+      <div class="appointment-event-compact-row">
+        ${serviceName ? `<span class="appointment-event-service-inline">${serviceName}</span>` : ''}
+        ${icons}
+      </div>
+    `;
 
     return {
       html: `
-        <div class="appointment-event-shell">
+        <div class="appointment-event-shell${isCompactEvent ? ' is-compact' : ''}${isTinyEvent ? ' is-tiny' : ''}">
           <div class="appointment-event-head">
             <span class="appointment-event-title">${title || 'Appuntamento'}</span>
           </div>
           <div class="appointment-event-expand">
             <span class="appointment-event-time">${this.escapeHtml(arg.timeText || '')}</span>
-            ${serviceName ? `<span class="appointment-event-info"><strong>Servizio:</strong> ${serviceName}</span>` : ''}
+            ${isCompactEvent ? compactRow : (serviceName ? `<span class="appointment-event-info"><strong>Servizio:</strong> ${serviceName}</span>` : '')}
             ${serviceDescription ? `<span class="appointment-event-info"><strong>Descrizione:</strong> ${serviceDescription}</span>` : ''}
             ${operatorName ? `<span class="appointment-event-info"><strong>Operatore:</strong> ${operatorName}</span>` : ''}
           </div>
-          ${icons}
+          ${isCompactEvent ? '' : icons}
         </div>
       `
     };
+  }
+
+  private getEventDurationMinutes(arg: EventContentArg): number {
+    const start = arg.event.start;
+    const end = arg.event.end;
+
+    if (!(start instanceof Date) || !(end instanceof Date)) {
+      return 0;
+    }
+
+    const diffMs = end.getTime() - start.getTime();
+    if (!Number.isFinite(diffMs) || diffMs <= 0) {
+      return 0;
+    }
+
+    return Math.round(diffMs / 60000);
   }
 
   private escapeHtml(value: string): string {
