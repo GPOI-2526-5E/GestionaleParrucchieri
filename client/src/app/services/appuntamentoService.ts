@@ -16,6 +16,7 @@ export interface CreaAppuntamentoPayload {
 export interface AggiornaAppuntamentoPayload {
   dataOraInizio: string;
   dataOraFine: string;
+  idServizio?: number | null;
   note?: string | null;
   stato?: string;
 }

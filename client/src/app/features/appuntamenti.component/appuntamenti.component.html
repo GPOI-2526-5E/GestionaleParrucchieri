@@ -309,7 +309,10 @@
       </label>
     </div>
 
-    <p *ngIf="appointmentActionError" class="appointment-detail-error">{{ appointmentActionError }}</p>
+    <div *ngIf="appointmentActionError" class="appointment-detail-error" role="alert" aria-live="polite">
+      <span class="appointment-detail-error-icon">!</span>
+      <span class="appointment-detail-error-text">{{ appointmentActionError }}</span>
+    </div>
 
     <div class="appointment-detail-actions" *ngIf="canManageSelectedAppointment">
       <button
@@ -342,7 +345,7 @@
         (click)="saveAppointmentEdit()"
       >
         <i class="bi bi-check2-circle"></i>
-        Salva
+        {{ isAppointmentActionLoading ? 'Salvataggio modifica...' : 'Salva modifiche' }}
       </button>
 
       <button

@@ -126,6 +126,11 @@ export class AppuntamentiComponent implements OnInit {
     dataOraFine: '',
     idServizio: null
   };
+  private originalAppointmentEditForm: AppointmentEditForm = {
+    dataOraInizio: '',
+    dataOraFine: '',
+    idServizio: null
+  };
   editStartDate = '';
   editStartTime = '';
   editDatePickerOpen = false;
@@ -475,6 +480,11 @@ export class AppuntamentiComponent implements OnInit {
       dataOraFine: this.toLocalDateTimeInput(appointment.dataOraFine),
       idServizio: null
     };
+    this.originalAppointmentEditForm = {
+      dataOraInizio: this.appointmentEditForm.dataOraInizio,
+      dataOraFine: this.appointmentEditForm.dataOraFine,
+      idServizio: null
+    };
     this.syncEditStartPartsFromForm();
     this.closeEditDatePicker(true);
     this.closeEditServicesPicker();
@@ -510,6 +520,11 @@ export class AppuntamentiComponent implements OnInit {
       this.selectedAppointmentLabel = '';
       this.editableServices = [];
       this.appointmentEditForm = {
+        dataOraInizio: '',
+        dataOraFine: '',
+        idServizio: null
+      };
+      this.originalAppointmentEditForm = {
         dataOraInizio: '',
         dataOraFine: '',
         idServizio: null
@@ -554,9 +569,9 @@ export class AppuntamentiComponent implements OnInit {
     this.isEditingAppointment = false;
     this.appointmentActionError = '';
     this.appointmentEditForm = {
-      dataOraInizio: this.toLocalDateTimeInput(this.selectedAppointment.dataOraInizio),
-      dataOraFine: this.toLocalDateTimeInput(this.selectedAppointment.dataOraFine),
-      idServizio: this.appointmentEditForm.idServizio
+      dataOraInizio: this.originalAppointmentEditForm.dataOraInizio,
+      dataOraFine: this.originalAppointmentEditForm.dataOraFine,
+      idServizio: this.originalAppointmentEditForm.idServizio
     };
     this.syncEditStartPartsFromForm();
     this.closeEditDatePicker(true);
@@ -644,6 +659,17 @@ export class AppuntamentiComponent implements OnInit {
       return;
     }
 
+    const hasRealChanges =
+      this.appointmentEditForm.dataOraInizio !== this.originalAppointmentEditForm.dataOraInizio ||
+      this.appointmentEditForm.dataOraFine !== this.originalAppointmentEditForm.dataOraFine ||
+      this.appointmentEditForm.idServizio !== this.originalAppointmentEditForm.idServizio;
+
+    if (!hasRealChanges) {
+      this.appointmentActionError = 'Non ci sono modifiche da salvare.';
+      this.forceViewRefresh();
+      return;
+    }
+
     this.isAppointmentActionLoading = true;
     this.appointmentActionError = '';
     this.forceViewRefresh();
@@ -651,6 +677,7 @@ export class AppuntamentiComponent implements OnInit {
     this.appuntamentoService.aggiornaAppuntamento(this.selectedAppointment.idAppuntamento, {
       dataOraInizio: this.appointmentEditForm.dataOraInizio,
       dataOraFine: this.appointmentEditForm.dataOraFine,
+      idServizio: range.service.idServizio,
       note: range.service.nome
     }).subscribe({
       next: () => {
@@ -878,6 +905,11 @@ export class AppuntamentiComponent implements OnInit {
 
           this.appointmentEditForm.idServizio = matchedService?.idServizio ?? firstAvailableService?.idServizio ?? null;
           this.refreshEditEndFromSelectedService();
+          this.originalAppointmentEditForm = {
+            dataOraInizio: this.appointmentEditForm.dataOraInizio,
+            dataOraFine: this.appointmentEditForm.dataOraFine,
+            idServizio: this.appointmentEditForm.idServizio
+          };
           this.isEditFormLoading = false;
           this.forceViewRefresh();
         },

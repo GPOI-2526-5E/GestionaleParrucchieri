@@ -1954,9 +1954,38 @@
 }
 
 .appointment-detail-error {
-  margin: 10px 0 0;
-  color: #ffd4d4;
+  margin: 12px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 196, 87, 0.34);
+  background:
+    linear-gradient(180deg, rgba(255, 219, 140, 0.12), rgba(255, 219, 140, 0.06)),
+    rgba(34, 26, 15, 0.88);
+  color: #fff0c8;
   font-size: 12px;
+  line-height: 1.45;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.appointment-detail-error-icon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212, 176, 106, 0.18);
+  border: 1px solid rgba(212, 176, 106, 0.36);
+  color: #ffd978;
+  font-weight: 800;
+}
+
+.appointment-detail-error-text {
+  flex: 1;
 }
 
 .appointment-detail-actions {

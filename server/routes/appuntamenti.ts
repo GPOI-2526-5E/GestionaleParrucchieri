@@ -4,7 +4,10 @@ import { verifyToken } from "../middleware/authMiddleware";
 import {
   AppointmentMailService,
   AppointmentMailUser,
-  sendAppointmentConfirmationEmail
+  AppointmentMailPayload,
+  sendAppointmentCancelledEmail,
+  sendAppointmentConfirmationEmail,
+  sendAppointmentUpdatedEmail
 } from "../services/appointment-email";
 
 interface Appuntamento {
@@ -36,6 +39,128 @@ function startOfDay(date: Date): Date {
   const value = new Date(date);
   value.setHours(0, 0, 0, 0);
   return value;
+}
+
+async function getAppointmentMailUser(idUtente: number): Promise<AppointmentMailUser | null> {
+  const { data, error } = await db
+    .from("utenti")
+    .select("idUtente, nome, cognome, email")
+    .eq("idUtente", idUtente)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return (data as AppointmentMailUser | null) ?? null;
+}
+
+async function getAppointmentMailServiceByAppointmentId(
+  idAppuntamento: number,
+  fallbackNote: string | null
+): Promise<AppointmentMailService | null> {
+  const { data: relations, error: relationError } = await db
+    .from("appuntamentiservizi")
+    .select("idServizio")
+    .eq("idAppuntamento", idAppuntamento)
+    .limit(1);
+
+  if (relationError) {
+    throw relationError;
+  }
+
+  const relation = Array.isArray(relations) ? relations[0] : null;
+  const serviceId = Number(relation?.idServizio);
+
+  if (!Number.isFinite(serviceId) || serviceId <= 0) {
+    return fallbackNote ? { idServizio: 0, nome: fallbackNote } : null;
+  }
+
+  const { data: service, error: serviceError } = await db
+    .from("servizi")
+    .select("idServizio, nome, prezzo")
+    .eq("idServizio", serviceId)
+    .maybeSingle();
+
+  if (serviceError) {
+    throw serviceError;
+  }
+
+  return (service as AppointmentMailService | null) ?? null;
+}
+
+async function buildAppointmentMailPayload(appointment: Appuntamento): Promise<AppointmentMailPayload | null> {
+  const cliente = await getAppointmentMailUser(appointment.idCliente);
+
+  if (!cliente?.email) {
+    return null;
+  }
+
+  const operatore = await getAppointmentMailUser(appointment.idOperatore);
+  const servizio = await getAppointmentMailServiceByAppointmentId(
+    appointment.idAppuntamento,
+    appointment.note
+  );
+
+  return {
+    cliente,
+    operatore,
+    servizio,
+    dataOraInizio: appointment.dataOraInizio,
+    dataOraFine: appointment.dataOraFine
+  };
+}
+
+async function updateAppointmentServiceRelation(
+  idAppuntamento: number,
+  idServizio: number | null
+): Promise<void> {
+  const { data: existingRelations, error: existingRelationsError } = await db
+    .from("appuntamentiservizi")
+    .select("idServizio")
+    .eq("idAppuntamento", idAppuntamento);
+
+  if (existingRelationsError) {
+    throw existingRelationsError;
+  }
+
+  const currentRelation = Array.isArray(existingRelations) ? existingRelations[0] : null;
+
+  if (!idServizio || !Number.isFinite(idServizio) || idServizio <= 0) {
+    if (currentRelation) {
+      const { error: deleteRelationError } = await db
+        .from("appuntamentiservizi")
+        .delete()
+        .eq("idAppuntamento", idAppuntamento);
+
+      if (deleteRelationError) {
+        throw deleteRelationError;
+      }
+    }
+
+    return;
+  }
+
+  if (currentRelation) {
+    const { error: updateRelationError } = await db
+      .from("appuntamentiservizi")
+      .update({ idServizio })
+      .eq("idAppuntamento", idAppuntamento);
+
+    if (updateRelationError) {
+      throw updateRelationError;
+    }
+
+    return;
+  }
+
+  const { error: insertRelationError } = await db
+    .from("appuntamentiservizi")
+    .insert({ idAppuntamento, idServizio });
+
+  if (insertRelationError) {
+    throw insertRelationError;
+  }
 }
 
 router.get("/count", async (req: Request, res: Response) => {
@@ -273,6 +398,8 @@ router.put("/:idAppuntamento", verifyToken, async (req: any, res: Response) => {
 
     const nextStart = req.body?.dataOraInizio || existingAppointment.dataOraInizio;
     const nextEnd = req.body?.dataOraFine || existingAppointment.dataOraFine;
+    const hasServiceInPayload = Object.prototype.hasOwnProperty.call(req.body ?? {}, "idServizio");
+    const nextServiceId = hasServiceInPayload ? Number(req.body?.idServizio) : null;
     const normalizedEndDateTime = normalizeEndDateTime(nextStart, nextEnd);
 
     const { data: overlappingAppointments, error: overlappingAppointmentsError } = await db
@@ -312,6 +439,38 @@ router.put("/:idAppuntamento", verifyToken, async (req: any, res: Response) => {
       throw error;
     }
 
+    if (hasServiceInPayload) {
+      await updateAppointmentServiceRelation(
+        idAppuntamento,
+        Number.isFinite(nextServiceId) ? nextServiceId : null
+      );
+    }
+
+    if (
+      existingAppointment.dataOraInizio !== nextStart ||
+      existingAppointment.dataOraFine !== normalizedEndDateTime
+    ) {
+      const { error: reminderResetError } = await db
+        .from("notifiche_email_appuntamenti")
+        .delete()
+        .eq("idAppuntamento", idAppuntamento)
+        .eq("tipo", "email_reminder_24h");
+
+      if (reminderResetError) {
+        console.error("Errore reset reminder appuntamento:", reminderResetError);
+      }
+    }
+
+    try {
+      const mailPayload = await buildAppointmentMailPayload(data as Appuntamento);
+
+      if (mailPayload) {
+        await sendAppointmentUpdatedEmail(mailPayload);
+      }
+    } catch (mailError) {
+      console.error("Errore invio mail aggiornamento appuntamento:", mailError);
+    }
+
     return res.json(data as Appuntamento);
   } catch (err: any) {
     console.error("Errore PUT /appuntamenti/:idAppuntamento:", err);
@@ -335,7 +494,7 @@ router.delete("/:idAppuntamento", verifyToken, async (req: any, res: Response) =
 
     const { data: appointment, error: appointmentError } = await db
       .from("appuntamenti")
-      .select("idAppuntamento, idCliente, dataOraInizio")
+      .select("idAppuntamento, idCliente, idOperatore, dataOraInizio, dataOraFine, stato, note")
       .eq("idAppuntamento", idAppuntamento)
       .maybeSingle();
 
@@ -371,6 +530,25 @@ router.delete("/:idAppuntamento", verifyToken, async (req: any, res: Response) =
 
     if (error) {
       throw error;
+    }
+
+    const { error: reminderCleanupError } = await db
+      .from("notifiche_email_appuntamenti")
+      .delete()
+      .eq("idAppuntamento", idAppuntamento);
+
+    if (reminderCleanupError) {
+      console.error("Errore pulizia notifiche email appuntamento:", reminderCleanupError);
+    }
+
+    try {
+      const mailPayload = await buildAppointmentMailPayload(appointment as Appuntamento);
+
+      if (mailPayload) {
+        await sendAppointmentCancelledEmail(mailPayload);
+      }
+    } catch (mailError) {
+      console.error("Errore invio mail eliminazione appuntamento:", mailError);
     }
 
     return res.json({ message: "Appuntamento eliminato con successo" });
