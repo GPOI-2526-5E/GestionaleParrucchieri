@@ -460,6 +460,26 @@
   text-decoration: none;
 }
 
+.management-profile-btn {
+  gap: 10px;
+  border-color: rgba(245, 204, 112, 0.55);
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.34), rgba(212, 176, 106, 0.14)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  color: #fff5da;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 221, 0.14),
+    0 16px 30px rgba(0, 0, 0, 0.22);
+}
+
+.management-profile-btn:hover {
+  color: #fffdf5;
+  border-color: rgba(245, 204, 112, 0.82);
+  background:
+    linear-gradient(180deg, rgba(212, 176, 106, 0.44), rgba(212, 176, 106, 0.18)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.024));
+}
+
 .identity-stats {
   display: grid;
   gap: 16px;

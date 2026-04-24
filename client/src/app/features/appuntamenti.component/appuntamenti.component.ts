@@ -90,6 +90,8 @@ export class AppuntamentiComponent implements OnInit {
   readonly calendarPickerMonthFormatter = new Intl.DateTimeFormat('it-IT', { month: 'long', year: 'numeric' });
   private alertTimeout: ReturnType<typeof setTimeout> | null = null;
   private calendarPickerCloseTimeout: ReturnType<typeof setTimeout> | null = null;
+  private requestedOperatorId: number | null = null;
+  private requestedCalendarDate: string | null = null;
 
   events: EventInput[] = [];
   private availabilityMaskEvents: EventInput[] = [];
@@ -157,10 +159,17 @@ export class AppuntamentiComponent implements OnInit {
   ngOnInit() {
     this.route.queryParamMap.subscribe((params) => {
       const servizio = params.get('servizio');
+      const operatore = params.get('operatore');
+      const requestedDate = params.get('data');
       const parsedServizio = servizio ? Number(servizio) : null;
+      const parsedOperatore = operatore ? Number(operatore) : null;
       this.selectedServiceId = parsedServizio !== null && Number.isFinite(parsedServizio)
         ? parsedServizio
         : null;
+      this.requestedOperatorId = parsedOperatore !== null && Number.isFinite(parsedOperatore)
+        ? parsedOperatore
+        : null;
+      this.requestedCalendarDate = requestedDate;
 
       if (this.selectedServiceId) {
         this.loadSelectedServiceContext(this.selectedServiceId);
@@ -179,7 +188,10 @@ export class AppuntamentiComponent implements OnInit {
         this.operatori = operatori;
 
         if (this.operatori.length > 0) {
-          if (this.selectedServiceId) {
+          if (this.requestedOperatorId && this.operatori.some((operatore) => operatore.idUtente === this.requestedOperatorId)) {
+            this.selectedOperator = this.requestedOperatorId;
+            this.onOperatorChange(null);
+          } else if (this.selectedServiceId) {
             this.loadSelectedServiceContext(this.selectedServiceId);
           } else {
             this.selectedOperator = this.operatori[0].idUtente;
@@ -581,12 +593,13 @@ export class AppuntamentiComponent implements OnInit {
   }
 
   private syncDatePickerValue(fallbackDate: Date): void {
-    const activeDate = this.calendarComponent
-      ? this.calendarComponent.getApi().getDate()
-      : fallbackDate;
+    const requestedDate = this.parseCalendarDateValue(this.requestedCalendarDate);
+    const activeDate = requestedDate
+      ?? (this.calendarComponent ? this.calendarComponent.getApi().getDate() : fallbackDate);
 
     this.calendarDatePickerValue = this.formatDateForInput(activeDate);
     this.syncCalendarPickerMonth(activeDate);
+    this.requestedCalendarDate = null;
   }
 
   private formatDateForInput(date: Date): string {
@@ -602,6 +615,15 @@ export class AppuntamentiComponent implements OnInit {
     }
 
     const date = new Date(`${value}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private parseCalendarDateValue(value: string | null): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    const date = new Date(value);
     return Number.isNaN(date.getTime()) ? null : date;
   }
 

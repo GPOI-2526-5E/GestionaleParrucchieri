@@ -17,6 +17,8 @@ import { authGuard } from './guards/auth.guard';
 import { PrenotaAppuntamentoComponent } from './features/prenota-appuntamento.component/prenota-appuntamento.component';
 import { paymentSuccessGuard } from './guards/payment-success.guard';
 import { registerGuard } from './guards/register.guard';
+import { managementGuard } from './guards/management.guard';
+import { HomeComponent } from './gestionale/home.component/home.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -35,5 +37,6 @@ export const routes: Routes = [
     { path: 'forgot-password', component: PasswordDimenticataComponent },
     { path: 'reset-password', component: ResetPasswordComponent },
     { path: 'prenotazione', component: PrenotaAppuntamentoComponent},
+    { path: 'gestionale', component: HomeComponent, canActivate: [managementGuard] },
     { path: '**', redirectTo: '/home' }
 ];

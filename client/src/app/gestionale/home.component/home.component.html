@@ -1,0 +1,63 @@
+<div class="management-layout">
+  <div class="management-layout__sidebar">
+    <app-sidenav></app-sidenav>
+  </div>
+
+  <main class="management-layout__content">
+    <section class="management-hero">
+      <div>
+        <p class="management-hero__eyebrow">Bozza gestionale</p>
+        <h1>Base operativa del salone</h1>
+        <p class="management-hero__copy">
+          Questa e una prima impostazione della dashboard con sidenav laterale e aree chiave
+          per appuntamenti, cassa, report, magazzino, servizi e fornitori.
+        </p>
+      </div>
+
+      <div class="management-hero__badge">
+        <span>Versione</span>
+        <strong>Preview</strong>
+      </div>
+    </section>
+
+    <section class="management-stats">
+      <article class="management-stat-card" *ngFor="let stat of stats">
+        <p>{{ stat.label }}</p>
+        <strong>{{ stat.value }}</strong>
+        <span>{{ stat.trend }}</span>
+      </article>
+    </section>
+
+    <section class="management-panels">
+      <div class="management-panel management-panel--primary">
+        <div class="management-panel__head">
+          <span>Vista centrale</span>
+          <h2>Moduli prioritari da sviluppare</h2>
+        </div>
+
+        <div class="management-focus-grid">
+          <article class="management-focus-card" *ngFor="let card of focusCards">
+            <h3>{{ card.title }}</h3>
+            <p>{{ card.text }}</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="management-panel management-panel--secondary">
+        <div class="management-panel__head">
+          <span>Roadmap UI</span>
+          <h2>Prossimi blocchi utili</h2>
+        </div>
+
+        <ul class="management-checklist">
+          <li>Calendario gestionale con filtri per operatore</li>
+          <li>Schermata cassa con riepilogo scontrino</li>
+          <li>Report sintetici per giorno, settimana e mese</li>
+          <li>Inventario con alert scorte e fornitori</li>
+          <li>Anagrafica servizi e tempi tecnici</li>
+          <li>Gestione staff, turni e permessi</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>

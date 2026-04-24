@@ -98,6 +98,14 @@
                     </button>
 
                     <a
+                      *ngIf="isManagementUser"
+                     [routerLink]="['/gestionale']"
+                      class="edit-btn register-users-btn management-profile-btn"
+                    >
+                      Vai al gestionale
+                    </a>
+
+                    <a
                       *ngIf="canRegisterUsers"
                       [routerLink]="['/register']"
                       class="edit-btn register-users-btn"

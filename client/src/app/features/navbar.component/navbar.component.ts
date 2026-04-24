@@ -2,6 +2,7 @@ import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterModule } from '@angular/router';
 import { ChatUiService } from '../../services/chat-ui';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-navbar',
@@ -15,6 +16,7 @@ export class NavbarComponent {
 
   private chatUi = inject(ChatUiService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
@@ -55,5 +57,9 @@ export class NavbarComponent {
 
   isUserPage(): boolean {
     return this.router.url === '/login' || this.router.url === '/account';
+  }
+
+  get isManagementUser(): boolean {
+    return this.auth.isOperatore();
   }
 }

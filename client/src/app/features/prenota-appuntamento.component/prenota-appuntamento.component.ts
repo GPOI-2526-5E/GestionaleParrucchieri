@@ -347,7 +347,13 @@ export class PrenotaAppuntamentoComponent implements OnInit {
           this.cdr.detectChanges();
 
           setTimeout(() => {
-            this.router.navigate(['/appointments']);
+            this.router.navigate(['/appointments'], {
+              queryParams: {
+                operatore: this.form.idOperatore ?? undefined,
+                data: this.form.dataOraInizio || undefined,
+                servizio: this.form.idServizio ?? undefined
+              }
+            });
           }, 1500);
         },
         error: (err: unknown) => {

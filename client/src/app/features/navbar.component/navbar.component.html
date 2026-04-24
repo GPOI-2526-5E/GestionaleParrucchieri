@@ -44,6 +44,12 @@
           <button class="nav-link ai-nav-btn" type="button" (click)="openAi()">CHIEDI ALL'IA</button>
         </li>
 
+        <li class="nav-item nav-item-management" *ngIf="isManagementUser">
+          <a class="nav-link management-nav-link" [routerLink]="['/gestionale']">
+            <span>GESTIONALE</span>
+          </a>
+        </li>
+
       </ul>
 
       <div class="d-flex align-items-center">
