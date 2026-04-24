@@ -12,11 +12,13 @@ import googleAuthRoute from "./routes/google-auth";
 import utentiRoute from "./routes/utenti";
 import appuntamentiRoute from "./routes/appuntamenti";
 import serviziRoute from "./routes/servizi";
+import { startAppointmentReminderJob } from "./services/appointment-reminders";
 
 
 dotenv.config();
 connectDatabase().then(() => {
   console.log("Database connesso nel server");
+  startAppointmentReminderJob();
 }).catch(err => {
   console.error("Errore connessione database:", err);
   process.exit(1);

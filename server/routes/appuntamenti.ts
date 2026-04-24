@@ -1,6 +1,11 @@
 import { Router, Request, Response } from "express";
 import { db } from "../db_parrucchieri";
 import { verifyToken } from "../middleware/authMiddleware";
+import {
+  AppointmentMailService,
+  AppointmentMailUser,
+  sendAppointmentConfirmationEmail
+} from "../services/appointment-email";
 
 interface Appuntamento {
   idAppuntamento: number;
@@ -51,6 +56,7 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
     const idCliente = req.user?.userId;
     const {
       idOperatore,
+      idServizio,
       dataOraInizio,
       dataOraFine,
       stato,
@@ -87,6 +93,48 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
       });
     }
 
+    const { data: cliente, error: clienteError } = await db
+      .from("utenti")
+      .select("idUtente, nome, cognome, email")
+      .eq("idUtente", idCliente)
+      .maybeSingle();
+
+    if (clienteError) {
+      throw clienteError;
+    }
+
+    if (!cliente?.email) {
+      return res.status(400).json({
+        message: "Email del cliente non disponibile"
+      });
+    }
+
+    const { data: operatore, error: operatoreError } = await db
+      .from("utenti")
+      .select("idUtente, nome, cognome, email")
+      .eq("idUtente", idOperatore)
+      .maybeSingle();
+
+    if (operatoreError) {
+      throw operatoreError;
+    }
+
+    let servizio: AppointmentMailService | null = null;
+
+    if (idServizio) {
+      const { data: servizioData, error: servizioError } = await db
+        .from("servizi")
+        .select("idServizio, nome, prezzo")
+        .eq("idServizio", idServizio)
+        .maybeSingle();
+
+      if (servizioError) {
+        throw servizioError;
+      }
+
+      servizio = (servizioData as AppointmentMailService | null) ?? null;
+    }
+
     const { data, error } = await db
       .from("appuntamenti")
       .insert({
@@ -102,6 +150,35 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
 
     if (error) {
       throw error;
+    }
+
+    if (idServizio) {
+      const appointmentId = Number((data as Appuntamento).idAppuntamento);
+
+      if (Number.isFinite(appointmentId) && appointmentId > 0) {
+        const { error: relationError } = await db
+          .from("appuntamentiservizi")
+          .insert({
+            idAppuntamento: appointmentId,
+            idServizio
+          });
+
+        if (relationError) {
+          console.error("Errore salvataggio relazione appuntamento-servizio:", relationError);
+        }
+      }
+    }
+
+    try {
+      await sendAppointmentConfirmationEmail({
+        cliente: cliente as AppointmentMailUser,
+        operatore: (operatore as AppointmentMailUser | null) ?? null,
+        servizio: servizio ?? (note ? { idServizio: Number(idServizio || 0), nome: String(note) } : null),
+        dataOraInizio,
+        dataOraFine: normalizedEndDateTime
+      });
+    } catch (mailError) {
+      console.error("Errore invio mail conferma appuntamento:", mailError);
     }
 
     return res.status(201).json(data as Appuntamento);

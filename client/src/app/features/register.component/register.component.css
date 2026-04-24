@@ -875,7 +875,7 @@ select.clean-input {
 
 
 input[type="date"].clean-input {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 input[type="date"].clean-input,

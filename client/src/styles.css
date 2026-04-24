@@ -2,6 +2,16 @@
 @import "leaflet/dist/leaflet.css";
 @import "intl-tel-input/build/css/intlTelInput.css";
 
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  color-scheme: light;
+  background: #f6f0e6;
+}
+
 .locker-marker {
   width: 18px;
   height: 18px;
