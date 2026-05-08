@@ -21,12 +21,145 @@
   </div>
 
   <main class="management-layout__content">
-    <section class="management-page">
-      <p class="management-page__eyebrow">Gestionale</p>
-      <h1>Clienti</h1>
-      <p class="management-page__copy">
-        Sezione pronta per anagrafica clienti, storico visite e note operative con la stessa shell della home.
-      </p>
+    <section class="management-hero">
+      <div>
+        <p class="management-hero__eyebrow">Gestionale</p>
+        <h1>Anagrafica clienti</h1>
+        <p class="management-hero__copy">
+          Consulta i clienti registrati, aggiorna i loro dati principali e rimuovi le anagrafiche non piu necessarie.
+        </p>
+      </div>
+
+      <div class="management-hero__badge">
+        <span>Totale</span>
+        <strong>{{ clienti.length }}</strong>
+      </div>
+    </section>
+
+    <div
+      *ngIf="feedbackMessage"
+      class="management-feedback"
+      [class.is-success]="feedbackType === 'success'"
+      [class.is-error]="feedbackType === 'error'"
+    >
+      {{ feedbackMessage }}
+    </div>
+
+    <section class="customers-layout">
+      <article class="customers-card customers-card--table">
+        <div class="customers-card__head">
+          <div>
+            <p class="customers-card__eyebrow">Database</p>
+            <h2>Clienti registrati</h2>
+          </div>
+          <button type="button" class="customers-refresh" (click)="loadClienti()" [disabled]="isLoading">
+            {{ isLoading ? 'Caricamento...' : 'Aggiorna' }}
+          </button>
+        </div>
+
+        <div *ngIf="isLoading" class="customers-empty-state">
+          Sto caricando i clienti dal database...
+        </div>
+
+        <div *ngIf="!isLoading && clienti.length === 0" class="customers-empty-state">
+          Nessun cliente presente nel database.
+        </div>
+
+        <div *ngIf="!isLoading && clienti.length > 0" class="customers-table-wrap">
+          <table class="customers-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Email</th>
+                <th>Telefono</th>
+                <th>Nascita</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let cliente of clienti"
+                [class.is-selected]="selectedCliente?.idUtente === cliente.idUtente"
+              >
+                <td>
+                  <strong>{{ cliente.nome }} {{ cliente.cognome }}</strong>
+                  <span>ID {{ cliente.idUtente }}</span>
+                </td>
+                <td>{{ cliente.email }}</td>
+                <td>{{ cliente.telefono || '-' }}</td>
+                <td>{{ formatDate(cliente.data_nascita) }}</td>
+                <td class="customers-actions">
+                  <button type="button" class="customers-button customers-button--edit" (click)="selectCliente(cliente)">
+                    Modifica
+                  </button>
+                  <button type="button" class="customers-button customers-button--delete" (click)="deleteCliente(cliente)" [disabled]="isDeleting">
+                    Elimina
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="customers-card customers-card--editor">
+        <div class="customers-card__head">
+          <div>
+            <p class="customers-card__eyebrow">Dettaglio</p>
+            <h2>{{ selectedCliente ? 'Modifica cliente' : 'Seleziona un cliente' }}</h2>
+          </div>
+          <button *ngIf="selectedCliente" type="button" class="customers-refresh" (click)="clearSelection()">
+            Chiudi
+          </button>
+        </div>
+
+        <div *ngIf="!selectedCliente || !draftCliente" class="customers-empty-state customers-empty-state--editor">
+          Seleziona un cliente dalla tabella per modificare nome, cognome, email, telefono e data di nascita.
+        </div>
+
+        <form *ngIf="selectedCliente && draftCliente" class="customers-form" (ngSubmit)="saveCliente()">
+          <div class="customers-form__grid">
+            <label class="customers-field">
+              <span>Nome</span>
+              <input [(ngModel)]="draftCliente.nome" name="nome" type="text" required />
+            </label>
+
+            <label class="customers-field">
+              <span>Cognome</span>
+              <input [(ngModel)]="draftCliente.cognome" name="cognome" type="text" required />
+            </label>
+
+            <label class="customers-field customers-field--full">
+              <span>Email</span>
+              <input [(ngModel)]="draftCliente.email" name="email" type="email" required />
+            </label>
+
+            <label class="customers-field">
+              <span>Telefono</span>
+              <input [(ngModel)]="draftCliente.telefono" name="telefono" type="text" />
+            </label>
+
+            <label class="customers-field">
+              <span>Data di nascita</span>
+              <input [(ngModel)]="draftCliente.data_nascita" name="data_nascita" type="date" />
+            </label>
+          </div>
+
+          <div class="customers-editor-meta">
+            <span>Ruolo: {{ draftCliente.ruolo || 'cliente' }}</span>
+            <span>ID cliente: {{ draftCliente.idUtente }}</span>
+          </div>
+
+          <div class="customers-editor-actions">
+            <button type="submit" class="customers-button customers-button--save" [disabled]="isSaving">
+              {{ isSaving ? 'Salvataggio...' : 'Salva modifiche' }}
+            </button>
+            <button type="button" class="customers-button customers-button--ghost" (click)="selectCliente(selectedCliente)">
+              Ripristina
+            </button>
+          </div>
+        </form>
+      </article>
     </section>
   </main>
 </div>
