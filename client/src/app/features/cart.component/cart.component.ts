@@ -31,6 +31,7 @@ export class CartComponent {
       0
     )
   );
+  cartExpirationLabel = computed(() => this.prodottoService.getCartExpirationLabel());
 
   constructor(
     private prodottoService: ProdottoService,
@@ -84,8 +85,13 @@ export class CartComponent {
       return;
     }
 
-    localStorage.setItem('cart', JSON.stringify(cart));
-    localStorage.setItem('cart_total', JSON.stringify(this.finalTotal()));
+    this.prodottoService.persistCheckoutSnapshot(this.finalTotal());
+
+    if (this.cartItems().length === 0) {
+      alert('Il carrello e scaduto');
+      return;
+    }
+
     console.log(cart);
 
     this.router.navigate(['/payment']);

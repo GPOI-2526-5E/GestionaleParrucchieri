@@ -70,9 +70,7 @@ export class ProductDetailsComponent implements OnInit, OnDestroy {
     if (!this.product) return;
 
     // Controllo lato client del limite quantità: evita UX incoerente prima della chiamata backend.
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find((p: Prodotto) => p.idProdotto === this.product!.idProdotto);
-    const qty = existing ? (existing.quantita || 1) : 0;
+    const qty = this.prodottoService.getCartItemQuantity(this.product.idProdotto);
 
     if (qty >= this.product.qta) {
       this.showErrorAlert(

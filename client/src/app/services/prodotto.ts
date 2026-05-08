@@ -35,16 +35,23 @@ export interface CheckoutCustomerData {
   providedIn: 'root'
 })
 export class ProdottoService {
+  private readonly cartTtlMs = 10 * 60 * 1000;
+  private readonly storageKey = 'cart';
+  private readonly cartExpiresAtStorageKey = 'cart_expires_at';
 
   private _cart: WritableSignal<Prodotto[]> = signal([]);
   cart = this._cart.asReadonly();
+  private _cartRemainingSeconds: WritableSignal<number> = signal(0);
+  cartRemainingSeconds = this._cartRemainingSeconds.asReadonly();
 
   private apiUrl = 'http://localhost:3000/api/prodotti';
   private apiBaseUrl = 'http://localhost:3000';
 
-  private STORAGE_KEY = 'cart';
-
-  constructor(private http: HttpClient) { this.loadCart(); }
+  constructor(private http: HttpClient) {
+    this.loadCart();
+    this.refreshCartCountdown();
+    setInterval(() => this.refreshCartCountdown(), 1000);
+  }
 
   getProdotti(): Observable<Prodotto[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
@@ -93,15 +100,72 @@ export class ProdottoService {
   }
 
   private loadCart() {
-    const data = localStorage.getItem(this.STORAGE_KEY);
+    if (this.isCartExpired()) {
+      this.clearCart();
+      return;
+    }
+
+    const data = localStorage.getItem(this.storageKey);
 
     if (data) {
-      this._cart.set(JSON.parse(data));
+      try {
+        this._cart.set(JSON.parse(data));
+
+        if (this._cart().length > 0 && !this.getCartExpiresAt()) {
+          localStorage.setItem(
+            this.cartExpiresAtStorageKey,
+            `${Date.now() + this.cartTtlMs}`
+          );
+        }
+      } catch {
+        this.clearCart();
+      }
     }
   }
 
   private saveCart() {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this._cart()));
+    if (this._cart().length === 0) {
+      localStorage.removeItem(this.storageKey);
+      localStorage.removeItem(this.cartExpiresAtStorageKey);
+      this._cartRemainingSeconds.set(0);
+      return;
+    }
+
+    if (!this.getCartExpiresAt()) {
+      localStorage.setItem(
+        this.cartExpiresAtStorageKey,
+        `${Date.now() + this.cartTtlMs}`
+      );
+    }
+
+    localStorage.setItem(this.storageKey, JSON.stringify(this._cart()));
+    this.refreshCartCountdown();
+  }
+
+  private getCartExpiresAt(): number | null {
+    const value = Number(localStorage.getItem(this.cartExpiresAtStorageKey));
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }
+
+  private isCartExpired(): boolean {
+    const expiresAt = this.getCartExpiresAt();
+    return expiresAt !== null && Date.now() >= expiresAt;
+  }
+
+  private refreshCartCountdown(): void {
+    const expiresAt = this.getCartExpiresAt();
+
+    if (!expiresAt || this._cart().length === 0) {
+      this._cartRemainingSeconds.set(0);
+      return;
+    }
+
+    const remainingSeconds = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+    this._cartRemainingSeconds.set(remainingSeconds);
+
+    if (remainingSeconds === 0) {
+      this.clearCart();
+    }
   }
 
   getProdottoById(id: number): Observable<Prodotto | undefined> {
@@ -111,6 +175,10 @@ export class ProdottoService {
   }
 
   addProductToCart(prod: Prodotto) {
+    if (this.isCartExpired()) {
+      this.clearCart();
+    }
+
     this._cart.update(cart => {
       const existing = cart.find(p => p.idProdotto === prod.idProdotto);
       if (existing) {
@@ -126,6 +194,11 @@ export class ProdottoService {
   }
 
   increaseQuantity(productId: number) {
+    if (this.isCartExpired()) {
+      this.clearCart();
+      return;
+    }
+
     this._cart.update(cart =>
       cart.map(p =>
         p.idProdotto === productId
@@ -137,6 +210,11 @@ export class ProdottoService {
   }
 
   decreaseQuantity(productId: number) {
+    if (this.isCartExpired()) {
+      this.clearCart();
+      return;
+    }
+
     this._cart.update(cart =>
       cart
         .map(p =>
@@ -158,19 +236,54 @@ export class ProdottoService {
 
   clearCart(): void {
     this._cart.set([]);
-    this.saveCart();
+    localStorage.removeItem(this.storageKey);
+    localStorage.removeItem(this.cartExpiresAtStorageKey);
+    localStorage.removeItem('cart_total');
+    this._cartRemainingSeconds.set(0);
   }
 
   getCart(): Prodotto[] {
+    if (this.isCartExpired()) {
+      this.clearCart();
+    }
+
     return this._cart();
   }
 
+  getCartItemQuantity(productId: number): number {
+    return this.getCart()
+      .find((product) => product.idProdotto === productId)
+      ?.quantita || 0;
+  }
+
+  getCartExpirationLabel(): string {
+    const remainingSeconds = this.cartRemainingSeconds();
+
+    if (remainingSeconds <= 0) {
+      return '00:00';
+    }
+
+    const minutes = `${Math.floor(remainingSeconds / 60)}`.padStart(2, '0');
+    const seconds = `${remainingSeconds % 60}`.padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+
+  persistCheckoutSnapshot(total: number): void {
+    if (this.isCartExpired()) {
+      this.clearCart();
+      return;
+    }
+
+    localStorage.setItem(this.storageKey, JSON.stringify(this._cart()));
+    localStorage.setItem('cart_total', JSON.stringify(total));
+  }
+
   getCartItemCount(): number {
-    return this._cart().reduce((sum, p) => sum + (p.quantita || 1), 0);
+    return this.getCart().reduce((sum, p) => sum + (p.quantita || 1), 0);
   }
 
   getCartTotal(): number {
-    return this._cart().reduce(
+    return this.getCart().reduce(
       (sum, p) => sum + p.prezzo * (p.quantita || 1),
       0
     );

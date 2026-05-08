@@ -36,6 +36,29 @@
               </span>
             </div>
 
+            <div class="products-search" [class.has-value]="searchTerm.trim().length > 0">
+              <span class="products-search-icon">
+                <i class="bi bi-search"></i>
+              </span>
+
+              <input
+                type="search"
+                name="productSearch"
+                [(ngModel)]="searchTerm"
+                placeholder="Cerca prodotti"
+                aria-label="Cerca prodotti">
+
+              @if (searchTerm.trim().length > 0) {
+                <button
+                  type="button"
+                  class="products-search-clear"
+                  aria-label="Cancella ricerca prodotti"
+                  (click)="clearSearch()">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              }
+            </div>
+
             <div class="products-filter custom-dropdown" [class.open]="isCategoryOpen">
               <button type="button" class="dropdown-trigger" (click)="toggleCategoryDropdown()">
                 <span>{{ selectedCategory === 'all' ? 'Tutti' : selectedCategory }}</span>
@@ -61,16 +84,23 @@
           </div>
         </div>
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 products-grid">
-          @for (product of products; track $index) {
-            @if (selectedCategory == 'all' || product.categoria == selectedCategory) {
-              <div class="col">
-                <app-product-card [product]="product" (addProductToCart)="onAddToCart($event)">
-                </app-product-card>
-              </div>
+        @if (getFilteredProducts(products).length > 0) {
+          <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 products-grid">
+            @for (product of getFilteredProducts(products); track product.idProdotto) {
+                <div class="col">
+                  <app-product-card [product]="product" (addProductToCart)="onAddToCart($event)">
+                  </app-product-card>
+                </div>
             }
+          </div>
+        } @else {
+          <div class="products-empty products-empty-search">
+            <div class="products-empty-title">Nessun prodotto trovato</div>
+            <div class="products-empty-text">
+              Prova con un nome, una marca o una categoria diversa.
+            </div>
+          </div>
           }
-        </div>
       }
 
     } @else {

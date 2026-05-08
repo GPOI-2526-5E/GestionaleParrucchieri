@@ -408,12 +408,12 @@
   top: 100px;
   width: 100%;
   max-width: 390px;
-  height: calc(100vh - 220px);
-  max-height: calc(100vh - 220px);
+  height: calc(100vh - 190px);
+  max-height: calc(100vh - 190px);
   justify-self: end;
   display: flex;
   flex-direction: column;
-  padding: 22px;
+  padding: 22px 22px 30px;
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(8, 8, 8, 0.88), rgba(6, 6, 6, 0.76));
   border: 1px solid rgba(212, 176, 106, 0.18);
@@ -448,6 +448,25 @@
   color: #bdbdbd;
   font-size: 13px;
   line-height: 1.6;
+}
+
+.cart-expiration-pill {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 176, 106, 0.36);
+  background: rgba(212, 176, 106, 0.14);
+  color: #fff1c9;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cart-expiration-pill i {
+  color: #d4b06a;
 }
 
 .cart-summary-main {
@@ -646,7 +665,7 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 12px 0 6px;
+  padding: 14px 0 14px;
   color: #dcdcdc;
   font-size: 13px;
   line-height: 1.5;

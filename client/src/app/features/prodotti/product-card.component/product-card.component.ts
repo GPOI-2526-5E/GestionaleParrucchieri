@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 
-import { Prodotto } from '../../../services/prodotto';
+import { Prodotto, ProdottoService } from '../../../services/prodotto';
 import { CurrencyPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -23,7 +23,10 @@ export class ProductCardComponent implements OnChanges {
   errorMessage = '';
   private alertTimeout: any;
 
-  constructor(private cdr: ChangeDetectorRef) { }
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private prodottoService: ProdottoService
+  ) { }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['product']) {
@@ -40,11 +43,7 @@ export class ProductCardComponent implements OnChanges {
   }
 
   addToCart() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
-    const existingProduct = cart.find((p: Prodotto) => p.idProdotto === this.product.idProdotto);
-
-    const currentQuantity = existingProduct ? (existingProduct.quantita || 1) : 0;
+    const currentQuantity = this.prodottoService.getCartItemQuantity(this.product.idProdotto);
 
     if (currentQuantity >= this.product.qta) {
       this.showAlert(

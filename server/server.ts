@@ -26,7 +26,7 @@ connectDatabase().then(() => {
   process.exit(1);
 });
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME as string,
   api_key: process.env.CLOUDINARY_API_KEY as string,
@@ -299,6 +299,56 @@ async function sendOrderConfirmationEmail(params: {
     html: buildOrderConfirmationEmail(params)
   });
 }
+
+type NormalizedCartItem = {
+  productId: number;
+  qty: number;
+  prezzoUnitario: number;
+};
+
+type CheckoutRpcResult = {
+  idVendita: number;
+};
+
+function normalizeCartItems(cartItems: any[]): NormalizedCartItem[] {
+  const byProduct = new Map<number, NormalizedCartItem>();
+
+  for (const item of cartItems) {
+    const productId = Number(item.idProdotto ?? item.id);
+    const qty = Number(item.quantita || 1);
+    const prezzoUnitario = Number(item.prezzo ?? item.prezzoRivendita ?? 0);
+
+    if (!Number.isFinite(productId) || !Number.isFinite(qty) || qty <= 0) {
+      throw new Error("Prodotto o quantita non validi");
+    }
+
+    const existing = byProduct.get(productId);
+
+    if (existing) {
+      existing.qty += qty;
+      continue;
+    }
+
+    byProduct.set(productId, {
+      productId,
+      qty,
+      prezzoUnitario: Number.isFinite(prezzoUnitario) ? prezzoUnitario : 0
+    });
+  }
+
+  return [...byProduct.values()];
+}
+
+function isStockError(error: unknown): boolean {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof (error as any)?.message === "string"
+        ? (error as any).message
+        : "";
+
+  return /stock[_ ]insufficiente/i.test(message);
+}
 app.get("/api/imgParrucchieri", async (req, res) => {
   try {
     const result = await cloudinary.v2.search
@@ -394,34 +444,18 @@ app.post("/api/products/update-stock", async (req, res) => {
   const cartItems = req.body;
 
   try {
-    for (const item of cartItems) {
-      const qty = item.quantita || 1;
+    const normalizedItems = normalizeCartItems(Array.isArray(cartItems) ? cartItems : []);
 
-      const productId = item.id ?? item.idProdotto;
-      const { data: prodotto, error: productError } = await db
-        .from("prodotti")
-        .select("quantitaMagazzino")
-        .eq("idProdotto", productId)
-        .maybeSingle();
+    const { error } = await db.rpc("decrement_product_stock_sicuro", {
+      p_items: normalizedItems
+    });
 
-      if (productError) throw productError;
-      if (!prodotto) throw new Error(`Prodotto ${item.id} non trovato`);
-
-      if (prodotto.quantitaMagazzino < qty)
-        throw new Error(`Stock insufficiente per ${item.id}`);
-
-      const { error: updateError } = await db
-        .from("prodotti")
-        .update({ quantitaMagazzino: prodotto.quantitaMagazzino - qty })
-        .eq("idProdotto", productId);
-
-      if (updateError) throw updateError;
-    }
+    if (error) throw error;
 
     res.json({ message: "Stock aggiornato" });
   } catch (err: any) {
     console.error(err);
-    res.status(500).json({
+    res.status(isStockError(err) ? 409 : 500).json({
       message: "Errore aggiornamento stock",
       error: err.message,
     });
@@ -457,74 +491,19 @@ app.post("/api/checkout/complete", async (req, res) => {
   }
 
   try {
-    for (const item of cartItems) {
-      const qty = Number(item.quantita || 1);
-      const productId = Number(item.idProdotto ?? item.id);
+    const normalizedItems = normalizeCartItems(cartItems);
 
-      if (!Number.isFinite(productId) || !Number.isFinite(qty) || qty <= 0) {
-        throw new Error("Prodotto o quantità non validi");
-      }
-
-      const { data: prodotto, error: productError } = await db
-        .from("prodotti")
-        .select("idProdotto, quantitaMagazzino")
-        .eq("idProdotto", productId)
-        .maybeSingle();
-
-      if (productError) throw productError;
-      if (!prodotto) throw new Error(`Prodotto ${productId} non trovato`);
-      if (prodotto.quantitaMagazzino < qty) {
-        throw new Error(`Stock insufficiente per il prodotto ${productId}`);
-      }
-    }
-
-    const now = new Date().toISOString();
-
-    const { data: vendita, error: venditaError } = await db
-      .from("vendite")
-      .insert({
-        idCliente: userId,
-        data: now,
-        totale: total,
+    const { data: checkoutData, error: checkoutError } = await db
+      .rpc("complete_checkout_sicuro", {
+        p_id_cliente: userId,
+        p_total: total,
+        p_items: normalizedItems
       })
-      .select("idVendita")
       .single();
 
-    if (venditaError) throw venditaError;
+    if (checkoutError) throw checkoutError;
 
-    const dettagli = cartItems.map((item: any) => ({
-      idVendita: vendita.idVendita,
-      idProdotto: Number(item.idProdotto ?? item.id),
-      quantita: Number(item.quantita || 1),
-      prezzoUnitario: Number(item.prezzo ?? item.prezzoRivendita ?? 0),
-    }));
-
-    const { error: dettagliError } = await db
-      .from("dettagliovendita")
-      .insert(dettagli);
-
-    if (dettagliError) throw dettagliError;
-
-    for (const item of cartItems) {
-      const qty = Number(item.quantita || 1);
-      const productId = Number(item.idProdotto ?? item.id);
-
-      const { data: prodotto, error: productError } = await db
-        .from("prodotti")
-        .select("quantitaMagazzino")
-        .eq("idProdotto", productId)
-        .maybeSingle();
-
-      if (productError) throw productError;
-      if (!prodotto) throw new Error(`Prodotto ${productId} non trovato`);
-
-      const { error: updateError } = await db
-        .from("prodotti")
-        .update({ quantitaMagazzino: prodotto.quantitaMagazzino - qty })
-        .eq("idProdotto", productId);
-
-      if (updateError) throw updateError;
-    }
+    const vendita = checkoutData as CheckoutRpcResult | null;
 
     try {
       await sendOrderConfirmationEmail({
@@ -546,18 +525,19 @@ app.post("/api/checkout/complete", async (req, res) => {
       console.error("Errore invio mail conferma acquisto:", mailError);
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Checkout completato",
-      idVendita: vendita.idVendita,
+      idVendita: vendita?.idVendita,
     });
   } catch (err: any) {
     console.error(err);
-    res.status(500).json({
+    return res.status(isStockError(err) ? 409 : 500).json({
       message: "Errore durante il salvataggio della vendita",
       error: err.message,
     });
   }
 });
+
 app.listen(PORT, () => {
   console.log(`Server attivo su http://localhost:${PORT}`);
 });

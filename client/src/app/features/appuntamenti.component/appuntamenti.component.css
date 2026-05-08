@@ -926,8 +926,12 @@
 }
 
 :host ::ng-deep .fc .fc-timegrid-col.fc-day-today {
-  background:
-    linear-gradient(180deg, rgba(212, 176, 106, 0.12), rgba(255, 255, 255, 0.06));
+  background: transparent !important;
+}
+
+:host ::ng-deep .fc .fc-day-today,
+:host ::ng-deep .fc .fc-col-header-cell.fc-day-today {
+  background: transparent !important;
 }
 
 :host ::ng-deep .fc-bg-event.invalid-slot-background {
@@ -991,6 +995,7 @@
 }
 
 :host ::ng-deep .fc-timegrid-event-harness {
+  z-index: 4 !important;
   margin-bottom: 2px !important;
   inset-inline: 5px !important;
   overflow: visible !important;

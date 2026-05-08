@@ -52,6 +52,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   isManagementBooking = false;
   returnRoute = '/appointments';
   private selectedServizioFromQuery: number | null = null;
+  private readonly minimumAppointmentDurationMinutes = 30;
   private readonly openingSchedule: Record<number, DailySchedule> = {
     0: { name: 'Domenica', intervals: [] },
     1: { name: 'Lunedi', intervals: [] },
@@ -691,7 +692,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
   private isServiceAvailableForSelectedSlot(servizio: Servizio): boolean {
     const start = new Date(this.form.dataOraInizio);
-    const end = this.calculateServiceEnd(servizio);
+    const end = this.calculateServiceCalendarHoldEnd(servizio);
 
     if (Number.isNaN(start.getTime()) || !end) {
       return true;
@@ -705,7 +706,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
         return false;
       }
 
-      return start < appointmentEnd && end > appointmentStart;
+      return start < this.getMinimumAppointmentEnd(appointmentStart, appointmentEnd) && end > appointmentStart;
     });
   }
 
@@ -717,8 +718,33 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     }
 
     const end = new Date(start);
-    end.setMinutes(end.getMinutes() + Number(servizio.durata || 0));
+    const durationMinutes = Number(servizio.durata || 0);
+
+    if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+      return null;
+    }
+
+    end.setMinutes(end.getMinutes() + durationMinutes);
     return end;
+  }
+
+  private calculateServiceCalendarHoldEnd(servizio: Servizio): Date | null {
+    const actualEnd = this.calculateServiceEnd(servizio);
+    const start = new Date(this.form.dataOraInizio);
+
+    if (!actualEnd || Number.isNaN(start.getTime())) {
+      return null;
+    }
+
+    const minimumEnd = new Date(start);
+    minimumEnd.setMinutes(minimumEnd.getMinutes() + this.minimumAppointmentDurationMinutes);
+    return actualEnd < minimumEnd ? minimumEnd : actualEnd;
+  }
+
+  private getMinimumAppointmentEnd(start: Date, end: Date): Date {
+    const minimumEnd = new Date(start);
+    minimumEnd.setMinutes(minimumEnd.getMinutes() + this.minimumAppointmentDurationMinutes);
+    return end < minimumEnd ? minimumEnd : end;
   }
 
   private getNormalizedEndDate(): Date | null {

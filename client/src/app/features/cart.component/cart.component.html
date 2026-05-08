@@ -10,7 +10,7 @@
           <h1 class="cart-title">Carrello</h1>
           <p class="cart-subtitle">
             Verifica i prodotti selezionati e continua al checkout
-            per scegliere consegna e completare il tuo ordine.
+            per scegliere consegna e completare il tuo ordine. Il carrello si svuota automaticamente dopo 10 minuti.
           </p>
         </div>
 
@@ -116,6 +116,10 @@
               <p class="cart-summary-subtitle">
                 Controlla quantità e totale prima di procedere al checkout.
               </p>
+              <div class="cart-expiration-pill" role="status" aria-live="polite">
+                <i class="bi bi-clock"></i>
+                <span>Scade tra {{ cartExpirationLabel() }}</span>
+              </div>
             </div>
 
             <div class="cart-summary-main">

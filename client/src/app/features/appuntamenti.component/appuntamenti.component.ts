@@ -55,6 +55,7 @@ interface AppointmentEditForm {
 })
 export class AppuntamentiComponent implements OnInit {
   private readonly mobileBreakpoint = 768;
+  private readonly minimumAppointmentDurationMinutes = 30;
 
   private api = 'http://localhost:3000/api/auth';
   private readonly openingSchedule: Record<number, DailySchedule> = {
@@ -397,6 +398,7 @@ export class AppuntamentiComponent implements OnInit {
     this.events = this.loadedAppointments.map((a) => {
       const normalizedStart = this.normalizeDateTimeForCalendar(a.dataOraInizio);
       const normalizedEnd = this.normalizeDateTimeForCalendar(a.dataOraFine);
+      const calendarEnd = this.getCalendarEventEnd(normalizedStart, normalizedEnd);
       const isMyAppointment = this.isCustomerOwnAppointment(a.idCliente);
       const appointmentEnd = new Date(normalizedEnd);
       const isPastAppointment =
@@ -417,9 +419,11 @@ export class AppuntamentiComponent implements OnInit {
         id: `${a.idAppuntamento}`,
         title: displayTitle,
         start: normalizedStart,
-        end: normalizedEnd,
+        end: calendarEnd,
         extendedProps: {
           idAppuntamento: a.idAppuntamento,
+          actualStart: normalizedStart,
+          actualEnd: normalizedEnd,
           canManage,
           canModify,
           canDelete,
@@ -447,6 +451,25 @@ export class AppuntamentiComponent implements OnInit {
 
     parsed.setSeconds(0, 0);
     return this.toLocalDateTimeInput(parsed.toISOString());
+  }
+
+  private getCalendarEventEnd(startValue: string, endValue: string): string {
+    const start = new Date(startValue);
+    const end = new Date(endValue);
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+      return endValue;
+    }
+
+    const durationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
+
+    if (durationMinutes >= this.minimumAppointmentDurationMinutes) {
+      return endValue;
+    }
+
+    const minimumEnd = new Date(start);
+    minimumEnd.setMinutes(minimumEnd.getMinutes() + this.minimumAppointmentDurationMinutes);
+    return this.toLocalDateTimeInput(minimumEnd.toISOString());
   }
 
   private isCustomerOwnAppointment(appointmentCustomerId: number | null | undefined): boolean {
@@ -933,7 +956,7 @@ export class AppuntamentiComponent implements OnInit {
       return false;
     }
 
-    return this.isWithinOpeningHoursRange(range.start, range.end) && !this.hasOverlapForEditedRange(range.start, range.end);
+    return this.isWithinOpeningHoursRange(range.start, range.end) && !this.hasOverlapForEditedRange(range.start, range.calendarHoldEnd);
   }
 
   private refreshEditEndFromSelectedService(): void {
@@ -982,7 +1005,7 @@ export class AppuntamentiComponent implements OnInit {
     return { ...range, service: selectedService };
   }
 
-  private buildEditedRangeFromService(service: Servizio): { start: Date; end: Date } | null {
+  private buildEditedRangeFromService(service: Servizio): { start: Date; end: Date; calendarHoldEnd: Date } | null {
     const start = new Date(this.appointmentEditForm.dataOraInizio);
     const durationMinutes = Number(service.durata || 0);
 
@@ -993,7 +1016,10 @@ export class AppuntamentiComponent implements OnInit {
     const end = new Date(start);
     end.setMinutes(end.getMinutes() + durationMinutes);
 
-    return { start, end };
+    const calendarHoldEnd = new Date(start);
+    calendarHoldEnd.setMinutes(calendarHoldEnd.getMinutes() + this.minimumAppointmentDurationMinutes);
+
+    return { start, end, calendarHoldEnd: end < calendarHoldEnd ? calendarHoldEnd : end };
   }
 
   private isWithinOpeningHoursRange(start: Date, end: Date): boolean {
@@ -1038,7 +1064,7 @@ export class AppuntamentiComponent implements OnInit {
         return false;
       }
 
-      return start < appointmentEnd && end > appointmentStart;
+      return start < this.getMinimumAppointmentEnd(appointmentStart, appointmentEnd) && end > appointmentStart;
     });
   }
 
@@ -1072,6 +1098,7 @@ export class AppuntamentiComponent implements OnInit {
     const serviceName = this.escapeHtml(String(arg.event.extendedProps['serviceName'] ?? '').trim());
     const serviceDescription = this.escapeHtml(String(arg.event.extendedProps['serviceDescription'] ?? '').trim());
     const operatorName = this.escapeHtml(String(arg.event.extendedProps['operatorName'] ?? '').trim());
+    const timeText = this.escapeHtml(this.buildEventTimeText(arg));
     const canManage = Boolean(arg.event.extendedProps['canManage']);
     const canModify = Boolean(arg.event.extendedProps['canModify']);
     const canDelete = Boolean(arg.event.extendedProps['canDelete']);
@@ -1101,7 +1128,7 @@ export class AppuntamentiComponent implements OnInit {
             <span class="appointment-event-title">${title || 'Appuntamento'}</span>
           </div>
           <div class="appointment-event-expand">
-            <span class="appointment-event-time">${this.escapeHtml(arg.timeText || '')}</span>
+            <span class="appointment-event-time">${timeText}</span>
             ${isCompactEvent ? compactRow : (serviceName ? `<span class="appointment-event-info"><strong>Servizio:</strong> ${serviceName}</span>` : '')}
             ${serviceDescription ? `<span class="appointment-event-info"><strong>Descrizione:</strong> ${serviceDescription}</span>` : ''}
             ${operatorName ? `<span class="appointment-event-info"><strong>Operatore:</strong> ${operatorName}</span>` : ''}
@@ -1126,6 +1153,41 @@ export class AppuntamentiComponent implements OnInit {
     }
 
     return Math.round(diffMs / 60000);
+  }
+
+  private buildEventTimeText(arg: EventContentArg): string {
+    const actualStart = this.parseEventDateValue(arg.event.extendedProps['actualStart']) ?? arg.event.start;
+    const actualEnd = this.parseEventDateValue(arg.event.extendedProps['actualEnd']) ?? arg.event.end;
+
+    if (!(actualStart instanceof Date) || !(actualEnd instanceof Date)) {
+      return arg.timeText || '';
+    }
+
+    if (Number.isNaN(actualStart.getTime()) || Number.isNaN(actualEnd.getTime())) {
+      return arg.timeText || '';
+    }
+
+    const formatter = new Intl.DateTimeFormat('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return `${formatter.format(actualStart)} - ${formatter.format(actualEnd)}`;
+  }
+
+  private parseEventDateValue(value: unknown): Date | null {
+    if (typeof value !== 'string' || !value) {
+      return null;
+    }
+
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private getMinimumAppointmentEnd(start: Date, end: Date): Date {
+    const minimumEnd = new Date(start);
+    minimumEnd.setMinutes(minimumEnd.getMinutes() + this.minimumAppointmentDurationMinutes);
+    return end < minimumEnd ? minimumEnd : end;
   }
 
   private escapeHtml(value: string): string {

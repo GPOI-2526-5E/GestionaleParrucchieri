@@ -30,13 +30,50 @@
         @else {
 
         <div class="services-topbar">
-            <div class="services-count">
-                <span class="services-count-number">{{ totalServices }}</span>
-                <span class="services-count-label">
-                    {{ totalServices == 1 ? 'Servizio disponibile' : 'Servizi disponibili' }}
-                </span>
+            <div class="services-topbar-line"></div>
+
+            <div class="services-topbar-center">
+                <div class="services-count">
+                    <span class="services-count-number">{{ totalServices }}</span>
+                    <span class="services-count-label">
+                        {{ totalServices == 1 ? 'Servizio disponibile' : 'Servizi disponibili' }}
+                    </span>
+                </div>
+
+                <div class="services-search" [class.has-value]="searchTerm.trim().length > 0">
+                    <span class="services-search-icon">
+                        <i class="bi bi-search"></i>
+                    </span>
+
+                    <input
+                        type="search"
+                        name="serviceSearch"
+                        [(ngModel)]="searchTerm"
+                        (ngModelChange)="applySearchFilter()"
+                        placeholder="Cerca servizi"
+                        aria-label="Cerca servizi">
+
+                    @if (searchTerm.trim().length > 0) {
+                    <button
+                        type="button"
+                        class="services-search-clear"
+                        aria-label="Cancella ricerca servizi"
+                        (click)="clearSearch()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    }
+                </div>
             </div>
         </div>
+
+        @if (totalServices == 0) {
+        <div class="services-empty services-empty-search">
+            <div class="services-empty-title">Nessun servizio trovato</div>
+            <div class="services-empty-text">
+                Prova con un nome, una categoria o un tipo di prenotazione diverso.
+            </div>
+        </div>
+        }
 
         @if (servicesBySite.length > 0) {
         <section class="services-group">

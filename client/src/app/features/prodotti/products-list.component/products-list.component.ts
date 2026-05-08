@@ -34,6 +34,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   allProducts: Prodotto[] = [];
 
   selectedCategory: string = 'all';
+  searchTerm: string = '';
   categories: string[] = [];
   isCategoryOpen: boolean = false;
 
@@ -109,13 +110,45 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   }
 
   getFilteredProductsCount(): number {
-    if (this.selectedCategory === 'all') {
-      return this.allProducts.length;
-    }
+    return this.getFilteredProducts(this.allProducts).length;
+  }
 
-    return this.allProducts.filter(
-      product => product.categoria === this.selectedCategory
-    ).length;
+  getFilteredProducts(products: Prodotto[]): Prodotto[] {
+    const query = this.normalizeSearchText(this.searchTerm);
+
+    return products.filter(product => {
+      const matchesCategory =
+        this.selectedCategory === 'all' || product.categoria === this.selectedCategory;
+
+      if (!matchesCategory) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      return this.normalizeSearchText([
+        product.nome,
+        product.marca,
+        product.formato,
+        product.descrizione,
+        product.categoria
+      ].join(' ')).includes(query);
+    });
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.forceUiUpdate();
+  }
+
+  private normalizeSearchText(value: string): string {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
   }
 
   onAddToCart(product: Prodotto): void {

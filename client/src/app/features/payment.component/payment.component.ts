@@ -110,12 +110,10 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     this.onShippingChange();
+    const savedCart = this.prodottoService.getCart();
 
-    const savedCart = localStorage.getItem('cart');
-
-    if (savedCart) {
-      this.cartItems = JSON.parse(savedCart);
-
+    if (savedCart.length > 0) {
+      this.cartItems = savedCart;
       this.totalQuantity = this.cartItems.reduce(
         (sum, item) => sum + (item.quantita || 1),
         0
@@ -488,6 +486,29 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
     this.showValidationErrors = true;
     this.paymentErrorMessage = '';
 
+    const currentCart = this.prodottoService.getCart();
+
+    if (currentCart.length === 0) {
+      this.cartItems = [];
+      this.totalQuantity = 0;
+      this.subtotal = 0;
+      this.finalTotal = 0;
+      this.paymentErrorMessage = 'Il carrello e scaduto. Torna ai prodotti per crearne uno nuovo.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.cartItems = currentCart;
+    this.totalQuantity = this.cartItems.reduce(
+      (sum, item) => sum + (item.quantita || 1),
+      0
+    );
+    this.subtotal = this.cartItems.reduce(
+      (sum, item) => sum + item.prezzo * (item.quantita || 1),
+      0
+    );
+    this.updateTotal();
+
     if (this.isPayDisabled()) {
       this.cdr.detectChanges();
       return;
@@ -526,8 +547,7 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
           setTimeout(() => {
             sessionStorage.setItem('paymentSuccessAccess', 'true');
 
-            localStorage.removeItem('cart');
-            localStorage.removeItem('cart_total');
+            this.prodottoService.clearCart();
 
             this.cartItems = [];
             this.totalQuantity = 0;
@@ -538,9 +558,11 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
           }, 3000);
         },
 
-        error: () => {
+        error: (err) => {
           this.isProcessing = false;
-          this.paymentErrorMessage = 'Pagamento non riuscito. Riprova tra qualche istante.';
+          this.paymentErrorMessage = err?.status === 409
+            ? 'Alcuni prodotti non sono piu disponibili nella quantita richiesta.'
+            : 'Pagamento non riuscito. Riprova tra qualche istante.';
           this.cdr.detectChanges();
         }
 

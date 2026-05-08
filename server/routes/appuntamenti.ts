@@ -37,6 +37,10 @@ function isStaffRole(ruolo: unknown): boolean {
   return ruolo === "admin" || ruolo === "operatore";
 }
 
+function isAppointmentConflictError(error: any): boolean {
+  return typeof error?.message === "string" && /operator_unavailable/i.test(error.message);
+}
+
 function startOfDay(date: Date): Date {
   const value = new Date(date);
   value.setHours(0, 0, 0, 0);
@@ -111,58 +115,6 @@ async function buildAppointmentMailPayload(appointment: Appuntamento): Promise<A
     dataOraInizio: appointment.dataOraInizio,
     dataOraFine: appointment.dataOraFine
   };
-}
-
-async function updateAppointmentServiceRelation(
-  idAppuntamento: number,
-  idServizio: number | null
-): Promise<void> {
-  const { data: existingRelations, error: existingRelationsError } = await db
-    .from("appuntamentiservizi")
-    .select("idServizio")
-    .eq("idAppuntamento", idAppuntamento);
-
-  if (existingRelationsError) {
-    throw existingRelationsError;
-  }
-
-  const currentRelation = Array.isArray(existingRelations) ? existingRelations[0] : null;
-
-  if (!idServizio || !Number.isFinite(idServizio) || idServizio <= 0) {
-    if (currentRelation) {
-      const { error: deleteRelationError } = await db
-        .from("appuntamentiservizi")
-        .delete()
-        .eq("idAppuntamento", idAppuntamento);
-
-      if (deleteRelationError) {
-        throw deleteRelationError;
-      }
-    }
-
-    return;
-  }
-
-  if (currentRelation) {
-    const { error: updateRelationError } = await db
-      .from("appuntamentiservizi")
-      .update({ idServizio })
-      .eq("idAppuntamento", idAppuntamento);
-
-    if (updateRelationError) {
-      throw updateRelationError;
-    }
-
-    return;
-  }
-
-  const { error: insertRelationError } = await db
-    .from("appuntamentiservizi")
-    .insert({ idAppuntamento, idServizio });
-
-  if (insertRelationError) {
-    throw insertRelationError;
-  }
 }
 
 router.get("/count", async (req: Request, res: Response) => {
@@ -302,26 +254,6 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
       });
     }
 
-    const normalizedEndDateTime = normalizeEndDateTime(dataOraInizio, dataOraFine);
-
-    const { data: overlappingAppointments, error: overlappingAppointmentsError } = await db
-      .from("appuntamenti")
-      .select("idAppuntamento")
-      .eq("idOperatore", idOperatore)
-      .lt("dataOraInizio", normalizedEndDateTime)
-      .gt("dataOraFine", dataOraInizio)
-      .limit(1);
-
-    if (overlappingAppointmentsError) {
-      throw overlappingAppointmentsError;
-    }
-
-    if ((overlappingAppointments || []).length > 0) {
-      return res.status(409).json({
-        message: "L'operatore non e disponibile per tutta la durata del servizio selezionato"
-      });
-    }
-
     const { data: cliente, error: clienteError } = await db
       .from("utenti")
       .select("idUtente, nome, cognome, email")
@@ -364,38 +296,33 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
       servizio = (servizioData as AppointmentMailService | null) ?? null;
     }
 
-    const { data, error } = await db
-      .from("appuntamenti")
-      .insert({
-        idCliente,
-        idOperatore,
-        dataOraInizio,
-        dataOraFine: normalizedEndDateTime,
-        stato: stato || "prenotato",
-        note: note || null
+    const normalizedEndDateTime = normalizeEndDateTime(dataOraInizio, dataOraFine);
+    const { data, error: createAppointmentError } = await db
+      .rpc("create_appuntamento_sicuro", {
+        p_id_cliente: idCliente,
+        p_id_operatore: idOperatore,
+        p_data_ora_inizio: dataOraInizio,
+        p_data_ora_fine: normalizedEndDateTime,
+        p_id_servizio: idServizio || null,
+        p_stato: stato || "prenotato",
+        p_note: note || null
       })
-      .select("idAppuntamento, idCliente, idOperatore, dataOraInizio, dataOraFine, stato, note")
       .single();
 
-    if (error) {
-      throw error;
+    if (createAppointmentError) {
+      if (isAppointmentConflictError(createAppointmentError)) {
+        return res.status(409).json({
+          message: "L'operatore non e disponibile per tutta la durata del servizio selezionato"
+        });
+      }
+
+      throw createAppointmentError;
     }
 
-    if (idServizio) {
-      const appointmentId = Number((data as Appuntamento).idAppuntamento);
-
-      if (Number.isFinite(appointmentId) && appointmentId > 0) {
-        const { error: relationError } = await db
-          .from("appuntamentiservizi")
-          .insert({
-            idAppuntamento: appointmentId,
-            idServizio
-          });
-
-        if (relationError) {
-          console.error("Errore salvataggio relazione appuntamento-servizio:", relationError);
-        }
-      }
+    if (!data) {
+      return res.status(409).json({
+        message: "L'operatore non e disponibile per tutta la durata del servizio selezionato"
+      });
     }
 
     try {
@@ -410,7 +337,7 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
       console.error("Errore invio mail conferma appuntamento:", mailError);
     }
 
-    return res.status(201).json(data as Appuntamento);
+    return res.status(201).json(data);
   } catch (err: any) {
     console.error("Errore POST /appuntamenti:", err);
     return res.status(500).json({ message: err.message });
@@ -467,49 +394,32 @@ router.put("/:idAppuntamento", verifyToken, async (req: any, res: Response) => {
     const hasServiceInPayload = Object.prototype.hasOwnProperty.call(req.body ?? {}, "idServizio");
     const nextServiceId = hasServiceInPayload ? Number(req.body?.idServizio) : null;
     const normalizedEndDateTime = normalizeEndDateTime(nextStart, nextEnd);
+    const { data, error: updateAppointmentError } = await db
+      .rpc("update_appuntamento_sicuro", {
+        p_id_appuntamento: idAppuntamento,
+        p_data_ora_inizio: nextStart,
+        p_data_ora_fine: normalizedEndDateTime,
+        p_stato: req.body?.stato || existingAppointment.stato || "prenotato",
+        p_note: req.body?.note ?? null,
+        p_update_servizio: hasServiceInPayload,
+        p_id_servizio: hasServiceInPayload && Number.isFinite(nextServiceId) ? nextServiceId : null
+      })
+      .single();
 
-    const { data: overlappingAppointments, error: overlappingAppointmentsError } = await db
-      .from("appuntamenti")
-      .select("idAppuntamento")
-      .eq("idOperatore", existingAppointment.idOperatore)
-      .neq("idAppuntamento", idAppuntamento)
-      .lt("dataOraInizio", normalizedEndDateTime)
-      .gt("dataOraFine", nextStart)
-      .limit(1);
+    if (updateAppointmentError) {
+      if (isAppointmentConflictError(updateAppointmentError)) {
+        return res.status(409).json({
+          message: "L'operatore non e disponibile per tutta la durata del servizio selezionato"
+        });
+      }
 
-    if (overlappingAppointmentsError) {
-      throw overlappingAppointmentsError;
+      throw updateAppointmentError;
     }
 
-    if ((overlappingAppointments || []).length > 0) {
+    if (!data) {
       return res.status(409).json({
         message: "L'operatore non e disponibile per tutta la durata del servizio selezionato"
       });
-    }
-
-    const updatePayload = {
-      dataOraInizio: nextStart,
-      dataOraFine: normalizedEndDateTime,
-      stato: req.body?.stato || existingAppointment.stato || "prenotato",
-      note: req.body?.note ?? null
-    };
-
-    const { data, error } = await db
-      .from("appuntamenti")
-      .update(updatePayload)
-      .eq("idAppuntamento", idAppuntamento)
-      .select("idAppuntamento, idCliente, idOperatore, dataOraInizio, dataOraFine, stato, note")
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    if (hasServiceInPayload) {
-      await updateAppointmentServiceRelation(
-        idAppuntamento,
-        Number.isFinite(nextServiceId) ? nextServiceId : null
-      );
     }
 
     if (
