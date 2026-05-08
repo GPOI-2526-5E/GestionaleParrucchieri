@@ -1,4 +1,4 @@
-<app-navbar></app-navbar>
+<app-navbar *ngIf="!isManagementBooking"></app-navbar>
 
 <div class="appointments-page booking-page">
   <div class="appointments-overlay"></div>
@@ -16,9 +16,15 @@
       <div class="booking-form-head">
         <div>
           <p class="appointments-hours-kicker">Dettagli appuntamento</p>
-          <h2 class="booking-form-title">Conferma i dati prima di inviare la richiesta</h2>
+          <h2 class="booking-form-title">
+            {{ isManagementBooking ? 'Inserisci appuntamento in agenda' : 'Conferma i dati prima di inviare la richiesta' }}
+          </h2>
           <p class="booking-form-subtitle">
-            Lo slot selezionato arriva dalla schermata appuntamenti. Qui puoi solo rifinire i dettagli finali.
+            {{
+              isManagementBooking
+                ? 'Completa cliente, operatore, servizio e orario prima di salvare la prenotazione.'
+                : 'Lo slot selezionato arriva dalla schermata appuntamenti. Qui puoi solo rifinire i dettagli finali.'
+            }}
           </p>
         </div>
       </div>
@@ -26,6 +32,11 @@
       <div class="appointments-select-wrapper booking-summary-card booking-summary-inline">
         <label>Riepilogo appuntamento</label>
         <div class="booking-summary-stack">
+          <div class="booking-summary-item" *ngIf="isManagementBooking">
+            <span class="booking-summary-label">Cliente</span>
+            <strong class="booking-summary-value">{{ getSelectedClienteLabel() }}</strong>
+          </div>
+
           <div class="booking-summary-item">
             <span class="booking-summary-label">Operatore</span>
             <strong class="booking-summary-value">{{ getSelectedOperatoreLabel() }}</strong>
@@ -58,6 +69,43 @@
 
       <div class="booking-form-grid">
         <div class="form-grid">
+          <div class="form-group full-width" *ngIf="isManagementBooking">
+            <label>Cliente</label>
+            <div class="booking-dropdown" [class.open]="isClienteOpen">
+              <button
+                type="button"
+                class="booking-dropdown-trigger"
+                [class.open]="isClienteOpen"
+                [disabled]="isLoadingData || isSubmitting || clienti.length === 0"
+                (click)="toggleClienteDropdown()"
+                [attr.aria-expanded]="isClienteOpen"
+              >
+                <span class="booking-dropdown-trigger-text">
+                  <span class="booking-trigger-kicker">Anagrafica</span>
+                  <span class="booking-trigger-value">{{ getSelectedClienteLabel() }}</span>
+                </span>
+                <span class="booking-dropdown-chevron"></span>
+              </button>
+
+              <div class="booking-dropdown-panel" [class.open]="isClienteOpen">
+                <div class="booking-dropdown-panel-inner">
+                  <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona cliente">
+                    <li
+                      *ngFor="let cliente of clienti"
+                      (click)="selectCliente(cliente.idUtente)"
+                      [class.active]="form.idCliente === cliente.idUtente"
+                    >
+                      {{ cliente.nome }} {{ cliente.cognome }}
+                    </li>
+                    <li *ngIf="clienti.length === 0" class="booking-dropdown-empty">
+                      Nessun cliente disponibile
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="form-group full-width">
             <label>Operatore</label>
             <div class="booking-dropdown" [class.open]="isOperatoreOpen">
@@ -133,10 +181,20 @@
 
           <div class="form-group form-group-separated">
             <label>Data e ora inizio</label>
-            <div class="booking-readonly-control">
+            <div *ngIf="!isManagementBooking; else editableStartDate" class="booking-readonly-control">
               <i class="bi bi-calendar-date booking-readonly-icon" aria-hidden="true"></i>
               <span class="booking-readonly-value">{{ startDateTimeDisplayLabel }}</span>
             </div>
+            <ng-template #editableStartDate>
+              <input
+                type="datetime-local"
+                [(ngModel)]="form.dataOraInizio"
+                name="dataOraInizio"
+                [min]="minDateTime"
+                [disabled]="isLoadingData || isSubmitting"
+                (ngModelChange)="onStartDateTimeChange()"
+              />
+            </ng-template>
           </div>
 
           <div class="form-group form-group-separated">
@@ -193,7 +251,7 @@
         <button
           type="button"
           class="booking-secondary-action"
-          [routerLink]="['/appointments']"
+          [routerLink]="[returnRoute]"
           [disabled]="isLoadingData || isSubmitting"
         >
           Annulla

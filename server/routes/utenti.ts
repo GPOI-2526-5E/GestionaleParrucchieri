@@ -20,7 +20,9 @@ router.get("/operatori", async (req: Request, res: Response) => {
     const { data, error } = await db
       .from("utenti")
       .select("idUtente, nome, cognome, email, telefono, data_nascita, ruolo")
-      .in("ruolo", ["operatore", "admin"]);
+      .in("ruolo", ["operatore", "admin"])
+      .order("cognome", { ascending: true })
+      .order("nome", { ascending: true });
 
     if (error) {
       throw error;
@@ -32,6 +34,28 @@ router.get("/operatori", async (req: Request, res: Response) => {
 
   } catch (err: any) {
     console.error("Errore GET /operatori:", err);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+router.get("/clienti", async (_req: Request, res: Response) => {
+  try {
+    const { data, error } = await db
+      .from("utenti")
+      .select("idUtente, nome, cognome, email, telefono, data_nascita, ruolo")
+      .eq("ruolo", "cliente")
+      .order("cognome", { ascending: true })
+      .order("nome", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return res.json({
+      clienti: (data || []) as Utente[]
+    });
+  } catch (err: any) {
+    console.error("Errore GET /clienti:", err);
     return res.status(500).json({ message: err.message });
   }
 });

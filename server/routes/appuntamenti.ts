@@ -18,6 +18,8 @@ interface Appuntamento {
   dataOraFine: string;
   stato: string;
   note: string | null;
+  idServizio?: number | null;
+  servizioNome?: string | null;
 }
 
 const router = Router();
@@ -207,7 +209,64 @@ router.get("/", async (req: Request, res: Response) => {
       throw error;
     }
 
-    return res.json({ appuntamenti: (data || []) as Appuntamento[] });
+    const appointments = (data || []) as Appuntamento[];
+    const appointmentIds = appointments.map((item) => item.idAppuntamento);
+
+    if (appointmentIds.length === 0) {
+      return res.json({ appuntamenti: appointments });
+    }
+
+    const { data: relations, error: relationsError } = await db
+      .from("appuntamentiservizi")
+      .select("idAppuntamento, idServizio")
+      .in("idAppuntamento", appointmentIds);
+
+    if (relationsError) {
+      throw relationsError;
+    }
+
+    const serviceIds = Array.from(
+      new Set((relations || []).map((relation: any) => Number(relation.idServizio)).filter(Number.isFinite))
+    );
+
+    const servicesById = new Map<number, string>();
+
+    if (serviceIds.length > 0) {
+      const { data: services, error: servicesError } = await db
+        .from("servizi")
+        .select("idServizio, nome")
+        .in("idServizio", serviceIds);
+
+      if (servicesError) {
+        throw servicesError;
+      }
+
+      (services || []).forEach((service: any) => {
+        servicesById.set(Number(service.idServizio), String(service.nome || ""));
+      });
+    }
+
+    const relationByAppointmentId = new Map<number, number>();
+    (relations || []).forEach((relation: any) => {
+      const appointmentId = Number(relation.idAppuntamento);
+      const serviceId = Number(relation.idServizio);
+
+      if (Number.isFinite(appointmentId) && Number.isFinite(serviceId)) {
+        relationByAppointmentId.set(appointmentId, serviceId);
+      }
+    });
+
+    const appointmentsWithServices = appointments.map((appointment) => {
+      const serviceId = relationByAppointmentId.get(appointment.idAppuntamento) ?? null;
+
+      return {
+        ...appointment,
+        idServizio: serviceId,
+        servizioNome: serviceId ? servicesById.get(serviceId) ?? null : appointment.note
+      };
+    });
+
+    return res.json({ appuntamenti: appointmentsWithServices });
   } catch (err: any) {
     console.error("Errore GET /appuntamenti:", err);
     return res.status(500).json({ message: err.message });
@@ -216,8 +275,10 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", verifyToken, async (req: any, res: Response) => {
   try {
-    const idCliente = req.user?.userId;
+    const authenticatedUserId = req.user?.userId;
+    const userRole = req.user?.ruolo;
     const {
+      idCliente: requestedClienteId,
       idOperatore,
       idServizio,
       dataOraInizio,
@@ -226,9 +287,14 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
       note
     } = req.body;
 
-    if (!idCliente) {
+    if (!authenticatedUserId) {
       return res.status(401).json({ message: "Utente non autenticato" });
     }
+
+    const requestedClienteIdNumber = Number(requestedClienteId);
+    const idCliente = isStaffRole(userRole) && Number.isFinite(requestedClienteIdNumber) && requestedClienteIdNumber > 0
+      ? requestedClienteIdNumber
+      : authenticatedUserId;
 
     if (!idOperatore || !dataOraInizio || !dataOraFine) {
       return res.status(400).json({

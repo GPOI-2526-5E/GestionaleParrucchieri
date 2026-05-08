@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { SidenavComponent } from '../sidenav.component/sidenav.component';
-import { AppuntamentoService } from '../../services/appuntamentoService';
 import { ChangeDetectorRef } from '@angular/core';
+import { DashboardService } from '../../services/dashboard';
 
 @Component({
   selector: 'app-home.component',
@@ -12,36 +12,66 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
-  constructor(private readonly appuntamentoService: AppuntamentoService, private cdr: ChangeDetectorRef,) {}
+  constructor(private readonly dashboardService: DashboardService, private cdr: ChangeDetectorRef) {}
 
   isSidenavCollapsed = false;
 
   toggleSidenav(): void {
     this.isSidenavCollapsed = !this.isSidenavCollapsed;
   }
-  readonly stats = [
-    { label: 'Appuntamenti oggi', value: '', trend: '+4 vs ieri' },
-    { label: 'Incasso giornaliero', value: 'EUR 642', trend: '+12%' },
-    { label: 'Prodotti in riordino', value: '7', trend: 'attenzione stock' },
-    { label: 'Clienti in salone', value: '3', trend: '2 in attesa' }
+  stats = [
+    { label: 'Appuntamenti oggi', value: '-', trend: 'calcolo dal calendario' },
+    { label: 'Incasso giornaliero', value: '-', trend: 'pagamenti di oggi' },
+    { label: 'Prodotti in riordino', value: '-', trend: 'attenzione stock' },
+    { label: 'Clienti in salone', value: '-', trend: 'fascia oraria corrente' }
   ];
 
   ngOnInit(): void {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const today = `${year}-${month}-${day}`;
+    this.dashboardService.getStats().subscribe({
+      next: (dashboardStats) => {
+        const slotStart = this.formatTime(dashboardStats.slotCorrente.inizio);
+        const slotEnd = this.formatTime(dashboardStats.slotCorrente.fine);
 
-    this.appuntamentoService.getAppuntamentiCount(today).subscribe({
-      next: (totale) => {
-        this.stats[0].value = String(totale);
+        this.stats = [
+          {
+            label: 'Appuntamenti oggi',
+            value: String(dashboardStats.appuntamentiOggi),
+            trend: dashboardStats.data
+          },
+          {
+            label: 'Incasso giornaliero',
+            value: this.formatCurrency(dashboardStats.incassoGiornaliero),
+            trend: 'somma pagamenti di oggi'
+          },
+          {
+            label: 'Prodotti in riordino',
+            value: String(dashboardStats.prodottiInRiordino),
+            trend: `stock <= ${dashboardStats.sogliaRiordino}`
+          },
+          {
+            label: 'Clienti in salone',
+            value: String(dashboardStats.clientiInSalone),
+            trend: `${slotStart}-${slotEnd}`
+          }
+        ];
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Errore nel recupero del totale appuntamenti di oggi:', error);
+        console.error('Errore nel recupero delle statistiche dashboard:', error);
       }
     });
+  }
+
+  private formatCurrency(value: number): string {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(value || 0);
+  }
+
+  private formatTime(value: string): string {
+    const [, time = ''] = value.split('T');
+    return time.slice(0, 5);
   }
 
   readonly focusCards = [

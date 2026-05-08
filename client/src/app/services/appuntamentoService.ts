@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { Appuntamento } from '../models/appuntamento.model';
 
 export interface CreaAppuntamentoPayload {
-  idCliente: number;
+  idCliente?: number | null;
   idOperatore: number | null;
   idServizio: number | null;
   dataOraInizio: string;

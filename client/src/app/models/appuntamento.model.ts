@@ -6,4 +6,6 @@ export interface Appuntamento {
     dataOraFine: string;
     stato: string;
     note: string | null;
+    idServizio?: number | null;
+    servizioNome?: string | null;
   }

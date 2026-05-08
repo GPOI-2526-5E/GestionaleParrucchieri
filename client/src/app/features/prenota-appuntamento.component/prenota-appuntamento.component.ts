@@ -35,6 +35,7 @@ interface DailySchedule {
 })
 export class PrenotaAppuntamentoComponent implements OnInit {
   operatori: Utente[] = [];
+  clienti: Utente[] = [];
   servizi: Servizio[] = [];
   appuntamentiOperatore: Appuntamento[] = [];
   minDateTime = '';
@@ -47,6 +48,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   serviceSearchTerm = '';
   isOperatoreOpen = false;
   isServizioOpen = false;
+  isClienteOpen = false;
+  isManagementBooking = false;
+  returnRoute = '/appointments';
   private selectedServizioFromQuery: number | null = null;
   private readonly openingSchedule: Record<number, DailySchedule> = {
     0: { name: 'Domenica', intervals: [] },
@@ -69,6 +73,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   ) { }
 
   form = {
+    idCliente: null as number | null,
     idOperatore: null as number | null,
     idServizio: null as number | null,
     dataOraInizio: '',
@@ -90,6 +95,9 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       const selectedDate = params.get('data');
       const selectedOperator = params.get('operatore');
       const selectedServizio = params.get('servizio');
+      const selectedCliente = params.get('cliente');
+      this.isManagementBooking = params.get('gestionale') === '1';
+      this.returnRoute = params.get('ritorno') || (this.isManagementBooking ? '/gestionale/appuntamenti' : '/appointments');
 
       if (selectedDate) {
         this.form.dataOraInizio = this.toDateTimeLocalValue(selectedDate);
@@ -105,6 +113,11 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       if (selectedOperator) {
         const parsedOperatore = Number(selectedOperator);
         this.form.idOperatore = Number.isFinite(parsedOperatore) ? parsedOperatore : null;
+      }
+
+      if (selectedCliente) {
+        const parsedCliente = Number(selectedCliente);
+        this.form.idCliente = Number.isFinite(parsedCliente) ? parsedCliente : null;
       }
 
       if (this.operatori.length > 0) {
@@ -125,6 +138,19 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       },
       error: (err) => console.error(err)
     });
+
+    if (this.isManagementBooking) {
+      this.utentiService.getClienti().subscribe({
+        next: (clienti) => {
+          this.clienti = clienti;
+          if (!this.form.idCliente && clienti.length > 0) {
+            this.form.idCliente = clienti[0].idUtente;
+          }
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error(err)
+      });
+    }
   }
 
   onOperatoreChange(): void {
@@ -140,6 +166,19 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     this.isOperatoreOpen = !this.isOperatoreOpen;
     if (this.isOperatoreOpen) {
       this.isServizioOpen = false;
+      this.isClienteOpen = false;
+    }
+  }
+
+  toggleClienteDropdown(): void {
+    if (this.isLoadingData || this.isSubmitting || !this.isManagementBooking) {
+      return;
+    }
+
+    this.isClienteOpen = !this.isClienteOpen;
+    if (this.isClienteOpen) {
+      this.isOperatoreOpen = false;
+      this.isServizioOpen = false;
     }
   }
 
@@ -151,6 +190,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     this.isServizioOpen = !this.isServizioOpen;
     if (this.isServizioOpen) {
       this.isOperatoreOpen = false;
+      this.isClienteOpen = false;
       return;
     }
 
@@ -202,6 +242,15 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     this.onOperatoreChange();
   }
 
+  selectCliente(idCliente: number): void {
+    if (this.isLoadingData || this.isSubmitting || !this.isManagementBooking) {
+      return;
+    }
+
+    this.form.idCliente = idCliente;
+    this.isClienteOpen = false;
+  }
+
   selectServizio(idServizio: number): void {
     if (this.isLoadingData || this.isSubmitting) {
       return;
@@ -222,6 +271,11 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   getSelectedOperatoreLabel(): string {
     const operatore = this.operatori.find((item) => item.idUtente === this.form.idOperatore);
     return operatore ? `${operatore.nome} ${operatore.cognome}` : 'Seleziona operatore';
+  }
+
+  getSelectedClienteLabel(): string {
+    const cliente = this.clienti.find((item) => item.idUtente === this.form.idCliente);
+    return cliente ? `${cliente.nome} ${cliente.cognome}` : 'Seleziona cliente';
   }
 
   getSelectedServizioLabel(): string {
@@ -313,8 +367,17 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     if (!target.closest('.booking-dropdown')) {
       this.isOperatoreOpen = false;
       this.isServizioOpen = false;
+      this.isClienteOpen = false;
       this.resetServiceSearchTerm();
     }
+  }
+
+  onStartDateTimeChange(): void {
+    this.form.dataOraFine = '';
+    if (this.form.idServizio) {
+      this.onServizioChange();
+    }
+    this.updateAvailabilityMessage();
   }
 
   prenotaAppuntamento(): void {
@@ -355,14 +418,16 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     }
 
     const decodedPayload = JSON.parse(atob(payloadBase64)) as { userId?: number };
-    const idCliente = decodedPayload.userId;
+    const idCliente = this.isManagementBooking ? this.form.idCliente : decodedPayload.userId;
     const note = this.getSelectedServizioNome();
 
     if (!idCliente) {
       this.showBookingAlert(
-        'Impossibile identificare l\'utente. Effettua di nuovo il login.',
+        this.isManagementBooking
+          ? 'Seleziona un cliente prima di confermare l\'appuntamento.'
+          : 'Impossibile identificare l\'utente. Effettua di nuovo il login.',
         'error',
-        'Login richiesto'
+        this.isManagementBooking ? undefined : 'Login richiesto'
       );
       return;
     }
@@ -403,7 +468,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
               queryParams['data'] = this.form.dataOraInizio;
             }
 
-            this.router.navigate(['/appointments'], {
+            this.router.navigate([this.returnRoute], {
               queryParams,
               replaceUrl: true
             });

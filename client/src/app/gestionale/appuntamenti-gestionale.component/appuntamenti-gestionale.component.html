@@ -21,12 +21,156 @@
   </div>
 
   <main class="management-layout__content">
-    <section class="management-page">
-      <p class="management-page__eyebrow">Gestionale</p>
-      <h1>Appuntamenti</h1>
-      <p class="management-page__copy">
-        Area predisposta per agenda, disponibilita operatori e gestione prenotazioni con la stessa shell della home.
-      </p>
+    <section class="appointments-section management-appointments-section">
+      <div class="appointments-top-row">
+        <div class="appointments-hero">
+          <p class="appointments-eyebrow">Gestionale</p>
+          <h1 class="appointments-title">Appuntamenti</h1>
+          <p class="appointments-subtitle">
+            Calendario operativo per inserire nuove prenotazioni e controllare l'agenda per operatore.
+          </p>
+        </div>
+
+        <div class="appointments-select-wrapper">
+          <label>Operatore</label>
+          <div class="booking-dropdown management-operator-dropdown" [class.open]="isOperatorDropdownOpen">
+            <button
+              type="button"
+              class="booking-dropdown-trigger"
+              [class.open]="isOperatorDropdownOpen"
+              [disabled]="operatori.length === 0"
+              (click)="toggleOperatorDropdown()"
+              [attr.aria-expanded]="isOperatorDropdownOpen"
+            >
+              <span class="booking-dropdown-trigger-text">
+                <span class="booking-trigger-kicker">Selezionato</span>
+                <span class="booking-trigger-value">{{ selectedOperatorLabel }}</span>
+              </span>
+              <span class="booking-dropdown-chevron"></span>
+            </button>
+
+            <div class="booking-dropdown-panel" [class.open]="isOperatorDropdownOpen">
+              <div class="booking-dropdown-panel-inner">
+                <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona operatore">
+                  <li
+                    *ngFor="let operatore of operatori"
+                    (click)="selectOperator(operatore.idUtente)"
+                    [class.active]="selectedOperator === operatore.idUtente"
+                  >
+                    {{ operatore.nome }} {{ operatore.cognome }}
+                  </li>
+                  <li *ngIf="operatori.length === 0" class="booking-dropdown-empty">
+                    Nessun operatore disponibile
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-wrapper">
+        <div *ngIf="isLoading" class="appointments-alert info appointments-service-alert">
+          <div class="appointments-alert-icon">i</div>
+          <div class="appointments-alert-text">Caricamento calendario...</div>
+        </div>
+
+        <div *ngIf="calendarMessage" class="appointments-alert info appointments-service-alert">
+          <div class="appointments-alert-icon">i</div>
+          <div class="appointments-alert-text">{{ calendarMessage }}</div>
+        </div>
+
+        <div class="appointments-calendar-meta">
+          <div class="appointments-calendar-meta-item">
+            <span class="appointments-calendar-operator-label">Operatore selezionato</span>
+            <strong class="appointments-calendar-operator-value">{{ selectedOperatorLabel }}</strong>
+          </div>
+        </div>
+
+        <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+      </div>
     </section>
   </main>
+</div>
+
+<div
+  *ngIf="(isAppointmentDetailOpen || isAppointmentDetailClosing) && selectedAppointment"
+  class="appointment-detail-modal"
+  [class.is-closing]="isAppointmentDetailClosing"
+  (click)="onAppointmentModalOverlayClick($event)"
+>
+  <div
+    class="appointment-detail-card"
+    [ngClass]="appointmentDetailToneClass"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Dettaglio appuntamento"
+  >
+    <div class="appointment-detail-head">
+      <div>
+        <p class="appointment-detail-kicker">Appuntamento</p>
+        <h3 class="appointment-detail-title">{{ selectedAppointmentLabel }}</h3>
+      </div>
+      <button
+        type="button"
+        class="appointment-detail-close"
+        (click)="closeAppointmentDetail()"
+        aria-label="Chiudi dettaglio"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+        <div class="appointment-detail-body appointment-detail-body--grid">
+      <div class="appointment-detail-row appointment-detail-row--wide">
+        <span class="appointment-detail-label">Servizio</span>
+        <strong class="appointment-detail-value">{{ getSelectedAppointmentServiceLabel() }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">Cliente</span>
+        <strong class="appointment-detail-value">{{ getSelectedAppointmentClientLabel() }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">Operatore</span>
+        <strong class="appointment-detail-value">{{ getSelectedAppointmentOperatorLabel() }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">Inizio</span>
+        <strong class="appointment-detail-value">{{ formatAppointmentDateTime(selectedAppointment.dataOraInizio) }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">Fine</span>
+        <strong class="appointment-detail-value">{{ formatAppointmentDateTime(selectedAppointment.dataOraFine) }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">Durata</span>
+        <strong class="appointment-detail-value">{{ getSelectedAppointmentDurationLabel() }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">Stato</span>
+        <strong class="appointment-detail-value">{{ selectedAppointment.stato || 'prenotato' }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">ID appuntamento</span>
+        <strong class="appointment-detail-value">#{{ selectedAppointment.idAppuntamento }}</strong>
+      </div>
+
+      <div class="appointment-detail-row">
+        <span class="appointment-detail-label">ID servizio</span>
+        <strong class="appointment-detail-value">{{ selectedAppointment.idServizio || 'Non indicato' }}</strong>
+      </div>
+
+      <div class="appointment-detail-row appointment-detail-row--wide">
+        <span class="appointment-detail-label">Note</span>
+        <strong class="appointment-detail-value">{{ selectedAppointment.note || 'Nessuna nota inserita' }}</strong>
+      </div>
+    </div>
+  </div>
 </div>

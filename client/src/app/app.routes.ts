@@ -41,8 +41,8 @@ export const routes: Routes = [
     { path: 'reset-password', component: ResetPasswordComponent },
     { path: 'prenotazione', component: PrenotaAppuntamentoComponent},
     { path: 'gestionale', component: HomeComponent, canActivate: [managementGuard] },
-    { path: 'gestionale/appuntamenti', component: AppuntamentiGestionaleComponent},
-    { path: 'gestionale/cassa', component: CassaComponent},
-    { path: 'gestionale/clienti', component: ClientiComponent},
+    { path: 'gestionale/appuntamenti', component: AppuntamentiGestionaleComponent, canActivate: [managementGuard]},
+    { path: 'gestionale/cassa', component: CassaComponent, canActivate: [managementGuard]},
+    { path: 'gestionale/clienti', component: ClientiComponent, canActivate: [managementGuard]},
     { path: '**', redirectTo: '/home' }
 ];

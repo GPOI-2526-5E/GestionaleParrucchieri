@@ -23,4 +23,12 @@ export class UtentiService {
       map(res => res.operatori)
     );
   }
+
+  getClienti(): Observable<Utente[]> {
+    return this.http.get<{ clienti: Utente[] }>(
+      `${this.api}/clienti`
+    ).pipe(
+      map(res => res.clienti)
+    );
+  }
 }
