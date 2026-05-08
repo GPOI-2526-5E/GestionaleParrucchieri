@@ -7,7 +7,7 @@ import * as L from 'leaflet';
 import { IntlTelInputComponent } from 'intl-tel-input/angularWithUtils';
 import { AuthService } from '../../services/auth';
 import { NavbarComponent } from '../navbar.component/navbar.component';
-import { Prodotto } from '../../services/prodotto';
+import { CheckoutCustomerData, Prodotto } from '../../services/prodotto';
 import { ProdottoService } from '../../services/prodotto';
 import { LockerService, LockerOption } from '../../services/locker';
 import { ChangeDetectorRef } from '@angular/core';
@@ -35,7 +35,7 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
   subtotal: number = 0;
   finalTotal: number = 0;
 
-  shippingMethod: string = 'standard';
+  shippingMethod: string = 'pickup';
   shippingCost: number = 0;
 
   name: string = '';
@@ -51,7 +51,7 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
 
   address: string = '';
   city: string = '';
-  zip: string = '';
+  zip: string | number = '';
 
   isProcessing: boolean = false;
   paymentSuccess: boolean = false;
@@ -109,6 +109,8 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit(): void {
+    this.onShippingChange();
+
     const savedCart = localStorage.getItem('cart');
 
     if (savedCart) {
@@ -286,9 +288,15 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
   }
 
   isValidAddress(): boolean {
+    const zipValue = this.getZipValue();
+
     return this.address.trim() !== '' &&
       this.city.trim() !== '' &&
-      /^[0-9]{5}$/.test(this.zip);
+      /^[0-9]{5}$/.test(zipValue);
+  }
+
+  private getZipValue(): string {
+    return String(this.zip ?? '').trim();
   }
 
   isPayDisabled(): boolean {
@@ -352,8 +360,8 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
         return this.city.trim() ? null : 'Inserisci la citta\' di consegna.';
       case 'zip':
         if (this.shippingMethod !== 'standard' && this.shippingMethod !== 'express') return null;
-        if (!this.zip.trim()) return 'Inserisci il CAP.';
-        return /^[0-9]{5}$/.test(this.zip) ? null : 'Il CAP deve avere 5 cifre.';
+        if (!this.getZipValue()) return 'Inserisci il CAP.';
+        return /^[0-9]{5}$/.test(this.getZipValue()) ? null : 'Il CAP deve avere 5 cifre.';
       case 'locker':
         return this.shippingMethod === 'locker' && !this.selectedLocker
           ? 'Seleziona un locker dalla mappa.'
@@ -489,8 +497,22 @@ export class PaymentComponent implements OnInit, AfterViewChecked {
     this.cdr.detectChanges();
 
     setTimeout(() => {
+      const customer: CheckoutCustomerData = {
+        name: this.name.trim(),
+        surname: this.surname.trim(),
+        email: this.email.trim(),
+        phone: this.phone.trim(),
+        shippingMethod: this.shippingMethod,
+        shippingCost: this.shippingCost,
+        address: this.address.trim(),
+        city: this.city.trim(),
+        zip: this.getZipValue(),
+        lockerLabel: this.selectedLocker
+          ? `${this.selectedLocker.name} - ${this.selectedLocker.address}`
+          : ''
+      };
 
-      this.prodottoService.completeCheckout(this.cartItems, this.finalTotal).subscribe({
+      this.prodottoService.completeCheckout(this.cartItems, this.finalTotal, customer).subscribe({
 
         next: () => {
 

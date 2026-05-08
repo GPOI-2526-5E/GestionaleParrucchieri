@@ -13,6 +13,7 @@ import utentiRoute from "./routes/utenti";
 import appuntamentiRoute from "./routes/appuntamenti";
 import serviziRoute from "./routes/servizi";
 import { startAppointmentReminderJob } from "./services/appointment-reminders";
+import nodemailer from "nodemailer";
 
 
 dotenv.config();
@@ -79,6 +80,223 @@ function isVisibleOnSite(record: any): boolean {
     record?.visualizzazione;
 
   return value === true || value === 1 || value === "true" || value === "t";
+}
+
+function createSmtpTransporter() {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = Number(process.env.SMTP_PORT);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  if (!smtpHost || !smtpPort || !smtpUser || !smtpPass) {
+    throw new Error("Configurazione SMTP incompleta");
+  }
+
+  return nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: false,
+    auth: {
+      user: smtpUser,
+      pass: smtpPass
+    }
+  });
+}
+
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR"
+  }).format(value);
+}
+
+function buildOrderConfirmationEmail(params: {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  shippingMethod: string;
+  shippingCost: number;
+  address?: string;
+  city?: string;
+  zip?: string;
+  lockerLabel?: string;
+  cartItems: any[];
+  total: number;
+  orderId: number;
+}) {
+  const shippingLabel =
+    params.shippingMethod === "pickup"
+      ? "Ritiro in negozio"
+      : params.shippingMethod === "express"
+      ? "Spedizione express"
+      : params.shippingMethod === "standard"
+        ? "Spedizione standard"
+        : "Ritiro locker";
+
+  const rows = params.cartItems
+    .map((item) => {
+      const qty = Number(item.quantita || 1);
+      const unitPrice = Number(item.prezzo ?? item.prezzoRivendita ?? 0);
+      const lineTotal = unitPrice * qty;
+
+      return `
+        <tr>
+          <td style="padding:12px 10px;border-bottom:1px solid #ead7b6;color:#1a1a1a !important;">${item.nome}</td>
+          <td style="padding:12px 10px;border-bottom:1px solid #ead7b6;color:#1a1a1a !important;text-align:center;">${qty}</td>
+          <td style="padding:12px 10px;border-bottom:1px solid #ead7b6;color:#1a1a1a !important;text-align:right;">${formatCurrency(unitPrice)}</td>
+          <td style="padding:12px 10px;border-bottom:1px solid #ead7b6;color:#1a1a1a !important;text-align:right;">${formatCurrency(lineTotal)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <!DOCTYPE html>
+    <html lang="it">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light only" />
+        <meta name="supported-color-schemes" content="light only" />
+        <title>Conferma acquisto</title>
+        <style>
+          :root {
+            color-scheme: light only;
+            supported-color-schemes: light only;
+          }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #f6f0e6 !important;
+            background-color: #f6f0e6 !important;
+            color: #16120d !important;
+          }
+          body, table, td, div, p, a, h1, th {
+            font-family: Arial, sans-serif !important;
+          }
+          .mail-shell {
+            background: #f6f0e6 !important;
+            background-color: #f6f0e6 !important;
+            color: #16120d !important;
+          }
+          .mail-card {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
+          }
+        </style>
+      </head>
+      <body style="margin:0;padding:0;background:#f6f0e6 !important;background-color:#f6f0e6 !important;color:#16120d !important;">
+        <div class="mail-shell" style="margin:0;padding:32px 18px;background:#f6f0e6 !important;background-color:#f6f0e6 !important;color:#16120d !important;">
+          <div style="max-width:760px;margin:0 auto;text-align:center;">
+            <div style="margin:0 auto 14px;width:234px;background:#1b1610 !important;background-color:#1b1610 !important;border-radius:16px;padding:18px 22px;box-sizing:border-box;">
+              <img
+                src="https://res.cloudinary.com/duimlq34k/image/upload/v1776668316/logo-parrucchieri-oro-bianco_jkgk5v.png"
+                alt="I Parrucchieri"
+                style="display:block;width:100%;height:auto;border:0;"
+              />
+            </div>
+
+            <div class="mail-card" style="margin:0 auto;max-width:718px;background:#ffffff !important;background-color:#ffffff !important;border:1px solid #e2c89b;border-radius:20px;padding:24px 34px 22px;text-align:left;box-sizing:border-box;color:#1a1a1a !important;">
+              <div style="display:inline-block;margin-bottom:8px;padding:6px 12px;border:1px solid #e5c37d;border-radius:999px;background:#f8f2e8 !important;background-color:#f8f2e8 !important;color:#b67a08 !important;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+                Conferma Acquisto
+              </div>
+
+              <h1 style="margin:0 0 10px;font-size:30px;line-height:1.2;color:#101010 !important;font-weight:800;">
+                Il tuo ordine è stato registrato
+              </h1>
+
+              <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#1a1a1a !important;">
+                Ciao ${params.name} ${params.surname},
+              </p>
+
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#1a1a1a !important;">
+                abbiamo ricevuto con successo il tuo acquisto. Qui sotto trovi il riepilogo dell'ordine <strong>#${params.orderId}</strong>.
+              </p>
+
+              <div style="margin:0 0 18px;padding:18px;border:1px solid #efc983;border-radius:16px;background:#fbf3e3 !important;background-color:#fbf3e3 !important;">
+                <div style="margin:0 0 8px;font-size:14px;color:#c08612 !important;font-weight:700;">Dettagli cliente</div>
+                <div style="font-size:15px;line-height:1.8;color:#1a1a1a !important;">
+                  <div><strong>Email:</strong> ${params.email}</div>
+                  <div><strong>Telefono:</strong> ${params.phone || "-"}</div>
+                  <div><strong>Consegna:</strong> ${shippingLabel}</div>
+                  ${(params.shippingMethod === "standard" || params.shippingMethod === "express") && [params.address, params.zip, params.city].filter(Boolean).length > 0
+                    ? `<div><strong>Indirizzo:</strong> ${[params.address, params.zip, params.city].filter(Boolean).join(", ")}</div>`
+                    : ""}
+                  ${params.shippingMethod === "locker" && params.lockerLabel
+                    ? `<div><strong>Indirizzo:</strong> ${params.lockerLabel}</div>`
+                    : ""}
+                </div>
+              </div>
+
+              <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 18px;background:#fffdf8 !important;background-color:#fffdf8 !important;border:1px solid #ead7b6;border-radius:14px;overflow:hidden;">
+                <thead>
+                  <tr style="background:#f8f2e8 !important;background-color:#f8f2e8 !important;">
+                    <th style="padding:12px 10px;text-align:left;color:#6f4d11 !important;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Prodotto</th>
+                    <th style="padding:12px 10px;text-align:center;color:#6f4d11 !important;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Qta</th>
+                    <th style="padding:12px 10px;text-align:right;color:#6f4d11 !important;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Prezzo</th>
+                    <th style="padding:12px 10px;text-align:right;color:#6f4d11 !important;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Totale</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                </tbody>
+              </table>
+
+              <div style="margin:0 0 18px;padding:16px;border:1px solid #ead7b6;border-radius:14px;background:#faf7f2 !important;background-color:#faf7f2 !important;">
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:1.8;color:#1a1a1a !important;">
+                  <span>Spedizione:</span>
+                  <strong>${formatCurrency(Number(params.shippingCost || 0))}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:17px;line-height:1.8;color:#101010 !important;font-weight:800;">
+                  <span>Totale ordine:</span>
+                  <span>${formatCurrency(params.total)}</span>
+                </div>
+              </div>
+
+              <div style="display:block;width:100%;margin:0;padding:0;overflow:visible !important;white-space:normal !important;text-overflow:clip !important;">
+              <p style="margin:0;display:block;width:100%;font-size:14px;line-height:1.7;color:#3a3126 !important;white-space:normal !important;overflow:visible !important;text-overflow:clip !important;word-break:break-word;">
+                Grazie per aver acquistato da I Parrucchieri. Per qualsiasi dubbio puoi contattarci direttamente.
+              </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+async function sendOrderConfirmationEmail(params: {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  shippingMethod: string;
+  shippingCost: number;
+  address?: string;
+  city?: string;
+  zip?: string;
+  lockerLabel?: string;
+  cartItems: any[];
+  total: number;
+  orderId: number;
+}) {
+  const smtpFrom = process.env.SMTP_FROM;
+
+  if (!smtpFrom) {
+    throw new Error("SMTP_FROM non configurato");
+  }
+
+  const transporter = createSmtpTransporter();
+
+  await transporter.sendMail({
+    from: `"I Parrucchieri" <${smtpFrom}>`,
+    to: params.email,
+    subject: "Conferma acquisto prodotti",
+    html: buildOrderConfirmationEmail(params)
+  });
 }
 app.get("/api/imgParrucchieri", async (req, res) => {
   try {
@@ -211,7 +429,18 @@ app.post("/api/products/update-stock", async (req, res) => {
 app.post("/api/checkout/complete", async (req, res) => {
   const cartItems = Array.isArray(req.body?.cartItems) ? req.body.cartItems : [];
   const total = Number(req.body?.total ?? 0);
+  const customer = req.body?.customer ?? {};
   const userId = getOptionalUserIdFromRequest(req);
+  const customerEmail = String(customer?.email ?? "").trim();
+  const customerName = String(customer?.name ?? "").trim();
+  const customerSurname = String(customer?.surname ?? "").trim();
+  const customerPhone = String(customer?.phone ?? "").trim();
+  const shippingMethod = String(customer?.shippingMethod ?? "standard").trim();
+  const shippingCost = Number(customer?.shippingCost ?? 0);
+  const address = String(customer?.address ?? "").trim();
+  const city = String(customer?.city ?? "").trim();
+  const zip = String(customer?.zip ?? "").trim();
+  const lockerLabel = String(customer?.lockerLabel ?? "").trim();
 
   if (cartItems.length === 0) {
     return res.status(400).json({ message: "Carrello vuoto" });
@@ -219,6 +448,10 @@ app.post("/api/checkout/complete", async (req, res) => {
 
   if (!Number.isFinite(total) || total <= 0) {
     return res.status(400).json({ message: "Totale non valido" });
+  }
+
+  if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+    return res.status(400).json({ message: "Email checkout non valida" });
   }
 
   try {
@@ -289,6 +522,26 @@ app.post("/api/checkout/complete", async (req, res) => {
         .eq("idProdotto", productId);
 
       if (updateError) throw updateError;
+    }
+
+    try {
+      await sendOrderConfirmationEmail({
+        name: customerName || "Cliente",
+        surname: customerSurname,
+        email: customerEmail,
+        phone: customerPhone,
+        shippingMethod,
+        shippingCost: Number.isFinite(shippingCost) ? shippingCost : 0,
+        address,
+        city,
+        zip,
+        lockerLabel,
+        cartItems,
+        total,
+        orderId: vendita.idVendita,
+      });
+    } catch (mailError) {
+      console.error("Errore invio mail conferma acquisto:", mailError);
     }
 
     res.status(201).json({

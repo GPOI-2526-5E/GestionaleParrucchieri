@@ -97,48 +97,101 @@ function wrapMailContent(
   const logoUrls = getLogoUrls();
 
   return `
-    <div style="margin:0;padding:32px 18px;background:#f6f0e6;font-family:Arial,sans-serif;color:#16120d;">
-      <div class="mail-shell" style="margin:0;padding:32px 18px;background:#f6f0e6;font-family:Arial,sans-serif;color:#16120d;">
-      <div style="max-width:760px;margin:0 auto;text-align:center;">
-        <div style="margin:0 auto 14px;width:234px;background:#1b1610;border-radius:16px;padding:18px 22px;box-sizing:border-box;">
-          <img
-            src="${logoUrls.light}"
-            alt="I Parrucchieri"
-            style="display:block;width:100%;height:auto;border:0;"
-          />
-        </div>
+    <!DOCTYPE html>
+    <html lang="it">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="color-scheme" content="light only" />
+        <meta name="supported-color-schemes" content="light only" />
+        <title>${title}</title>
+        <style>
+          :root {
+            color-scheme: light only;
+            supported-color-schemes: light only;
+          }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #f6f0e6 !important;
+            background-color: #f6f0e6 !important;
+            color: #16120d !important;
+          }
+          body, table, td, div, p, a, h1 {
+            font-family: Arial, sans-serif !important;
+          }
+          .mail-shell {
+            background: #f6f0e6 !important;
+            background-color: #f6f0e6 !important;
+            color: #16120d !important;
+          }
+          .mail-card {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
+          }
+          .mail-title,
+          .mail-copy,
+          .mail-footer,
+          .mail-details-content,
+          .mail-meta,
+          .mail-meta div,
+          .mail-details-label {
+            color: inherit !important;
+          }
+          [data-ogsc] .mail-shell,
+          [data-ogsb] .mail-shell,
+          [data-ogsc] .mail-card,
+          [data-ogsb] .mail-card {
+            background: inherit !important;
+            background-color: inherit !important;
+            color: inherit !important;
+          }
+        </style>
+      </head>
+      <body style="margin:0;padding:0;background:#f6f0e6 !important;background-color:#f6f0e6 !important;color:#16120d !important;">
+        <div class="mail-shell" style="margin:0;padding:32px 18px;background:#f6f0e6 !important;background-color:#f6f0e6 !important;font-family:Arial,sans-serif;color:#16120d !important;">
+          <div style="max-width:760px;margin:0 auto;text-align:center;">
+            <div style="margin:0 auto 14px;width:234px;background:#1b1610 !important;background-color:#1b1610 !important;border-radius:16px;padding:18px 22px;box-sizing:border-box;">
+              <img
+                src="${logoUrls.light}"
+                alt="I Parrucchieri"
+                style="display:block;width:100%;height:auto;border:0;"
+              />
+            </div>
 
-        <div class="mail-card" style="margin:0 auto;max-width:718px;background:#ffffff;border:1px solid #e2c89b;border-radius:20px;padding:24px 34px 22px;text-align:left;box-sizing:border-box;">
-          <div class="mail-badge" style="display:inline-block;margin-bottom:8px;padding:6px 12px;border:1px solid #e5c37d;border-radius:999px;background:#f8f2e8;color:#b67a08;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
-            ${badge}
+            <div class="mail-card" style="margin:0 auto;max-width:718px;background:#ffffff !important;background-color:#ffffff !important;border:1px solid #e2c89b;border-radius:20px;padding:24px 34px 22px;text-align:left;box-sizing:border-box;color:#1a1a1a !important;">
+              <div class="mail-badge" style="display:inline-block;margin-bottom:8px;padding:6px 12px;border:1px solid #e5c37d;border-radius:999px;background:#f8f2e8 !important;background-color:#f8f2e8 !important;color:#b67a08 !important;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">
+                ${badge}
+              </div>
+
+              <h1 class="mail-title" style="margin:0 0 10px;font-size:30px;line-height:1.2;color:#101010 !important;font-weight:800;">
+                ${title}
+              </h1>
+
+              <p class="mail-copy" style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#1a1a1a !important;">
+                ${greeting}
+              </p>
+
+              <p class="mail-copy" style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#1a1a1a !important;">
+                ${intro}
+              </p>
+
+              ${detailsBlock}
+
+              <p class="mail-footer" style="margin:0;font-size:14px;line-height:1.7;color:#3a3126 !important;">
+                ${footerCopy}
+              </p>
+            </div>
+
+            <div class="mail-meta" style="padding-top:14px;text-align:center;color:#8b7555 !important;">
+              <div style="font-size:13px;line-height:1.5;color:#8b7555 !important;">I Parrucchieri, Fossano</div>
+              <div style="font-size:11px;line-height:1.6;color:#8b7555 !important;">Questa e una comunicazione automatica relativa al tuo appuntamento.</div>
+            </div>
           </div>
-
-          <h1 class="mail-title" style="margin:0 0 10px;font-size:30px;line-height:1.2;color:#101010;font-weight:800;">
-            ${title}
-          </h1>
-
-          <p class="mail-copy" style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#1a1a1a;">
-            ${greeting}
-          </p>
-
-          <p class="mail-copy" style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#1a1a1a;">
-            ${intro}
-          </p>
-
-          ${detailsBlock}
-
-          <p class="mail-footer" style="margin:0;font-size:14px;line-height:1.7;color:#3a3126;">
-            ${footerCopy}
-          </p>
         </div>
-
-        <div class="mail-meta" style="padding-top:14px;text-align:center;color:#8b7555;">
-          <div style="font-size:13px;line-height:1.5;">I Parrucchieri, Fossano</div>
-          <div style="font-size:11px;line-height:1.6;">Questa e una comunicazione automatica relativa al tuo appuntamento.</div>
-        </div>
-      </div>
-      </div>
-    </div>
+      </body>
+    </html>
   `;
 }
 
@@ -187,10 +240,10 @@ export async function sendAppointmentReminderEmail(params: AppointmentMailPayloa
 
 export async function sendAppointmentUpdatedEmail(params: AppointmentMailPayload) {
   const html = wrapMailContent(
-    "Il tuo appuntamento e stato aggiornato",
+    "Il tuo appuntamento è stato aggiornato",
     "Appuntamento Modificato",
     `Ciao ${params.cliente.nome} ${params.cliente.cognome},`,
-    `ti confermiamo che il tuo appuntamento presso <strong>I Parrucchieri</strong> e stato aggiornato con i nuovi dettagli qui sotto.`,
+    `ti confermiamo che il tuo appuntamento presso <strong>I Parrucchieri</strong> è stato aggiornato con i nuovi dettagli qui sotto.`,
     buildAppointmentInfoBlock(params),
     "Se la modifica non ti risulta corretta, contattaci appena possibile."
   );
@@ -203,7 +256,7 @@ export async function sendAppointmentCancelledEmail(params: AppointmentMailPaylo
     "Il tuo appuntamento e stato annullato",
     "Appuntamento Eliminato",
     `Ciao ${params.cliente.nome} ${params.cliente.cognome},`,
-    `ti informiamo che il tuo appuntamento presso <strong>I Parrucchieri</strong> e stato annullato.`,
+    `ti informiamo che il tuo appuntamento presso <strong>I Parrucchieri</strong> è stato annullato.`,
     buildAppointmentInfoBlock(params),
     "Se desideri fissare una nuova data, puoi prenotare nuovamente quando preferisci."
   );

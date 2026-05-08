@@ -18,6 +18,19 @@ export interface Prodotto {
   quantita?: number;
 }
 
+export interface CheckoutCustomerData {
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  shippingMethod: string;
+  shippingCost: number;
+  address?: string;
+  city?: string;
+  zip?: string;
+  lockerLabel?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -167,10 +180,15 @@ export class ProdottoService {
     return this.http.post('http://localhost:3000/api/products/update-stock', cartItems);
   }
 
-  completeCheckout(cartItems: Prodotto[], total: number) {
+  completeCheckout(
+    cartItems: Prodotto[],
+    total: number,
+    customer: CheckoutCustomerData
+  ) {
     return this.http.post('http://localhost:3000/api/checkout/complete', {
       cartItems,
-      total
+      total,
+      customer
     });
   }
 }
