@@ -12,6 +12,11 @@ interface Utente {
 }
 
 type ClienteSource = "clienti" | "utenti";
+type ClienteLookup = {
+  source: ClienteSource;
+  idColumn?: string;
+  row?: any;
+};
 
 const router = express.Router();
 
@@ -99,35 +104,89 @@ async function getClientiFromUtentiTable(): Promise<Utente[]> {
 }
 
 async function getClientiWithSource(): Promise<{ clienti: Utente[]; source: ClienteSource }> {
+  let clientiTableRows: Utente[] = [];
+
   try {
-    const clienti = await getClientiFromClientiTable();
-    return { clienti, source: "clienti" };
+    clientiTableRows = await getClientiFromClientiTable();
   } catch (error) {
     if (!isMissingTableError(error)) {
       console.warn("Lettura tabella clienti fallita, provo fallback su utenti:", error);
     }
-
-    const clienti = await getClientiFromUtentiTable();
-    return { clienti, source: "utenti" };
   }
+
+  const utentiRows = await getClientiFromUtentiTable();
+
+  if (clientiTableRows.length === 0) {
+    return { clienti: utentiRows, source: "utenti" };
+  }
+
+  const clientiById = new Map<number, Utente>();
+
+  for (const cliente of [...clientiTableRows, ...utentiRows]) {
+    clientiById.set(cliente.idUtente, cliente);
+  }
+
+  return { clienti: sortClienti([...clientiById.values()]), source: "clienti" };
 }
 
-async function getClientSourceById(id: number): Promise<ClienteSource> {
-  try {
-    const { data, error } = await db
-      .from("clienti")
-      .select("*")
-      .or(`idCliente.eq.${id},idUtente.eq.${id},id.eq.${id}`)
-      .limit(1);
+async function findClienteInClientiTable(id: number): Promise<{ idColumn: string; row: any } | null> {
+  const candidateIdColumns = ["idUtente", "idCliente", "id"];
 
-    if (!error && Array.isArray(data) && data.length > 0) {
-      return "clienti";
+  for (const idColumn of candidateIdColumns) {
+    try {
+      const { data, error } = await db
+        .from("clienti")
+        .select("*")
+        .eq(idColumn, id)
+        .limit(1);
+
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return { idColumn, row: data[0] };
+      }
+    } catch {
+      // Prova la colonna successiva: i database usati nel progetto non hanno tutti la stessa anagrafica clienti.
     }
-  } catch {
-    // fallback silenzioso su utenti
   }
 
-  return "utenti";
+  return null;
+}
+
+async function getClientLookupById(id: number): Promise<ClienteLookup> {
+  const clienteTableMatch = await findClienteInClientiTable(id);
+
+  if (clienteTableMatch) {
+    return {
+      source: "clienti",
+      idColumn: clienteTableMatch.idColumn,
+      row: clienteTableMatch.row
+    };
+  }
+
+  return { source: "utenti" };
+}
+
+function buildClientiUpdatePayload(row: any, values: {
+  nome: string;
+  cognome: string;
+  email: string;
+  telefono: string;
+  data_nascita: string;
+}) {
+  const payload: Record<string, string | null> = {
+    nome: values.nome,
+    cognome: values.cognome,
+    email: values.email
+  };
+
+  if (Object.prototype.hasOwnProperty.call(row, "telefono")) {
+    payload.telefono = values.telefono || null;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(row, "data_nascita")) {
+    payload.data_nascita = values.data_nascita || null;
+  }
+
+  return payload;
 }
 
 router.get("/clienti", async (_req: Request, res: Response) => {
@@ -160,19 +219,19 @@ router.put("/clienti/:id", async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Nome, cognome ed email sono obbligatori" });
     }
 
-    const source = await getClientSourceById(idUtente);
+    const lookup = await getClientLookupById(idUtente);
 
-    if (source === "clienti") {
+    if (lookup.source === "clienti" && lookup.idColumn) {
       const { data, error } = await db
         .from("clienti")
-        .update({
+        .update(buildClientiUpdatePayload(lookup.row, {
           nome,
           cognome,
           email,
-          telefono: telefono || null,
-          data_nascita: data_nascita || null
-        })
-        .or(`idCliente.eq.${idUtente},idUtente.eq.${idUtente},id.eq.${idUtente}`)
+          telefono,
+          data_nascita
+        }))
+        .eq(lookup.idColumn, idUtente)
         .select("*")
         .limit(1);
 
@@ -242,13 +301,13 @@ router.delete("/clienti/:id", async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Cliente non valido" });
     }
 
-    const source = await getClientSourceById(idUtente);
+    const lookup = await getClientLookupById(idUtente);
 
-    if (source === "clienti") {
+    if (lookup.source === "clienti" && lookup.idColumn) {
       const { data, error } = await db
         .from("clienti")
         .delete()
-        .or(`idCliente.eq.${idUtente},idUtente.eq.${idUtente},id.eq.${idUtente}`)
+        .eq(lookup.idColumn, idUtente)
         .select("*")
         .limit(1);
 
@@ -263,6 +322,22 @@ router.delete("/clienti/:id", async (req: Request, res: Response) => {
       return res.json({ message: "Cliente eliminato con successo" });
     }
 
+    const { data: existingCliente, error: existingError } = await db
+      .from("utenti")
+      .select("idUtente, ruolo")
+      .eq("idUtente", idUtente)
+      .maybeSingle();
+
+    if (existingError) {
+      throw existingError;
+    }
+
+    const ruolo = String((existingCliente as any)?.ruolo ?? "").toLowerCase();
+
+    if (!existingCliente || ["operatore", "admin", "salone"].includes(ruolo)) {
+      return res.status(404).json({ message: "Cliente non trovato" });
+    }
+
     const { data, error } = await db
       .from("utenti")
       .delete()
@@ -274,9 +349,7 @@ router.delete("/clienti/:id", async (req: Request, res: Response) => {
       throw error;
     }
 
-    const ruolo = String((data as any)?.ruolo ?? "").toLowerCase();
-
-    if (!data || ["operatore", "admin", "salone"].includes(ruolo)) {
+    if (!data) {
       return res.status(404).json({ message: "Cliente non trovato" });
     }
 

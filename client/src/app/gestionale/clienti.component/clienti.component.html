@@ -26,13 +26,19 @@
         <p class="management-hero__eyebrow">Gestionale</p>
         <h1>Anagrafica clienti</h1>
         <p class="management-hero__copy">
-          Consulta i clienti registrati, aggiorna i loro dati principali e rimuovi le anagrafiche non piu necessarie.
+          Clienti, contatti e modifiche rapide in un pannello ordinato, essenziale e sempre sincronizzato con il database.
         </p>
       </div>
 
-      <div class="management-hero__badge">
-        <span>Totale</span>
-        <strong>{{ clienti.length }}</strong>
+      <div class="management-hero__stats">
+        <div class="management-hero__badge">
+          <span>Clienti</span>
+          <strong>{{ clienti.length }}</strong>
+        </div>
+        <div class="management-hero__badge management-hero__badge--soft">
+          <span>Telefono</span>
+          <strong>{{ clientiConTelefono }}</strong>
+        </div>
       </div>
     </section>
 
@@ -52,12 +58,27 @@
             <p class="customers-card__eyebrow">Database</p>
             <h2>Clienti registrati</h2>
           </div>
-          <button type="button" class="customers-refresh" (click)="loadClienti()" [disabled]="isLoading">
-            {{ isLoading ? 'Caricamento...' : 'Aggiorna' }}
+          <button type="button" class="customers-icon-button" (click)="loadClienti()" [disabled]="isLoading" title="Aggiorna clienti">
+            <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+            <span>{{ isLoading ? 'Carico' : 'Aggiorna' }}</span>
           </button>
         </div>
 
+        <div class="customers-toolbar">
+          <label class="customers-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input
+              [(ngModel)]="searchTerm"
+              name="searchTerm"
+              type="search"
+              placeholder="Cerca per nome, email, telefono o ID"
+            />
+          </label>
+          <span class="customers-count">{{ filteredClienti.length }} risultati</span>
+        </div>
+
         <div *ngIf="isLoading" class="customers-empty-state">
+          <span class="customers-loader" aria-hidden="true"></span>
           Sto caricando i clienti dal database...
         </div>
 
@@ -65,35 +86,56 @@
           Nessun cliente presente nel database.
         </div>
 
-        <div *ngIf="!isLoading && clienti.length > 0" class="customers-table-wrap">
+        <div *ngIf="!isLoading && clienti.length > 0 && filteredClienti.length === 0" class="customers-empty-state">
+          Nessun cliente corrisponde alla ricerca.
+        </div>
+
+        <div *ngIf="!isLoading && filteredClienti.length > 0" class="customers-table-wrap">
           <table class="customers-table">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Cliente</th>
+                <th>Nome</th>
+                <th>Cognome</th>
                 <th>Email</th>
                 <th>Telefono</th>
-                <th>Nascita</th>
+                <th>Data nascita</th>
+                <th>Ruolo</th>
                 <th>Azioni</th>
               </tr>
             </thead>
             <tbody>
               <tr
-                *ngFor="let cliente of clienti"
+                *ngFor="let cliente of filteredClienti"
                 [class.is-selected]="selectedCliente?.idUtente === cliente.idUtente"
               >
-                <td>
-                  <strong>{{ cliente.nome }} {{ cliente.cognome }}</strong>
-                  <span>ID {{ cliente.idUtente }}</span>
-                </td>
-                <td>{{ cliente.email }}</td>
-                <td>{{ cliente.telefono || '-' }}</td>
-                <td>{{ formatDate(cliente.data_nascita) }}</td>
-                <td class="customers-actions">
-                  <button type="button" class="customers-button customers-button--edit" (click)="selectCliente(cliente)">
-                    Modifica
+                <td class="customers-cell-id">#{{ cliente.idUtente }}</td>
+                <td class="customers-cell-primary">
+                  <button type="button" class="customers-person" (click)="selectCliente(cliente)">
+                    <span class="customers-avatar">{{ getInitials(cliente) }}</span>
+                    <span>
+                      <strong>{{ cliente.nome }} {{ cliente.cognome }}</strong>
+                      <small>{{ cliente.email }}</small>
+                    </span>
                   </button>
-                  <button type="button" class="customers-button customers-button--delete" (click)="deleteCliente(cliente)" [disabled]="isDeleting">
-                    Elimina
+                </td>
+                <td>{{ cliente.nome || '-' }}</td>
+                <td>{{ cliente.cognome || '-' }}</td>
+                <td class="customers-cell-email">{{ cliente.email || '-' }}</td>
+                <td class="customers-cell-phone">{{ cliente.telefono || 'Non inserito' }}</td>
+                <td class="customers-cell-date">{{ formatDate(cliente.data_nascita) }}</td>
+                <td>
+                  <span class="customers-role-badge">{{ cliente.ruolo || 'cliente' }}</span>
+                </td>
+                <td class="customers-actions">
+                  <button type="button" class="customers-action-button" (click)="selectCliente(cliente)" title="Modifica cliente">
+                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                    <span>Modifica</span>
+                  </button>
+                  <button type="button" class="customers-action-button customers-action-button--delete" (click)="requestDeleteCliente(cliente)" [disabled]="isDeleting" title="Elimina cliente">
+                    <i class="bi bi-trash3" aria-hidden="true"></i>
+                    <span>Elimina</span>
                   </button>
                 </td>
               </tr>
@@ -102,22 +144,32 @@
         </div>
       </article>
 
-      <article class="customers-card customers-card--editor">
+      <article class="customers-card customers-card--editor" id="modifica-cliente">
         <div class="customers-card__head">
           <div>
             <p class="customers-card__eyebrow">Dettaglio</p>
-            <h2>{{ selectedCliente ? 'Modifica cliente' : 'Seleziona un cliente' }}</h2>
+            <h2>{{ selectedCliente ? 'Modifica cliente selezionato' : 'Seleziona un cliente da modificare' }}</h2>
           </div>
-          <button *ngIf="selectedCliente" type="button" class="customers-refresh" (click)="clearSelection()">
-            Chiudi
+          <button *ngIf="selectedCliente" type="button" class="customers-icon-button customers-icon-button--ghost" (click)="clearSelection()" title="Chiudi dettaglio">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+            <span>Chiudi</span>
           </button>
         </div>
 
         <div *ngIf="!selectedCliente || !draftCliente" class="customers-empty-state customers-empty-state--editor">
+          <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
           Seleziona un cliente dalla tabella per modificare nome, cognome, email, telefono e data di nascita.
         </div>
 
         <form *ngIf="selectedCliente && draftCliente" class="customers-form" (ngSubmit)="saveCliente()">
+          <div class="customers-editor-profile">
+            <span class="customers-avatar customers-avatar--large">{{ getInitials(draftCliente) }}</span>
+            <div>
+              <strong>{{ selectedCliente.nome }} {{ selectedCliente.cognome }}</strong>
+              <span>{{ selectedCliente.email }}</span>
+            </div>
+          </div>
+
           <div class="customers-form__grid">
             <label class="customers-field">
               <span>Nome</span>
@@ -135,31 +187,68 @@
             </label>
 
             <label class="customers-field">
-              <span>Telefono</span>
-              <input [(ngModel)]="draftCliente.telefono" name="telefono" type="text" />
+              <span>Numero telefono</span>
+              <input [(ngModel)]="draftCliente.telefono" name="telefono" type="tel" placeholder="+39 ..." />
             </label>
 
             <label class="customers-field">
               <span>Data di nascita</span>
               <input [(ngModel)]="draftCliente.data_nascita" name="data_nascita" type="date" />
             </label>
+
+            <label class="customers-field">
+              <span>Ruolo</span>
+              <input [ngModel]="draftCliente.ruolo || 'cliente'" name="ruolo" type="text" readonly />
+            </label>
           </div>
 
           <div class="customers-editor-meta">
-            <span>Ruolo: {{ draftCliente.ruolo || 'cliente' }}</span>
-            <span>ID cliente: {{ draftCliente.idUtente }}</span>
+            <div class="customers-meta-chip">
+              <span>Ruolo</span>
+              <strong>{{ draftCliente.ruolo || 'cliente' }}</strong>
+            </div>
+            <div class="customers-meta-chip">
+              <span>ID cliente</span>
+              <strong>{{ draftCliente.idUtente }}</strong>
+            </div>
           </div>
 
           <div class="customers-editor-actions">
-            <button type="submit" class="customers-button customers-button--save" [disabled]="isSaving">
+            <button type="submit" class="customers-button customers-button--save" [disabled]="isSaving || !hasDraftChanges">
+              <i class="bi bi-check2" aria-hidden="true"></i>
               {{ isSaving ? 'Salvataggio...' : 'Salva modifiche' }}
             </button>
             <button type="button" class="customers-button customers-button--ghost" (click)="selectCliente(selectedCliente)">
+              <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
               Ripristina
+            </button>
+            <button type="button" class="customers-button customers-button--delete customers-button--danger-inline" (click)="requestDeleteCliente(selectedCliente)" [disabled]="isDeleting">
+              <i class="bi bi-trash3" aria-hidden="true"></i>
+              Elimina
             </button>
           </div>
         </form>
       </article>
     </section>
   </main>
+
+  <div *ngIf="pendingDeleteCliente" class="customers-modal" role="dialog" aria-modal="true" aria-labelledby="deleteClienteTitle">
+    <div class="customers-modal__panel">
+      <div class="customers-modal__icon">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+      </div>
+      <h2 id="deleteClienteTitle">Eliminare questo cliente?</h2>
+      <p>
+        {{ pendingDeleteCliente.nome }} {{ pendingDeleteCliente.cognome }} verra rimosso dal database. L'operazione non puo essere annullata.
+      </p>
+      <div class="customers-modal__actions">
+        <button type="button" class="customers-button customers-button--ghost" (click)="cancelDeleteCliente()" [disabled]="isDeleting">
+          Annulla
+        </button>
+        <button type="button" class="customers-button customers-button--delete customers-button--confirm-delete" (click)="confirmDeleteCliente()" [disabled]="isDeleting">
+          {{ isDeleting ? 'Eliminazione...' : 'Elimina cliente' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1076,3 +1076,227 @@
   background: rgba(212, 176, 106, 0.45);
   border-radius: 999px;
 }
+
+/* Minimal management skin aligned with clienti */
+:host {
+  background: linear-gradient(180deg, #17120d 0%, #100c09 56%, #0b0907 100%) !important;
+}
+
+.management-layout__toggle {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 8px !important;
+  background: rgba(18, 14, 11, 0.88) !important;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22) !important;
+  transition: left 0.28s ease, border-color 0.18s ease, transform 0.18s ease !important;
+}
+
+.management-layout__toggle:hover {
+  border-color: rgba(242, 209, 139, 0.52) !important;
+  background: rgba(18, 14, 11, 0.88) !important;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22) !important;
+}
+
+.management-layout__toggle-shell {
+  transition: transform 0.28s ease !important;
+}
+
+.management-layout__toggle-pane--rail {
+  background: linear-gradient(180deg, #f2d18b, #be8640) !important;
+}
+
+.management-layout__content {
+  transition: margin-left 0.34s ease, padding-left 0.28s ease !important;
+}
+
+.appointments-section.management-appointments-section {
+  padding-top: 0 !important;
+}
+
+.management-appointments-section .appointments-top-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.36fr) !important;
+  align-items: stretch !important;
+  gap: 18px !important;
+  margin-bottom: 18px !important;
+}
+
+.management-appointments-section .appointments-hero,
+.management-appointments-section .appointments-select-wrapper,
+.management-appointments-section .calendar-wrapper {
+  border: 1px solid rgba(212, 176, 106, 0.14) !important;
+  border-radius: 8px !important;
+  background: rgba(23, 18, 13, 0.78) !important;
+  box-shadow: 0 22px 40px rgba(0, 0, 0, 0.18) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.management-appointments-section .appointments-hero {
+  padding: 28px !important;
+}
+
+.management-appointments-section .appointments-select-wrapper {
+  padding: 22px !important;
+}
+
+.management-appointments-section .appointments-select-wrapper::before {
+  display: none !important;
+}
+
+.management-appointments-section .appointments-eyebrow,
+.management-appointments-section .appointments-select-wrapper label,
+.appointment-detail-kicker {
+  margin: 0 0 8px !important;
+  color: rgba(255, 226, 175, 0.72) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+}
+
+.management-appointments-section .appointments-title {
+  margin: 0 !important;
+  color: #f8f1e7 !important;
+  font-size: clamp(2rem, 2.7vw, 2.85rem) !important;
+  line-height: 1.04 !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+}
+
+.management-appointments-section .appointments-subtitle {
+  max-width: 780px !important;
+  margin: 14px 0 0 !important;
+  color: rgba(248, 241, 231, 0.72) !important;
+  font-size: 15px !important;
+  line-height: 1.75 !important;
+}
+
+.management-appointments-section .booking-dropdown-trigger {
+  min-height: 68px !important;
+  padding: 14px 16px !important;
+  border-radius: 8px !important;
+  border-color: rgba(212, 176, 106, 0.24) !important;
+  background: rgba(10, 8, 6, 0.5) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.management-appointments-section .booking-dropdown-trigger:hover,
+.management-appointments-section .booking-dropdown-trigger.open {
+  border-color: rgba(242, 209, 139, 0.5) !important;
+}
+
+.management-appointments-section .booking-trigger-kicker {
+  color: rgba(255, 226, 175, 0.72) !important;
+  letter-spacing: 0.12em !important;
+}
+
+.management-appointments-section .booking-trigger-value {
+  color: #fff7e8 !important;
+  font-weight: 800 !important;
+}
+
+.management-appointments-section .booking-dropdown-panel {
+  border-radius: 8px !important;
+  background: #18120d !important;
+}
+
+.management-appointments-section .booking-dropdown-list li {
+  border-radius: 8px !important;
+}
+
+.management-appointments-section .calendar-wrapper {
+  padding: 22px !important;
+}
+
+.appointments-calendar-meta {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-bottom: 16px !important;
+}
+
+.appointments-calendar-meta-item {
+  padding: 12px 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.appointments-calendar-operator-label {
+  display: block !important;
+  margin-bottom: 5px !important;
+  color: rgba(255, 226, 175, 0.66) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+.appointments-calendar-operator-value {
+  color: #fff4df !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+}
+
+:host ::ng-deep .fc {
+  --fc-border-color: rgba(255, 255, 255, 0.1) !important;
+  --fc-today-bg-color: rgba(212, 176, 106, 0.09) !important;
+}
+
+:host ::ng-deep .fc .fc-toolbar-title {
+  color: #fff7e8 !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+}
+
+:host ::ng-deep .fc .fc-button {
+  border-radius: 8px !important;
+  border-color: rgba(212, 176, 106, 0.24) !important;
+  background: rgba(18, 14, 11, 0.76) !important;
+  color: #fff2d4 !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active,
+:host ::ng-deep .fc .fc-button-primary:not(:disabled):active,
+:host ::ng-deep .fc .fc-button:hover {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #f2d18b, #be8640) !important;
+  color: #2b1c0f !important;
+}
+
+.appointment-detail-modal {
+  z-index: 80 !important;
+  background: rgba(5, 4, 3, 0.62) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.appointment-detail-card,
+.appointment-detail-modal.is-closing .appointment-detail-card,
+.appointment-detail-card.tone-my,
+.appointment-detail-card.tone-past {
+  border-radius: 8px !important;
+  border-color: rgba(212, 176, 106, 0.2) !important;
+  background: #18120d !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.44) !important;
+}
+
+.appointment-detail-close,
+.appointment-detail-row {
+  border-radius: 8px !important;
+}
+
+.appointment-detail-title {
+  color: #fff7e8 !important;
+  font-weight: 800 !important;
+}
+
+@media (max-width: 980px) {
+  .management-appointments-section .appointments-top-row,
+  .appointments-calendar-meta {
+    grid-template-columns: 1fr !important;
+  }
+}

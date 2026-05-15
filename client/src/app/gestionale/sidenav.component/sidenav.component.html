@@ -30,8 +30,10 @@
         [attr.title]="isCollapsed ? item.label : null"
       >
         <div class="management-sidenav__link-copy">
+          <span class="management-sidenav__link-monogram">{{ item.label.slice(0, 2) }}</span>
           <div class="management-sidenav__link-head">
             <span>{{ item.label }}</span>
+            <small *ngIf="item.badge">{{ item.badge }}</small>
           </div>
           <p>{{ item.description }}</p>
         </div>
@@ -40,9 +42,9 @@
   </nav>
 
   <div class="management-sidenav__footer">
-    <p class="management-sidenav__footer-title">Prossimo step</p>
+    <p class="management-sidenav__footer-title">Area staff</p>
     <p class="management-sidenav__footer-copy">
-      Collegare ogni voce a una pagina reale del gestionale e definire i permessi per ruolo.
+      Gestione operativa del salone.
     </p>
   </div>
 </aside>

@@ -21,12 +21,125 @@
   </div>
 
   <main class="management-layout__content">
-    <section class="management-page">
-      <p class="management-page__eyebrow">Gestionale</p>
-      <h1>Cassa</h1>
-      <p class="management-page__copy">
-        Modulo pronto per ospitare scontrino, pagamenti e chiusura giornaliera con la stessa shell della home.
-      </p>
+    <section class="management-hero">
+      <div>
+        <p class="management-hero__eyebrow">Gestionale</p>
+        <h1>Cassa</h1>
+        <p class="management-hero__copy">
+          Riepilogo vendita, pagamenti e chiusura giornaliera in una schermata semplice da usare al banco.
+        </p>
+      </div>
+
+      <div class="management-hero__stats">
+        <div class="management-hero__badge">
+          <span>Sessione</span>
+          <strong>Aperta</strong>
+        </div>
+        <div class="management-hero__badge management-hero__badge--soft">
+          <span>Totale</span>
+          <strong>€ 0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="cash-stats">
+      <article class="cash-stat-card">
+        <span>Incasso oggi</span>
+        <strong>€ 0,00</strong>
+        <small>In attesa di movimenti</small>
+      </article>
+      <article class="cash-stat-card">
+        <span>Scontrini</span>
+        <strong>0</strong>
+        <small>Vendite registrate</small>
+      </article>
+      <article class="cash-stat-card">
+        <span>Pagamento</span>
+        <strong>Non selezionato</strong>
+        <small>Contanti, carta o misto</small>
+      </article>
+    </section>
+
+    <section class="cash-layout">
+      <article class="cash-card cash-card--receipt">
+        <div class="cash-card__head">
+          <div>
+            <p class="cash-card__eyebrow">Scontrino</p>
+            <h2>Vendita corrente</h2>
+          </div>
+          <button type="button" class="cash-icon-button" title="Nuova vendita">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            <span>Nuova</span>
+          </button>
+        </div>
+
+        <div class="cash-empty-receipt">
+          <i class="bi bi-receipt" aria-hidden="true"></i>
+          <strong>Nessun articolo inserito</strong>
+          <span>Aggiungi servizi o prodotti per comporre lo scontrino.</span>
+        </div>
+
+        <div class="cash-total-box">
+          <div>
+            <span>Subtotale</span>
+            <strong>€ 0,00</strong>
+          </div>
+          <div>
+            <span>Sconto</span>
+            <strong>€ 0,00</strong>
+          </div>
+          <div class="cash-total-box__grand">
+            <span>Totale</span>
+            <strong>€ 0,00</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="cash-card">
+        <div class="cash-card__head">
+          <div>
+            <p class="cash-card__eyebrow">Pagamento</p>
+            <h2>Metodo e chiusura</h2>
+          </div>
+        </div>
+
+        <div class="cash-methods" aria-label="Metodi di pagamento">
+          <button type="button" class="cash-method is-active">
+            <i class="bi bi-credit-card" aria-hidden="true"></i>
+            Carta
+          </button>
+          <button type="button" class="cash-method">
+            <i class="bi bi-cash" aria-hidden="true"></i>
+            Contanti
+          </button>
+          <button type="button" class="cash-method">
+            <i class="bi bi-shuffle" aria-hidden="true"></i>
+            Misto
+          </button>
+        </div>
+
+        <div class="cash-field-grid">
+          <label class="cash-field">
+            <span>Cliente</span>
+            <input type="text" placeholder="Seleziona cliente" />
+          </label>
+          <label class="cash-field">
+            <span>Operatore</span>
+            <input type="text" placeholder="Seleziona operatore" />
+          </label>
+        </div>
+
+        <div class="cash-actions">
+          <button type="button" class="cash-button cash-button--primary">
+            <i class="bi bi-check2" aria-hidden="true"></i>
+            Registra pagamento
+          </button>
+          <button type="button" class="cash-button cash-button--ghost">
+            <i class="bi bi-printer" aria-hidden="true"></i>
+            Stampa
+          </button>
+        </div>
+      </article>
     </section>
   </main>
 </div>

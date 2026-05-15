@@ -13,19 +13,27 @@ export class UtentiService {
   constructor(private http: HttpClient) {}
   private api = 'http://localhost:3000/api/utenti';
 
+  private normalizeUtentiResponse(response: Utente[] | { clienti?: Utente[]; operatori?: Utente[] }): Utente[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    return response.clienti ?? response.operatori ?? [];
+  }
+
   getOperatori(): Observable<Utente[]> {
-    return this.http.get<{ operatori: Utente[] }>(
+    return this.http.get<Utente[] | { operatori: Utente[] }>(
       `${this.api}/operatori`
     ).pipe(
-      map(res => res.operatori)
+      map((res) => this.normalizeUtentiResponse(res))
     );
   }
 
   getClienti(): Observable<Utente[]> {
-    return this.http.get<{ clienti: Utente[] }>(
+    return this.http.get<Utente[] | { clienti: Utente[] }>(
       `${this.api}/clienti`
     ).pipe(
-      map(res => res.clienti)
+      map((res) => this.normalizeUtentiResponse(res))
     );
   }
 

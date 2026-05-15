@@ -2,9 +2,7 @@
   display: block;
   height: 100vh;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top right, rgba(212, 176, 106, 0.1), transparent 22%),
-    linear-gradient(180deg, #17120d, #0f0c09 58%, #0b0907);
+  background: linear-gradient(180deg, #17120d 0%, #100c09 56%, #0b0907 100%);
 }
 
 .management-layout {
@@ -18,36 +16,21 @@
   top: 22px;
   left: 22px;
   z-index: 40;
-  width: 54px;
-  height: 54px;
-  border: 1px solid rgba(212, 176, 106, 0.26);
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
-    rgba(18, 14, 11, 0.82);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 18px 30px rgba(0, 0, 0, 0.24);
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(212, 176, 106, 0.28);
+  border-radius: 8px;
+  background: rgba(18, 14, 11, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22);
   cursor: pointer;
-  transition:
-    left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.22s ease,
-    border-color 0.22s ease,
-    transform 0.22s ease,
-    box-shadow 0.22s ease;
+  transition: left 0.28s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
 .management-layout__toggle:hover {
   transform: translateY(-1px);
-  border-color: rgba(212, 176, 106, 0.42);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04)),
-    rgba(22, 18, 14, 0.88);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 22px 34px rgba(0, 0, 0, 0.28);
+  border-color: rgba(242, 209, 139, 0.52);
 }
 
 .management-layout__toggle-shell {
@@ -57,7 +40,7 @@
   grid-template-columns: 6px 1fr;
   gap: 4px;
   align-items: stretch;
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.28s ease;
 }
 
 .management-layout__toggle.is-collapsed .management-layout__toggle-shell {
@@ -70,11 +53,11 @@
 }
 
 .management-layout__toggle-pane--rail {
-  background: linear-gradient(180deg, rgba(242, 209, 139, 0.98), rgba(199, 146, 61, 0.92));
+  background: linear-gradient(180deg, #f2d18b, #be8640);
 }
 
 .management-layout__toggle-pane--body {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .management-layout__sidebar {
@@ -84,20 +67,14 @@
   height: 100vh;
   min-height: 0;
   z-index: 30;
-  transition:
-    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.24s ease,
-    visibility 0s linear 0s;
+  transition: transform 0.34s ease, opacity 0.24s ease, visibility 0s linear 0s;
 }
 
 .management-layout.is-sidenav-collapsed .management-layout__sidebar {
   transform: translateX(calc(-100% - 20px));
   opacity: 0;
   visibility: hidden;
-  transition:
-    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.2s ease,
-    visibility 0s linear 0.2s;
+  transition: transform 0.34s ease, opacity 0.2s ease, visibility 0s linear 0.2s;
 }
 
 .management-layout:not(.is-sidenav-collapsed) .management-layout__toggle {
@@ -113,7 +90,7 @@
   color: #f8f1e7;
   scrollbar-width: thin;
   scrollbar-color: rgba(212, 176, 106, 0.34) transparent;
-  transition: margin-left 0.34s cubic-bezier(0.22, 1, 0.36, 1), padding-left 0.28s ease;
+  transition: margin-left 0.34s ease, padding-left 0.28s ease;
 }
 
 .management-layout.is-sidenav-collapsed .management-layout__content {
@@ -130,110 +107,119 @@
   background: rgba(212, 176, 106, 0.34);
 }
 
+.management-hero,
+.management-stat-card,
+.management-panel,
+.management-focus-card {
+  border: 1px solid rgba(212, 176, 106, 0.14);
+  border-radius: 8px;
+  background: rgba(23, 18, 13, 0.78);
+  box-shadow: 0 22px 40px rgba(0, 0, 0, 0.18);
+}
+
 .management-hero {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  padding: 30px;
-  border-radius: 30px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(212, 176, 106, 0.03));
-  border: 1px solid rgba(212, 176, 106, 0.12);
-  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.18);
+  gap: 24px;
+  padding: 28px;
 }
 
 .management-hero__eyebrow,
 .management-panel__head span {
-  margin: 0 0 10px;
+  display: block;
+  margin: 0 0 8px;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 226, 175, 0.7);
+  color: rgba(255, 226, 175, 0.72);
 }
 
 .management-hero h1,
 .management-panel__head h2 {
   margin: 0;
+  letter-spacing: 0;
 }
 
 .management-hero h1 {
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1;
+  font-size: clamp(2rem, 2.7vw, 2.85rem);
+  line-height: 1.04;
+  font-weight: 800;
 }
 
 .management-hero__copy {
-  max-width: 760px;
+  max-width: 780px;
   margin: 14px 0 0;
   color: rgba(248, 241, 231, 0.72);
   font-size: 15px;
-  line-height: 1.8;
+  line-height: 1.75;
+}
+
+.management-hero__stats {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 
 .management-hero__badge {
-  min-width: 132px;
-  padding: 16px 18px;
-  border-radius: 22px;
+  min-width: 120px;
+  padding: 15px 16px;
+  border-radius: 8px;
   text-align: right;
   background: linear-gradient(135deg, #f2d18b, #be8640);
   color: #2b1c0f;
-  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
+}
+
+.management-hero__badge--soft {
+  border: 1px solid rgba(242, 209, 139, 0.24);
+  background: rgba(255, 255, 255, 0.055);
+  color: #fff0cd;
 }
 
 .management-hero__badge span {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .management-hero__badge strong {
   font-size: 24px;
+  line-height: 1;
 }
 
 .management-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 22px;
-}
-
-.management-stat-card,
-.management-panel,
-.management-focus-card {
-  border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.03), rgba(212, 176, 106, 0.025));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.16);
+  gap: 14px;
+  margin-top: 18px;
 }
 
 .management-stat-card {
-  padding: 22px;
+  padding: 20px;
 }
 
 .management-stat-card p,
 .management-stat-card span,
 .management-focus-card p,
 .management-checklist li {
-  color: rgba(248, 241, 231, 0.7);
+  color: rgba(248, 241, 231, 0.68);
 }
 
 .management-stat-card p {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-size: 13px;
 }
 
 .management-stat-card strong {
   display: block;
-  margin-bottom: 10px;
-  font-size: 30px;
+  margin-bottom: 8px;
   color: #fff7e8;
+  font-size: 28px;
+  line-height: 1.1;
 }
 
 .management-stat-card span {
@@ -242,47 +228,55 @@
 
 .management-panels {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.8fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.8fr);
   gap: 18px;
-  margin-top: 22px;
+  margin-top: 18px;
 }
 
 .management-panel {
-  padding: 26px;
+  padding: 22px;
 }
 
 .management-focus-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 18px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .management-focus-card {
-  padding: 22px;
-  min-height: 180px;
+  min-height: 164px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: none;
 }
 
 .management-focus-card h3 {
   margin: 0 0 10px;
-  font-size: 18px;
   color: #fff7e8;
+  font-size: 17px;
 }
 
 .management-focus-card p {
   margin: 0;
   font-size: 14px;
-  line-height: 1.75;
+  line-height: 1.7;
 }
 
 .management-checklist {
-  margin: 18px 0 0;
-  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
 .management-checklist li {
-  margin-bottom: 12px;
-  line-height: 1.65;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  line-height: 1.5;
 }
 
 @media (max-width: 1200px) {
@@ -340,14 +334,23 @@
 }
 
 @media (max-width: 640px) {
-  .management-hero {
+  .management-hero,
+  .management-hero__stats {
     flex-direction: column;
-    padding: 22px;
+  }
+
+  .management-hero,
+  .management-panel,
+  .management-stat-card {
+    padding: 18px;
+  }
+
+  .management-hero__stats,
+  .management-hero__badge {
+    width: 100%;
   }
 
   .management-hero__badge {
-    min-width: 0;
-    width: 100%;
     text-align: left;
   }
 
