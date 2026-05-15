@@ -41,6 +41,14 @@ function isAppointmentConflictError(error: any): boolean {
   return typeof error?.message === "string" && /operator_unavailable/i.test(error.message);
 }
 
+function isMissingRpcError(error: any): boolean {
+  return error?.code === "PGRST202" ||
+    (
+      typeof error?.message === "string" &&
+      /Could not find the function .*appuntamento_sicuro/i.test(error.message)
+    );
+}
+
 function startOfDay(date: Date): Date {
   const value = new Date(date);
   value.setHours(0, 0, 0, 0);
@@ -114,6 +122,89 @@ async function buildAppointmentMailPayload(appointment: Appuntamento): Promise<A
     servizio,
     dataOraInizio: appointment.dataOraInizio,
     dataOraFine: appointment.dataOraFine
+  };
+}
+
+async function createAppointmentFallback(payload: {
+  idCliente: number;
+  idOperatore: number;
+  idServizio?: number | null;
+  dataOraInizio: string;
+  dataOraFine: string;
+  stato?: string | null;
+  note?: string | null;
+}): Promise<Appuntamento | null> {
+  const start = new Date(payload.dataOraInizio);
+  const end = new Date(payload.dataOraFine);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    throw new Error("Date appuntamento non valide");
+  }
+
+  const minimumEnd = new Date(start);
+  minimumEnd.setMinutes(minimumEnd.getMinutes() + 30);
+  const guardedEnd = end < minimumEnd ? minimumEnd : end;
+
+  const { data: overlappingAppointments, error: overlapError } = await db
+    .from("appuntamenti")
+    .select("idAppuntamento, dataOraInizio, dataOraFine")
+    .eq("idOperatore", payload.idOperatore)
+    .lt("dataOraInizio", guardedEnd.toISOString())
+    .gt("dataOraFine", payload.dataOraInizio);
+
+  if (overlapError) {
+    throw overlapError;
+  }
+
+  if ((overlappingAppointments || []).length > 0) {
+    return null;
+  }
+
+  const { data: createdAppointment, error: appointmentError } = await db
+    .from("appuntamenti")
+    .insert({
+      idCliente: payload.idCliente,
+      idOperatore: payload.idOperatore,
+      dataOraInizio: payload.dataOraInizio,
+      dataOraFine: payload.dataOraFine,
+      stato: payload.stato || "prenotato",
+      note: payload.note || null
+    })
+    .select("idAppuntamento, idCliente, idOperatore, dataOraInizio, dataOraFine, stato, note")
+    .single();
+
+  if (appointmentError) {
+    throw appointmentError;
+  }
+
+  const appointment = createdAppointment as Appuntamento | null;
+
+  if (!appointment) {
+    return null;
+  }
+
+  if (payload.idServizio) {
+    const { error: relationError } = await db
+      .from("appuntamentiservizi")
+      .insert({
+        idAppuntamento: appointment.idAppuntamento,
+        idServizio: payload.idServizio
+      });
+
+    if (relationError) {
+      await db
+        .from("appuntamenti")
+        .delete()
+        .eq("idAppuntamento", appointment.idAppuntamento);
+
+      throw relationError;
+    }
+  }
+
+  return {
+    ...appointment,
+    idServizio: payload.idServizio ?? null,
+    servizioNome: payload.note ?? null
   };
 }
 
@@ -297,7 +388,7 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
     }
 
     const normalizedEndDateTime = normalizeEndDateTime(dataOraInizio, dataOraFine);
-    const { data, error: createAppointmentError } = await db
+    let { data, error: createAppointmentError } = await db
       .rpc("create_appuntamento_sicuro", {
         p_id_cliente: idCliente,
         p_id_operatore: idOperatore,
@@ -308,6 +399,25 @@ router.post("/", verifyToken, async (req: any, res: Response) => {
         p_note: note || null
       })
       .single();
+
+    if (createAppointmentError) {
+      if (isMissingRpcError(createAppointmentError)) {
+        console.warn(
+          "Funzione create_appuntamento_sicuro non disponibile: uso fallback applicativo."
+        );
+
+        data = await createAppointmentFallback({
+          idCliente,
+          idOperatore,
+          idServizio: idServizio || null,
+          dataOraInizio,
+          dataOraFine: normalizedEndDateTime,
+          stato: stato || "prenotato",
+          note: note || null
+        });
+        createAppointmentError = null;
+      }
+    }
 
     if (createAppointmentError) {
       if (isAppointmentConflictError(createAppointmentError)) {

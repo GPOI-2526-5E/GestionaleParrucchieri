@@ -89,16 +89,32 @@
 
               <div class="booking-dropdown-panel" [class.open]="isClienteOpen">
                 <div class="booking-dropdown-panel-inner">
+                  <div class="booking-dropdown-search">
+                    <input
+                      type="text"
+                      name="clienteSearch"
+                      [(ngModel)]="clienteSearchTerm"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="Scrivi nome, cognome o email"
+                      autocomplete="off"
+                      [disabled]="isSubmitting"
+                    />
+                  </div>
                   <ul class="booking-dropdown-list" role="listbox" aria-label="Seleziona cliente">
                     <li
-                      *ngFor="let cliente of clienti"
+                      *ngFor="let cliente of filteredClienti"
                       (click)="selectCliente(cliente.idUtente)"
                       [class.active]="form.idCliente === cliente.idUtente"
                     >
                       {{ cliente.nome }} {{ cliente.cognome }}
+                      <span class="booking-dropdown-option-meta">{{ cliente.email }}</span>
                     </li>
-                    <li *ngIf="clienti.length === 0" class="booking-dropdown-empty">
-                      Nessun cliente disponibile
+                    <li *ngIf="filteredClienti.length === 0" class="booking-dropdown-empty">
+                      {{
+                        clienti.length === 0
+                          ? 'Nessun cliente disponibile'
+                          : 'Nessun cliente trovato'
+                      }}
                     </li>
                   </ul>
                 </div>

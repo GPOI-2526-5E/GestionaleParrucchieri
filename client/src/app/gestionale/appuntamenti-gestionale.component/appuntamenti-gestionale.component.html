@@ -92,6 +92,21 @@
         </div>
 
         <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+
+        <div
+          *ngIf="isCalendarDatePickerOpen"
+          class="management-calendar-date-popover"
+          (click)="$event.stopPropagation()"
+        >
+          <label for="managementCalendarDate">Vai alla data</label>
+          <input
+            id="managementCalendarDate"
+            type="date"
+            [(ngModel)]="calendarPickerDate"
+            (change)="goToCalendarPickerDate()"
+            (keydown.enter)="goToCalendarPickerDate()"
+          />
+        </div>
       </div>
     </section>
   </main>
@@ -159,16 +174,6 @@
       <div class="appointment-detail-row">
         <span class="appointment-detail-label">Stato</span>
         <strong class="appointment-detail-value">{{ selectedAppointment.stato || 'prenotato' }}</strong>
-      </div>
-
-      <div class="appointment-detail-row">
-        <span class="appointment-detail-label">ID appuntamento</span>
-        <strong class="appointment-detail-value">#{{ selectedAppointment.idAppuntamento }}</strong>
-      </div>
-
-      <div class="appointment-detail-row">
-        <span class="appointment-detail-label">ID servizio</span>
-        <strong class="appointment-detail-value">{{ selectedAppointment.idServizio || 'Non indicato' }}</strong>
       </div>
 
       <div class="appointment-detail-row appointment-detail-row--wide">

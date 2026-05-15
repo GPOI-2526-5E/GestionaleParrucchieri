@@ -46,12 +46,14 @@ export class PrenotaAppuntamentoComponent implements OnInit {
   isLoadingData = true;
   isSubmitting = false;
   serviceSearchTerm = '';
+  clienteSearchTerm = '';
   isOperatoreOpen = false;
   isServizioOpen = false;
   isClienteOpen = false;
   isManagementBooking = false;
   returnRoute = '/appointments';
   private selectedServizioFromQuery: number | null = null;
+  private hasLoadedManagementClienti = false;
   private readonly minimumAppointmentDurationMinutes = 30;
   private readonly openingSchedule: Record<number, DailySchedule> = {
     0: { name: 'Domenica', intervals: [] },
@@ -100,6 +102,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       this.isManagementBooking = params.get('gestionale') === '1';
       this.returnRoute = params.get('ritorno') || (this.isManagementBooking ? '/gestionale/appuntamenti' : '/appointments');
 
+      if (this.isManagementBooking) {
+        this.loadManagementClienti();
+      }
+
       if (selectedDate) {
         this.form.dataOraInizio = this.toDateTimeLocalValue(selectedDate);
       }
@@ -140,18 +146,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       error: (err) => console.error(err)
     });
 
-    if (this.isManagementBooking) {
-      this.utentiService.getClienti().subscribe({
-        next: (clienti) => {
-          this.clienti = clienti;
-          if (!this.form.idCliente && clienti.length > 0) {
-            this.form.idCliente = clienti[0].idUtente;
-          }
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error(err)
-      });
-    }
+    this.loadManagementClienti();
   }
 
   onOperatoreChange(): void {
@@ -180,7 +175,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     if (this.isClienteOpen) {
       this.isOperatoreOpen = false;
       this.isServizioOpen = false;
+      return;
     }
+
+    this.resetClienteSearchTerm();
   }
 
   toggleServizioDropdown(): void {
@@ -250,6 +248,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
     this.form.idCliente = idCliente;
     this.isClienteOpen = false;
+    this.resetClienteSearchTerm();
   }
 
   selectServizio(idServizio: number): void {
@@ -303,6 +302,24 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     return this.servizi.filter((servizio) =>
       servizio.nome.toLowerCase().startsWith(search)
     );
+  }
+
+  get filteredClienti(): Utente[] {
+    const search = this.normalizeSearchTerm(this.clienteSearchTerm);
+
+    if (!search) {
+      return this.clienti;
+    }
+
+    return this.clienti.filter((cliente) => {
+      const nomeCompleto = this.normalizeSearchTerm(`${cliente.nome} ${cliente.cognome}`);
+      const cognomeNome = this.normalizeSearchTerm(`${cliente.cognome} ${cliente.nome}`);
+      const email = this.normalizeSearchTerm(cliente.email ?? '');
+
+      return nomeCompleto.includes(search) ||
+        cognomeNome.includes(search) ||
+        email.includes(search);
+    });
   }
 
   get servizioTriggerLabel(): string {
@@ -370,6 +387,7 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       this.isServizioOpen = false;
       this.isClienteOpen = false;
       this.resetServiceSearchTerm();
+      this.resetClienteSearchTerm();
     }
   }
 
@@ -406,20 +424,10 @@ export class PrenotaAppuntamentoComponent implements OnInit {
       return;
     }
 
-    const token = this.authService.getToken();
-    const payloadBase64 = token?.split('.')[1];
-
-    if (!payloadBase64) {
-      this.showBookingAlert(
-        'Sessione non valida. Effettua di nuovo il login.',
-        'error',
-        'Login richiesto'
-      );
-      return;
-    }
-
-    const decodedPayload = JSON.parse(atob(payloadBase64)) as { userId?: number };
-    const idCliente = this.isManagementBooking ? this.form.idCliente : decodedPayload.userId;
+    const decodedPayload = this.isManagementBooking
+      ? null
+      : this.decodeTokenPayload<{ userId?: number }>();
+    const idCliente = this.isManagementBooking ? this.form.idCliente : decodedPayload?.userId;
     const note = this.getSelectedServizioNome();
 
     if (!idCliente) {
@@ -690,6 +698,28 @@ export class PrenotaAppuntamentoComponent implements OnInit {
     });
   }
 
+  private loadManagementClienti(): void {
+    if (!this.isManagementBooking || this.hasLoadedManagementClienti) {
+      return;
+    }
+
+    this.hasLoadedManagementClienti = true;
+
+    this.utentiService.getClienti().subscribe({
+      next: (clienti) => {
+        this.clienti = clienti;
+        if (!this.form.idCliente && clienti.length > 0) {
+          this.form.idCliente = clienti[0].idUtente;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(err);
+        this.hasLoadedManagementClienti = false;
+      }
+    });
+  }
+
   private isServiceAvailableForSelectedSlot(servizio: Servizio): boolean {
     const start = new Date(this.form.dataOraInizio);
     const end = this.calculateServiceCalendarHoldEnd(servizio);
@@ -782,6 +812,49 @@ export class PrenotaAppuntamentoComponent implements OnInit {
 
   private resetServiceSearchTerm(): void {
     this.serviceSearchTerm = '';
+  }
+
+  private resetClienteSearchTerm(): void {
+    this.clienteSearchTerm = '';
+  }
+
+  private normalizeSearchTerm(value: string): string {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  private decodeTokenPayload<T extends object>(): T | null {
+    const token = this.authService.getToken();
+    const payloadBase64 = token?.split('.')[1];
+
+    if (!payloadBase64) {
+      this.showBookingAlert(
+        'Sessione non valida. Effettua di nuovo il login.',
+        'error',
+        'Login richiesto'
+      );
+      return null;
+    }
+
+    try {
+      const normalizedPayload = payloadBase64
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+        .padEnd(Math.ceil(payloadBase64.length / 4) * 4, '=');
+
+      return JSON.parse(atob(normalizedPayload)) as T;
+    } catch (error) {
+      console.error('Errore decodifica token prenotazione:', error);
+      this.showBookingAlert(
+        'Sessione non valida. Effettua di nuovo il login.',
+        'error',
+        'Login richiesto'
+      );
+      return null;
+    }
   }
 
   private clearBookingAlert(): void {

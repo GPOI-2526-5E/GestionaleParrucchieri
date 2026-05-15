@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SidenavComponent } from '../sidenav.component/sidenav.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,7 @@ import { forkJoin } from 'rxjs';
     '../../features/appuntamenti.component/appuntamenti.component.css'
   ],
 })
-export class AppuntamentiGestionaleComponent implements OnInit {
+export class AppuntamentiGestionaleComponent implements OnInit, OnDestroy {
   @ViewChild('calendar') calendarComponent?: FullCalendarComponent;
 
   isSidenavCollapsed = false;
@@ -40,10 +40,27 @@ export class AppuntamentiGestionaleComponent implements OnInit {
   isAppointmentDetailOpen = false;
   isAppointmentDetailClosing = false;
   appointmentDetailToneClass = 'tone-my';
+  isCalendarDatePickerOpen = false;
+  calendarPickerDate = '';
   private appointmentDetailCloseTimeout: ReturnType<typeof setTimeout> | null = null;
   private disabledSlotEvents: EventInput[] = [];
   private visibleRangeStart: Date | null = null;
   private visibleRangeEnd: Date | null = null;
+  private calendarTitleElement: HTMLElement | null = null;
+  private readonly calendarTitleClickHandler = (event: Event): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggleCalendarDatePicker();
+  };
+  private readonly calendarTitleKeydownHandler = (event: KeyboardEvent): void => {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.toggleCalendarDatePicker();
+  };
 
   calendarOptions: CalendarOptions = {
     plugins: [timeGridPlugin, interactionPlugin],
@@ -91,7 +108,8 @@ export class AppuntamentiGestionaleComponent implements OnInit {
     private readonly appuntamentoService: AppuntamentoService,
     private readonly utentiService: UtentiService,
     private readonly router: Router,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly elementRef: ElementRef<HTMLElement>
   ) {}
 
   ngOnInit(): void {
@@ -113,6 +131,29 @@ export class AppuntamentiGestionaleComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.detachCalendarTitleHandlers();
+
+    if (this.appointmentDetailCloseTimeout) {
+      clearTimeout(this.appointmentDetailCloseTimeout);
+      this.appointmentDetailCloseTimeout = null;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+
+    if (
+      target?.closest('.management-calendar-date-popover') ||
+      target?.closest('.fc-toolbar-title')
+    ) {
+      return;
+    }
+
+    this.isCalendarDatePickerOpen = false;
   }
 
   toggleSidenav(): void {
@@ -217,7 +258,29 @@ export class AppuntamentiGestionaleComponent implements OnInit {
   private handleDatesSet(arg: { start: Date; end: Date }): void {
     this.visibleRangeStart = arg.start;
     this.visibleRangeEnd = arg.end;
+    this.calendarPickerDate = this.toDateInputValue(arg.start);
+    this.setupClickableCalendarTitle();
     this.syncCalendarEvents();
+  }
+
+  toggleCalendarDatePicker(): void {
+    this.isCalendarDatePickerOpen = !this.isCalendarDatePickerOpen;
+    this.cdr.detectChanges();
+  }
+
+  goToCalendarPickerDate(): void {
+    if (!this.calendarPickerDate) {
+      return;
+    }
+
+    this.isCalendarDatePickerOpen = false;
+
+    const calendarApi = this.calendarComponent?.getApi();
+    if (!calendarApi) {
+      return;
+    }
+
+    calendarApi.gotoDate(`${this.calendarPickerDate}T12:00:00`);
   }
 
   private mapAppointmentToEvent(appointment: Appuntamento): EventInput {
@@ -299,6 +362,11 @@ export class AppuntamentiGestionaleComponent implements OnInit {
     const pad = (part: number) => String(part).padStart(2, '0');
 
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
+
+  private toDateInputValue(date: Date): string {
+    const pad = (part: number) => String(part).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 
   private buildAppointmentLabel(appointment: Appuntamento): string {
@@ -449,6 +517,38 @@ export class AppuntamentiGestionaleComponent implements OnInit {
 
     calendarApi.removeAllEvents();
     calendarApi.addEventSource(calendarEvents);
+    this.setupClickableCalendarTitle();
+  }
+
+  private setupClickableCalendarTitle(): void {
+    setTimeout(() => {
+      const titleElement = this.elementRef.nativeElement.querySelector(
+        '.fc-toolbar-title'
+      ) as HTMLElement | null;
+
+      if (!titleElement || titleElement === this.calendarTitleElement) {
+        return;
+      }
+
+      this.detachCalendarTitleHandlers();
+      this.calendarTitleElement = titleElement;
+      this.calendarTitleElement.classList.add('management-calendar-title-trigger');
+      this.calendarTitleElement.setAttribute('role', 'button');
+      this.calendarTitleElement.setAttribute('tabindex', '0');
+      this.calendarTitleElement.setAttribute('title', 'Scegli una data');
+      this.calendarTitleElement.addEventListener('click', this.calendarTitleClickHandler);
+      this.calendarTitleElement.addEventListener('keydown', this.calendarTitleKeydownHandler);
+    });
+  }
+
+  private detachCalendarTitleHandlers(): void {
+    if (!this.calendarTitleElement) {
+      return;
+    }
+
+    this.calendarTitleElement.removeEventListener('click', this.calendarTitleClickHandler);
+    this.calendarTitleElement.removeEventListener('keydown', this.calendarTitleKeydownHandler);
+    this.calendarTitleElement = null;
   }
 }
 
