@@ -176,6 +176,12 @@
   color: #fff0cd;
 }
 
+.management-hero__badge--muted {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(248, 241, 231, 0.86);
+}
+
 .management-hero__badge span {
   display: block;
   margin-bottom: 5px;
@@ -190,23 +196,86 @@
   line-height: 1;
 }
 
-.management-feedback {
+.customers-alert {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 13px;
   margin-top: 16px;
-  padding: 13px 16px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff4dc;
-  background: rgba(34, 27, 21, 0.86);
+  padding: 15px 17px;
+  border-radius: 15px;
+  color: #edf5ff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.management-feedback.is-success {
-  border-color: rgba(92, 187, 120, 0.44);
-  background: rgba(21, 58, 30, 0.72);
+.customers-alert.success {
+  background: #0a3018;
+  border: 1px solid rgba(74, 168, 106, 0.65);
 }
 
-.management-feedback.is-error {
-  border-color: rgba(227, 102, 102, 0.44);
-  background: rgba(82, 24, 24, 0.72);
+.customers-alert.error {
+  background: rgba(200, 60, 60, 0.18);
+  border: 1px solid rgba(255, 120, 120, 0.25);
+}
+
+.customers-alert__icon {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.customers-alert.success .customers-alert__icon {
+  color: #163d22;
+  background: #78f294;
+  box-shadow: none;
+}
+
+.customers-alert__copy {
+  min-width: 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.customers-alert__title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.customers-alert__text {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.customers-alert__close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease;
+}
+
+.customers-alert__close:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
 }
 
 .customers-layout {
@@ -231,6 +300,13 @@
 .customers-card__head h2 {
   font-size: 22px;
   font-weight: 800;
+}
+
+.customers-head-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .customers-toolbar {
@@ -301,6 +377,14 @@
   padding: 9px 12px;
 }
 
+.customers-action-button {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  font-size: 17px;
+}
+
 .customers-icon-button:hover,
 .customers-action-button:hover,
 .customers-button:hover {
@@ -322,6 +406,16 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.customers-icon-button--primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, #f2d18b, #be8640);
+  color: #2b1c0f;
+}
+
+.customers-icon-button--primary:hover {
+  background: linear-gradient(135deg, #f7dc9d, #c8914c);
+}
+
 .customers-table-wrap {
   overflow: auto;
   border-radius: 8px;
@@ -333,7 +427,7 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: auto;
-  min-width: 1180px;
+  min-width: 960px;
 }
 
 .customers-table th,
@@ -360,32 +454,30 @@
 
 .customers-table th:first-child,
 .customers-table td:first-child {
-  width: 72px;
+  width: 78px;
 }
 
 .customers-table th:last-child,
 .customers-table td:last-child {
-  width: 190px;
-  position: sticky;
-  right: 0;
-  z-index: 2;
-  background: #17120d;
-  box-shadow: -10px 0 18px rgba(0, 0, 0, 0.2);
+  width: 126px;
 }
 
 .customers-table th:last-child {
-  z-index: 3;
-  background: #1b150f;
+  background: rgba(255, 255, 255, 0.028);
 }
 
 .customers-table tbody tr {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.012);
   transition: background 0.18s ease;
+}
+
+.customers-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.028);
 }
 
 .customers-table tbody tr:hover,
 .customers-table tbody tr.is-selected {
-  background: rgba(212, 176, 106, 0.1);
+  background: rgba(212, 176, 106, 0.115);
 }
 
 .customers-person {
@@ -421,6 +513,7 @@
 
 .customers-cell-id {
   color: rgba(255, 226, 175, 0.78);
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -445,12 +538,31 @@
   color: #2b1c0f;
   font-size: 13px;
   font-weight: 900;
+  overflow: hidden;
 }
 
 .customers-avatar--large {
-  width: 52px;
-  height: 52px;
-  font-size: 16px;
+  width: 58px;
+  height: 58px;
+  font-size: 17px;
+}
+
+.customers-avatar--create {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  color: #2b1c0f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.customers-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .customers-cell-date {
@@ -460,9 +572,15 @@
 
 .customers-actions {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
   width: auto;
   white-space: nowrap;
+}
+
+.customers-actions .customers-action-button {
+  min-width: 0;
 }
 
 .customers-action-button + .customers-action-button {
@@ -525,6 +643,73 @@
   background: rgba(255, 255, 255, 0.035);
 }
 
+.customers-create-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(242, 209, 139, 0.18);
+  background:
+    linear-gradient(90deg, rgba(242, 209, 139, 0.1), transparent 36%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.customers-create-header > div > strong,
+.customers-create-header > div > span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.customers-create-header > div > strong {
+  color: #fff6e8;
+  font-size: 17px;
+}
+
+.customers-create-header > div > span {
+  margin-top: 4px;
+  color: rgba(248, 241, 231, 0.62);
+  font-size: 13px;
+}
+
+.customers-create-shell {
+  display: block;
+}
+
+.customers-create-profile,
+.customers-editor-profile--new {
+  border-color: rgba(242, 209, 139, 0.2);
+  background: rgba(242, 209, 139, 0.06);
+}
+
+.customers-create-profile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  min-height: 100%;
+  padding: 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(242, 209, 139, 0.2);
+}
+
+.customers-create-profile strong,
+.customers-create-profile span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.customers-create-profile strong {
+  color: #fff6e8;
+  font-size: 18px;
+}
+
+.customers-create-profile span {
+  margin-top: 5px;
+  color: rgba(248, 241, 231, 0.62);
+  font-size: 13px;
+}
+
 .customers-editor-profile strong,
 .customers-editor-profile span {
   display: block;
@@ -546,6 +731,10 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+
+.customers-form__grid--create {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .customers-field {
@@ -583,6 +772,206 @@
   outline: none;
   border-color: rgba(242, 209, 139, 0.52);
   box-shadow: 0 0 0 4px rgba(212, 176, 106, 0.08);
+}
+
+::ng-deep .customers-field intl-tel-input {
+  display: block;
+  width: 100%;
+}
+
+::ng-deep .customers-field intl-tel-input .iti {
+  width: 100%;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__tel-input,
+::ng-deep .customers-field intl-tel-input input.customers-phone-input {
+  width: 100% !important;
+  min-height: 50px;
+  padding: 12px 14px;
+  padding-left: 104px !important;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 8, 6, 0.58) !important;
+  color: #fff8ec !important;
+  -webkit-text-fill-color: #fff8ec !important;
+  font-size: 15px;
+  outline: none;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__tel-input::placeholder,
+::ng-deep .customers-field intl-tel-input input.customers-phone-input::placeholder {
+  color: rgba(248, 241, 231, 0.44) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__tel-input:focus,
+::ng-deep .customers-field intl-tel-input input.customers-phone-input:focus {
+  border-color: rgba(242, 209, 139, 0.52) !important;
+  box-shadow: 0 0 0 4px rgba(212, 176, 106, 0.08) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__selected-country {
+  padding-left: 12px;
+  padding-right: 10px;
+  border-radius: 8px 0 0 8px;
+  background: rgba(255, 255, 255, 0.035) !important;
+  border-right: 1px solid rgba(212, 176, 106, 0.12);
+}
+
+::ng-deep .customers-field intl-tel-input .iti__selected-country:hover {
+  background: rgba(212, 176, 106, 0.06) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__selected-dial-code {
+  color: #fff0cd !important;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__arrow {
+  margin-left: 8px;
+  border-top-color: #f2d18b !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__dropdown-content,
+::ng-deep .customers-field intl-tel-input .iti__country-list {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028)),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(244, 239, 231, 0.016)),
+    radial-gradient(circle at top right, rgba(212, 176, 106, 0.08), transparent 40%),
+    #17120d !important;
+  color: #f8f1e7 !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__dropdown-content {
+  top: calc(100% + 8px) !important;
+  bottom: auto !important;
+  display: block !important;
+  visibility: hidden;
+  pointer-events: none;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 20px 40px rgba(0, 0, 0, 0.18) !important;
+  clip-path: inset(0 0 100% 0 round 18px);
+  transform: perspective(900px) rotateX(-10deg) scaleY(0.94);
+  transform-origin: top center;
+  transition:
+    clip-path 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    transform 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    visibility 0s linear 0.34s;
+  z-index: 100 !important;
+  backdrop-filter: blur(26px) saturate(130%);
+  -webkit-backdrop-filter: blur(26px) saturate(130%);
+}
+
+::ng-deep .customers-field intl-tel-input .iti__dropdown-content:not(.iti__hide) {
+  visibility: visible;
+  pointer-events: auto;
+  clip-path: inset(0 0 0 0 round 18px);
+  transform: perspective(900px) rotateX(0) scaleY(1);
+  transition:
+    clip-path 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    transform 0.34s cubic-bezier(0.2, 0.9, 0.24, 1),
+    visibility 0s linear 0s;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__dropdown-content.iti__hide {
+  display: block !important;
+  visibility: hidden;
+  pointer-events: none;
+  clip-path: inset(0 0 100% 0 round 18px);
+  transform: perspective(900px) rotateX(-8deg) scaleY(0.94);
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country-list {
+  max-height: 260px !important;
+  padding: 6px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0 !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 176, 106, 0.65) rgba(255, 255, 255, 0.04);
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country-list::-webkit-scrollbar-thumb {
+  background: rgba(212, 176, 106, 0.65);
+  border-radius: 999px;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid transparent !important;
+  color: #f8f1e7 !important;
+  background: transparent !important;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country:hover,
+::ng-deep .customers-field intl-tel-input .iti__highlight {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03)),
+    rgba(212, 176, 106, 0.08) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country.iti__active,
+::ng-deep .customers-field intl-tel-input .iti__country[aria-selected="true"] {
+  border-color: rgba(212, 176, 106, 0.16) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04)),
+    rgba(212, 176, 106, 0.1) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country-name,
+::ng-deep .customers-field intl-tel-input .iti__dial-code {
+  color: #f7f2e8 !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__country-name {
+  font-weight: 600;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__dial-code {
+  color: rgba(243, 223, 181, 0.88) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__search-input {
+  width: calc(100% - 20px) !important;
+  margin: 10px !important;
+  min-height: 46px !important;
+  padding: 12px 14px 12px 46px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.11) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.022)),
+    rgba(255, 255, 255, 0.025) !important;
+  color: #fffaf1 !important;
+  outline: none !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__search-input::placeholder {
+  color: rgba(247, 242, 232, 0.58) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__search-input:focus {
+  border-color: rgba(212, 176, 106, 0.34) !important;
+  box-shadow: 0 0 0 4px rgba(212, 176, 106, 0.1) !important;
+}
+
+::ng-deep .customers-field intl-tel-input .iti__search-icon {
+  left: 30px !important;
+  color: rgba(247, 242, 232, 0.56) !important;
 }
 
 .customers-editor-meta {
@@ -761,6 +1150,7 @@
 
   .management-hero__stats,
   .customers-toolbar,
+  .customers-head-actions,
   .customers-editor-meta,
   .customers-modal__actions {
     width: 100%;
@@ -773,11 +1163,20 @@
   }
 
   .customers-table {
-    min-width: 1060px;
+    min-width: 900px;
   }
 
   .customers-form__grid {
     grid-template-columns: 1fr;
+  }
+
+  .customers-create-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .customers-create-profile {
+    min-height: 0;
+    align-items: flex-start;
   }
 
   .customers-field--full {

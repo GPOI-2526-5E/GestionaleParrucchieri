@@ -1,30 +1,58 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { IntlTelInputComponent } from 'intl-tel-input/angularWithUtils';
 import { timeout } from 'rxjs/operators';
 import { SidenavComponent } from '../sidenav.component/sidenav.component';
 import { UtentiService } from '../../services/utentiService';
 import { Utente } from '../../models/utente.model';
 
+interface ClienteFormDraft {
+  nome: string;
+  cognome: string;
+  email: string;
+  telefono: string;
+  data_nascita: string;
+  ruolo: string;
+  password: string;
+  confirmPassword: string;
+}
+
 @Component({
   selector: 'app-clienti.component',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidenavComponent],
+  imports: [CommonModule, FormsModule, SidenavComponent, IntlTelInputComponent],
   templateUrl: './clienti.component.html',
   styleUrl: './clienti.component.css',
 })
 export class ClientiComponent implements OnInit {
+  private feedbackTimeout: ReturnType<typeof setTimeout> | null = null;
   isSidenavCollapsed = false;
   clienti: Utente[] = [];
   selectedCliente: Utente | null = null;
   draftCliente: Utente | null = null;
+  newCliente: ClienteFormDraft = this.createEmptyClienteDraft();
   pendingDeleteCliente: Utente | null = null;
+  brokenProfilePhotos = new Set<number | string>();
   searchTerm = '';
   isLoading = true;
   isSaving = false;
+  isCreating = false;
+  isCreateMode = false;
   isDeleting = false;
   feedbackMessage = '';
   feedbackType: 'success' | 'error' | '' = '';
+  feedbackTitle = '';
+  isNewPhoneValid = false;
+  initTelOptions = {
+    initialCountry: 'it' as const,
+    preferredCountries: ['it', 'gb', 'fr', 'de', 'es', 'us'],
+    separateDialCode: true,
+    nationalMode: false,
+    strictMode: true,
+    formatOnDisplay: true,
+    autoPlaceholder: 'polite' as const
+  };
 
   constructor(
     private utentiService: UtentiService,
@@ -55,6 +83,10 @@ export class ClientiComponent implements OnInit {
     return this.clienti.filter((cliente) => !!cliente.telefono).length;
   }
 
+  get clientiSenzaTelefono(): number {
+    return this.clienti.length - this.clientiConTelefono;
+  }
+
   get hasDraftChanges(): boolean {
     if (!this.selectedCliente || !this.draftCliente) {
       return false;
@@ -65,6 +97,25 @@ export class ClientiComponent implements OnInit {
       this.selectedCliente.email !== this.draftCliente.email ||
       (this.selectedCliente.telefono ?? '') !== (this.draftCliente.telefono ?? '') ||
       this.toDateInputValue(this.selectedCliente.data_nascita) !== (this.draftCliente.data_nascita ?? '');
+  }
+
+  get isNewClienteValid(): boolean {
+    return this.newCliente.nome.trim() !== '' &&
+      this.newCliente.cognome.trim() !== '' &&
+      this.newCliente.email.trim() !== '' &&
+      this.newCliente.telefono.trim() !== '' &&
+      this.isNewPhoneValid &&
+      this.isAdult(this.newCliente.data_nascita) &&
+      this.isNewPasswordValid &&
+      this.newCliente.password === this.newCliente.confirmPassword;
+  }
+
+  get isNewPasswordValid(): boolean {
+    const password = this.newCliente.password;
+
+    return password.length >= 6 &&
+      /[A-Z]/.test(password) &&
+      /[0-9!@#$%^&*(),.?":{}|<>]/.test(password);
   }
 
   ngOnInit(): void {
@@ -81,7 +132,7 @@ export class ClientiComponent implements OnInit {
 
   loadClienti(): void {
     this.isLoading = true;
-    this.feedbackMessage = '';
+    this.clearFeedback();
     this.refreshView();
 
     this.getClientiRequest().subscribe({
@@ -102,8 +153,11 @@ export class ClientiComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Errore caricamento clienti:', err);
-        this.feedbackType = 'error';
-        this.feedbackMessage = 'Impossibile caricare i clienti. Controlla che il backend sia avviato e collegato a Supabase.';
+        this.showFeedback(
+          'Impossibile caricare i clienti. Controlla che il backend sia avviato e collegato a Supabase.',
+          'error',
+          'Caricamento non riuscito'
+        );
         this.isLoading = false;
         this.refreshView();
       }
@@ -111,6 +165,7 @@ export class ClientiComponent implements OnInit {
   }
 
   selectCliente(cliente: Utente): void {
+    this.isCreateMode = false;
     this.selectedCliente = cliente;
     this.draftCliente = {
       ...cliente,
@@ -118,15 +173,44 @@ export class ClientiComponent implements OnInit {
       data_nascita: this.toDateInputValue(cliente.data_nascita),
       ruolo: cliente.ruolo ?? 'cliente'
     };
-    this.feedbackMessage = '';
-    this.feedbackType = '';
+    this.clearFeedback();
   }
 
   clearSelection(): void {
     this.selectedCliente = null;
     this.draftCliente = null;
-    this.feedbackMessage = '';
-    this.feedbackType = '';
+    this.isCreateMode = false;
+    this.clearFeedback();
+  }
+
+  startCreateCliente(): void {
+    this.isCreateMode = true;
+    this.selectedCliente = null;
+    this.draftCliente = null;
+    this.newCliente = this.createEmptyClienteDraft();
+    this.isNewPhoneValid = false;
+    this.clearFeedback();
+    this.scrollToEditor();
+  }
+
+  cancelCreateCliente(): void {
+    if (this.isCreating) {
+      return;
+    }
+
+    this.isCreateMode = false;
+    this.newCliente = this.createEmptyClienteDraft();
+    this.isNewPhoneValid = false;
+    this.clearFeedback();
+  }
+
+  onNewPhoneNumberChange(phoneNumber: string): void {
+    this.newCliente.telefono = phoneNumber || '';
+  }
+
+  onNewPhoneValidityChange(isValid: boolean): void {
+    this.isNewPhoneValid = isValid;
+    this.refreshView();
   }
 
   requestDeleteCliente(cliente: Utente): void {
@@ -135,8 +219,7 @@ export class ClientiComponent implements OnInit {
     }
 
     this.pendingDeleteCliente = cliente;
-    this.feedbackMessage = '';
-    this.feedbackType = '';
+    this.clearFeedback();
   }
 
   cancelDeleteCliente(): void {
@@ -159,7 +242,7 @@ export class ClientiComponent implements OnInit {
     }
 
     this.isSaving = true;
-    this.feedbackMessage = '';
+    this.clearFeedback();
     this.refreshView();
 
     this.utentiService.updateCliente(this.selectedCliente.idUtente, {
@@ -174,16 +257,63 @@ export class ClientiComponent implements OnInit {
           cliente.idUtente === clienteAggiornato.idUtente ? clienteAggiornato : cliente
         );
         this.selectCliente(clienteAggiornato);
-        this.feedbackType = 'success';
-        this.feedbackMessage = 'Cliente modificato con successo.';
+        this.showFeedback('Cliente modificato con successo.', 'success', 'Modifica completata');
         this.isSaving = false;
         this.refreshView();
       },
       error: (err: any) => {
         console.error('Errore aggiornamento cliente:', err);
-        this.feedbackType = 'error';
-        this.feedbackMessage = err?.error?.message || 'Aggiornamento cliente non riuscito.';
+        this.showFeedback(
+          err?.error?.message || 'Aggiornamento cliente non riuscito.',
+          'error',
+          'Modifica non riuscita'
+        );
         this.isSaving = false;
+        this.refreshView();
+      }
+    });
+  }
+
+  saveNewCliente(): void {
+    if (this.isCreating || !this.isNewClienteValid) {
+      return;
+    }
+
+    this.isCreating = true;
+    this.clearFeedback();
+    this.refreshView();
+
+    this.utentiService.createCliente({
+      nome: this.newCliente.nome.trim(),
+      cognome: this.newCliente.cognome.trim(),
+      email: this.newCliente.email.trim().toLowerCase(),
+      telefono: this.newCliente.telefono.trim(),
+      data_nascita: this.newCliente.data_nascita,
+      ruolo: 'cliente',
+      password: this.newCliente.password.trim()
+    }).subscribe({
+      next: (clienteCreato: Utente) => {
+        this.clienti = [...this.clienti, clienteCreato].sort((a, b) => {
+          const cognomeCompare = a.cognome.localeCompare(b.cognome, 'it', { sensitivity: 'base' });
+          return cognomeCompare !== 0
+            ? cognomeCompare
+            : a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' });
+        });
+        this.newCliente = this.createEmptyClienteDraft();
+        this.isCreateMode = false;
+        this.selectCliente(clienteCreato);
+        this.showFeedback('Cliente inserito con successo.', 'success', 'Cliente creato');
+        this.isCreating = false;
+        this.refreshView();
+      },
+      error: (err: any) => {
+        console.error('Errore inserimento cliente:', err);
+        this.showFeedback(
+          err?.error?.message || 'Inserimento cliente non riuscito.',
+          'error',
+          'Inserimento non riuscito'
+        );
+        this.isCreating = false;
         this.refreshView();
       }
     });
@@ -195,7 +325,7 @@ export class ClientiComponent implements OnInit {
     }
 
     this.isDeleting = true;
-    this.feedbackMessage = '';
+    this.clearFeedback();
     this.refreshView();
 
     this.utentiService.deleteCliente(cliente.idUtente).subscribe({
@@ -205,22 +335,24 @@ export class ClientiComponent implements OnInit {
         if (this.selectedCliente?.idUtente === cliente.idUtente) {
           this.clearSelection();
         }
-        this.feedbackType = 'success';
-        this.feedbackMessage = 'Cliente rimosso con successo.';
+        this.showFeedback('Cliente rimosso con successo.', 'success', 'Cliente eliminato');
         this.isDeleting = false;
         this.refreshView();
       },
       error: (err: any) => {
         console.error('Errore eliminazione cliente:', err);
-        this.feedbackType = 'error';
-        this.feedbackMessage = err?.error?.message || 'Eliminazione cliente non riuscita.';
+        this.showFeedback(
+          err?.error?.message || 'Eliminazione cliente non riuscita.',
+          'error',
+          'Eliminazione non riuscita'
+        );
         this.isDeleting = false;
         this.refreshView();
       }
     });
   }
 
-  getInitials(cliente: Utente): string {
+  getInitials(cliente: Pick<Utente, 'nome' | 'cognome'>): string {
     const initials = `${cliente.nome?.[0] ?? ''}${cliente.cognome?.[0] ?? ''}`.trim();
     return initials ? initials.toUpperCase() : 'CL';
   }
@@ -235,6 +367,122 @@ export class ClientiComponent implements OnInit {
 
   private refreshView(): void {
     this.cdr.detectChanges();
+  }
+
+  private showFeedback(
+    message: string,
+    type: 'success' | 'error',
+    title: string
+  ): void {
+    if (this.feedbackTimeout) {
+      clearTimeout(this.feedbackTimeout);
+      this.feedbackTimeout = null;
+    }
+
+    this.feedbackMessage = message;
+    this.feedbackType = type;
+    this.feedbackTitle = title;
+
+    if (type === 'success') {
+      this.feedbackTimeout = setTimeout(() => {
+        this.clearFeedback();
+        this.refreshView();
+      }, 2600);
+    }
+  }
+
+  clearFeedback(): void {
+    if (this.feedbackTimeout) {
+      clearTimeout(this.feedbackTimeout);
+      this.feedbackTimeout = null;
+    }
+
+    this.feedbackMessage = '';
+    this.feedbackType = '';
+    this.feedbackTitle = '';
+  }
+
+  getClientePhotoUrl(cliente: Partial<Utente> | ClienteFormDraft): string | null {
+    const key = 'idUtente' in cliente && cliente.idUtente
+      ? cliente.idUtente
+      : `${cliente.email || cliente.nome || 'new'}`;
+
+    if (this.brokenProfilePhotos.has(key)) {
+      return null;
+    }
+
+    const rawUrl = String(
+      ('photoURL' in cliente && cliente.photoURL) ||
+      ('picture' in cliente && cliente.picture) ||
+      ('avatar_url' in cliente && cliente.avatar_url) ||
+      ('avatar' in cliente && cliente.avatar) ||
+      ''
+    ).trim();
+
+    if (!rawUrl) {
+      return null;
+    }
+
+    const normalizedUrl = rawUrl.startsWith('//') ? `https:${rawUrl}` : rawUrl;
+
+    if (normalizedUrl.includes('googleusercontent.com')) {
+      return normalizedUrl.replace(/=s\d+-c$/, '=s256-c');
+    }
+
+    return normalizedUrl;
+  }
+
+  onClientePhotoError(cliente: Partial<Utente> | ClienteFormDraft): void {
+    const key = 'idUtente' in cliente && cliente.idUtente
+      ? cliente.idUtente
+      : `${cliente.email || cliente.nome || 'new'}`;
+
+    this.brokenProfilePhotos.add(key);
+    this.refreshView();
+  }
+
+  private createEmptyClienteDraft(): ClienteFormDraft {
+    return {
+      nome: '',
+      cognome: '',
+      email: '',
+      telefono: '',
+      data_nascita: '',
+      ruolo: 'cliente',
+      password: '',
+      confirmPassword: ''
+    };
+  }
+
+  private scrollToEditor(): void {
+    setTimeout(() => {
+      document.getElementById('modifica-cliente')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    });
+  }
+
+  private isAdult(value: string): boolean {
+    if (!value) {
+      return false;
+    }
+
+    const birth = new Date(`${value}T00:00:00`);
+
+    if (Number.isNaN(birth.getTime())) {
+      return false;
+    }
+
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    return age >= 18;
   }
 
   formatDate(value?: string | null): string {

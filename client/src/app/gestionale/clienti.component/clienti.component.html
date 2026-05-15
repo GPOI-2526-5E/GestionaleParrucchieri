@@ -39,16 +39,34 @@
           <span>Telefono</span>
           <strong>{{ clientiConTelefono }}</strong>
         </div>
+        <div class="management-hero__badge management-hero__badge--muted">
+          <span>Da completare</span>
+          <strong>{{ clientiSenzaTelefono }}</strong>
+        </div>
       </div>
     </section>
 
     <div
       *ngIf="feedbackMessage"
-      class="management-feedback"
-      [class.is-success]="feedbackType === 'success'"
-      [class.is-error]="feedbackType === 'error'"
+      class="customers-alert"
+      [ngClass]="feedbackType"
+      role="status"
     >
-      {{ feedbackMessage }}
+      <div class="customers-alert__icon">
+        <i *ngIf="feedbackType === 'success'" class="bi bi-check-lg" aria-hidden="true"></i>
+        <span *ngIf="feedbackType === 'error'">!</span>
+      </div>
+
+      <div class="customers-alert__copy">
+        <strong class="customers-alert__title">
+          {{ feedbackTitle || (feedbackType === 'success' ? 'Operazione completata' : 'Operazione non riuscita') }}
+        </strong>
+        <div class="customers-alert__text">{{ feedbackMessage }}</div>
+      </div>
+
+      <button type="button" class="customers-alert__close" (click)="clearFeedback()" aria-label="Chiudi avviso">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
     </div>
 
     <section class="customers-layout">
@@ -58,10 +76,16 @@
             <p class="customers-card__eyebrow">Database</p>
             <h2>Clienti registrati</h2>
           </div>
-          <button type="button" class="customers-icon-button" (click)="loadClienti()" [disabled]="isLoading" title="Aggiorna clienti">
-            <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
-            <span>{{ isLoading ? 'Carico' : 'Aggiorna' }}</span>
-          </button>
+          <div class="customers-head-actions">
+            <button type="button" class="customers-icon-button customers-icon-button--primary" (click)="startCreateCliente()" title="Nuovo cliente">
+              <i class="bi bi-person-plus" aria-hidden="true"></i>
+              <span>Nuovo cliente</span>
+            </button>
+            <button type="button" class="customers-icon-button" (click)="loadClienti()" [disabled]="isLoading" title="Aggiorna clienti">
+              <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+              <span>{{ isLoading ? 'Carico' : 'Aggiorna' }}</span>
+            </button>
+          </div>
         </div>
 
         <div class="customers-toolbar">
@@ -96,12 +120,9 @@
               <tr>
                 <th>ID</th>
                 <th>Cliente</th>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Email</th>
-                <th>Telefono</th>
+                <th>Contatti</th>
                 <th>Data nascita</th>
-                <th>Ruolo</th>
+                <th>Profilo</th>
                 <th>Azioni</th>
               </tr>
             </thead>
@@ -113,29 +134,38 @@
                 <td class="customers-cell-id">#{{ cliente.idUtente }}</td>
                 <td class="customers-cell-primary">
                   <button type="button" class="customers-person" (click)="selectCliente(cliente)">
-                    <span class="customers-avatar">{{ getInitials(cliente) }}</span>
+                    <span class="customers-avatar">
+                      <img
+                        *ngIf="getClientePhotoUrl(cliente) as photoUrl"
+                        [src]="photoUrl"
+                        alt="Foto profilo"
+                        referrerpolicy="no-referrer"
+                        (error)="onClientePhotoError(cliente)"
+                      />
+                      <ng-container *ngIf="!getClientePhotoUrl(cliente)">
+                        {{ getInitials(cliente) }}
+                      </ng-container>
+                    </span>
                     <span>
                       <strong>{{ cliente.nome }} {{ cliente.cognome }}</strong>
-                      <small>{{ cliente.email }}</small>
+                      <small>{{ cliente.ruolo || 'cliente' }}</small>
                     </span>
                   </button>
                 </td>
-                <td>{{ cliente.nome || '-' }}</td>
-                <td>{{ cliente.cognome || '-' }}</td>
-                <td class="customers-cell-email">{{ cliente.email || '-' }}</td>
-                <td class="customers-cell-phone">{{ cliente.telefono || 'Non inserito' }}</td>
+                <td>
+                  <span class="customers-cell-email">{{ cliente.email || '-' }}</span>
+                  <span class="customers-cell-phone">{{ cliente.telefono || 'Telefono non inserito' }}</span>
+                </td>
                 <td class="customers-cell-date">{{ formatDate(cliente.data_nascita) }}</td>
                 <td>
                   <span class="customers-role-badge">{{ cliente.ruolo || 'cliente' }}</span>
                 </td>
                 <td class="customers-actions">
-                  <button type="button" class="customers-action-button" (click)="selectCliente(cliente)" title="Modifica cliente">
+                  <button type="button" class="customers-action-button" (click)="selectCliente(cliente)" title="Modifica cliente" aria-label="Modifica cliente">
                     <i class="bi bi-pencil-square" aria-hidden="true"></i>
-                    <span>Modifica</span>
                   </button>
-                  <button type="button" class="customers-action-button customers-action-button--delete" (click)="requestDeleteCliente(cliente)" [disabled]="isDeleting" title="Elimina cliente">
+                  <button type="button" class="customers-action-button customers-action-button--delete" (click)="requestDeleteCliente(cliente)" [disabled]="isDeleting" title="Elimina cliente" aria-label="Elimina cliente">
                     <i class="bi bi-trash3" aria-hidden="true"></i>
-                    <span>Elimina</span>
                   </button>
                 </td>
               </tr>
@@ -147,23 +177,124 @@
       <article class="customers-card customers-card--editor" id="modifica-cliente">
         <div class="customers-card__head">
           <div>
-            <p class="customers-card__eyebrow">Dettaglio</p>
-            <h2>{{ selectedCliente ? 'Modifica cliente selezionato' : 'Seleziona un cliente da modificare' }}</h2>
+            <p class="customers-card__eyebrow">{{ isCreateMode ? 'Inserimento' : 'Dettaglio' }}</p>
+            <h2>
+              {{
+                isCreateMode
+                  ? 'Inserisci nuovo cliente'
+                  : selectedCliente
+                    ? 'Modifica cliente selezionato'
+                    : 'Seleziona un cliente da modificare'
+              }}
+            </h2>
           </div>
-          <button *ngIf="selectedCliente" type="button" class="customers-icon-button customers-icon-button--ghost" (click)="clearSelection()" title="Chiudi dettaglio">
+          <button *ngIf="isCreateMode" type="button" class="customers-icon-button customers-icon-button--ghost" (click)="cancelCreateCliente()" title="Chiudi inserimento">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+            <span>Chiudi</span>
+          </button>
+          <button *ngIf="!isCreateMode && selectedCliente" type="button" class="customers-icon-button customers-icon-button--ghost" (click)="clearSelection()" title="Chiudi dettaglio">
             <i class="bi bi-x-lg" aria-hidden="true"></i>
             <span>Chiudi</span>
           </button>
         </div>
 
-        <div *ngIf="!selectedCliente || !draftCliente" class="customers-empty-state customers-empty-state--editor">
+        <form *ngIf="isCreateMode" class="customers-form" (ngSubmit)="saveNewCliente()">
+          <div class="customers-create-header">
+            <span class="customers-avatar customers-avatar--large customers-avatar--create">
+              {{ getInitials(newCliente) }}
+            </span>
+            <div>
+              <strong>{{ newCliente.nome || 'Nuovo' }} {{ newCliente.cognome || 'cliente' }}</strong>
+              <span>{{ newCliente.email || 'Account cliente con ruolo cliente' }}</span>
+            </div>
+          </div>
+
+          <div class="customers-create-shell">
+            <div class="customers-form__grid customers-form__grid--create">
+              <label class="customers-field">
+                <span>Nome</span>
+                <input [(ngModel)]="newCliente.nome" name="newNome" type="text" required />
+              </label>
+
+              <label class="customers-field">
+                <span>Cognome</span>
+                <input [(ngModel)]="newCliente.cognome" name="newCognome" type="text" required />
+              </label>
+
+              <label class="customers-field customers-field--full">
+                <span>Email</span>
+                <input [(ngModel)]="newCliente.email" name="newEmail" type="email" required />
+              </label>
+
+              <label class="customers-field">
+                <span>Numero telefono</span>
+                <intl-tel-input
+                  name="newTelefono"
+                  [initialValue]="newCliente.telefono || ''"
+                  [initOptions]="initTelOptions"
+                  [inputProps]="{
+                    id: 'newTelefono',
+                    class: 'customers-phone-input',
+                    placeholder: 'Inserisci il numero'
+                  }"
+                  (numberChange)="onNewPhoneNumberChange($event)"
+                  (validityChange)="onNewPhoneValidityChange($event)"
+                ></intl-tel-input>
+              </label>
+
+              <label class="customers-field">
+                <span>Data di nascita</span>
+                <input [(ngModel)]="newCliente.data_nascita" name="newDataNascita" type="date" />
+              </label>
+
+              <label class="customers-field">
+                <span>Ruolo</span>
+                <input [ngModel]="newCliente.ruolo" name="newRuolo" type="text" readonly />
+              </label>
+
+              <label class="customers-field">
+                <span>Password iniziale</span>
+                <input [(ngModel)]="newCliente.password" name="newPassword" type="password" required minlength="6" autocomplete="new-password" />
+              </label>
+
+              <label class="customers-field">
+                <span>Conferma password</span>
+                <input [(ngModel)]="newCliente.confirmPassword" name="newConfirmPassword" type="password" required minlength="6" autocomplete="new-password" />
+              </label>
+            </div>
+          </div>
+
+          <div class="customers-editor-actions">
+            <button type="submit" class="customers-button customers-button--save" [disabled]="isCreating || !isNewClienteValid">
+              <i class="bi bi-check2" aria-hidden="true"></i>
+              {{ isCreating ? 'Inserimento...' : 'Inserisci cliente' }}
+            </button>
+            <button type="button" class="customers-button customers-button--ghost" (click)="cancelCreateCliente()" [disabled]="isCreating">
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+              Annulla
+            </button>
+          </div>
+        </form>
+
+        <div *ngIf="!isCreateMode && (!selectedCliente || !draftCliente)" class="customers-empty-state customers-empty-state--editor">
           <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
-          Seleziona un cliente dalla tabella per modificare nome, cognome, email, telefono e data di nascita.
+          Seleziona un cliente dalla tabella per modificarlo oppure crea una nuova anagrafica.
         </div>
 
-        <form *ngIf="selectedCliente && draftCliente" class="customers-form" (ngSubmit)="saveCliente()">
+        <form *ngIf="!isCreateMode && selectedCliente && draftCliente" class="customers-form" (ngSubmit)="saveCliente()">
           <div class="customers-editor-profile">
-            <span class="customers-avatar customers-avatar--large">{{ getInitials(draftCliente) }}</span>
+            <span class="customers-avatar customers-avatar--large">
+              <img
+                *ngIf="getClientePhotoUrl(draftCliente) as photoUrl"
+                [src]="photoUrl"
+                alt="Foto profilo"
+                referrerpolicy="no-referrer"
+                (error)="onClientePhotoError(draftCliente)"
+              />
+              <ng-container *ngIf="!getClientePhotoUrl(draftCliente)">
+                {{ getInitials(draftCliente) }}
+              </ng-container>
+            </span>
             <div>
               <strong>{{ selectedCliente.nome }} {{ selectedCliente.cognome }}</strong>
               <span>{{ selectedCliente.email }}</span>

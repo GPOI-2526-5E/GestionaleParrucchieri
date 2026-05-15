@@ -37,6 +37,10 @@ export class UtentiService {
     );
   }
 
+  createCliente(cliente: Partial<Utente> & { password: string }): Observable<Utente> {
+    return this.http.post<Utente>(`${this.api}/clienti`, cliente);
+  }
+
   updateCliente(idUtente: number, cliente: Partial<Utente>): Observable<Utente> {
     return this.http.put<Utente>(`${this.api}/clienti/${idUtente}`, cliente);
   }

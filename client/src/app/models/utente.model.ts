@@ -6,4 +6,8 @@ export interface Utente {
     telefono?: string | null;
     data_nascita?: string | null;
     ruolo?: string;
+    photoURL?: string | null;
+    picture?: string | null;
+    avatar_url?: string | null;
+    avatar?: string | null;
   }

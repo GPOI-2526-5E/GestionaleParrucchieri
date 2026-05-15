@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import { db } from "../db_parrucchieri";
 
 interface Utente {
@@ -189,6 +190,28 @@ function buildClientiUpdatePayload(row: any, values: {
   return payload;
 }
 
+function isAdultBirthDate(value: string): boolean {
+  if (!value) {
+    return false;
+  }
+
+  const birth = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(birth.getTime())) {
+    return false;
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+
+  return age >= 18;
+}
+
 router.get("/clienti", async (_req: Request, res: Response) => {
   try {
     const { clienti } = await getClientiWithSource();
@@ -198,6 +221,78 @@ router.get("/clienti", async (_req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error("Errore GET /clienti:", err);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+router.post("/clienti", async (req: Request, res: Response) => {
+  try {
+    const nome = String(req.body?.nome ?? "").trim();
+    const cognome = String(req.body?.cognome ?? "").trim();
+    const email = String(req.body?.email ?? "").trim().toLowerCase();
+    const password = String(req.body?.password ?? "").trim();
+    const telefono = String(req.body?.telefono ?? "").trim();
+    const data_nascita = String(req.body?.data_nascita ?? "").trim();
+
+    if (!nome || !cognome || !email || !password || !telefono || !data_nascita) {
+      return res.status(400).json({ message: "Nome, cognome, email, password, telefono e data di nascita sono obbligatori" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "La password deve contenere almeno 6 caratteri" });
+    }
+
+    if (!/[A-Z]/.test(password) || !/[0-9!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return res.status(400).json({ message: "La password deve contenere almeno una maiuscola e un numero o carattere speciale" });
+    }
+
+    if (!isAdultBirthDate(data_nascita)) {
+      return res.status(400).json({ message: "Il cliente deve essere maggiorenne" });
+    }
+
+    const { data: existingUser, error: existingError } = await db
+      .from("utenti")
+      .select("idUtente")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (existingError) {
+      throw existingError;
+    }
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Esiste gia un utente con questa email" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const { data, error } = await db
+      .from("utenti")
+      .insert({
+        nome,
+        cognome,
+        email,
+        password: hashedPassword,
+        telefono: telefono || null,
+        data_nascita: data_nascita || null,
+        ruolo: "cliente"
+      })
+      .select("idUtente, nome, cognome, email, telefono, data_nascita, ruolo")
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    const cliente = normalizeClienteRow(data, "utenti");
+
+    if (!cliente) {
+      return res.status(500).json({ message: "Cliente creato ma non leggibile" });
+    }
+
+    return res.status(201).json(cliente);
+  } catch (err: any) {
+    console.error("Errore POST /clienti:", err);
     return res.status(500).json({ message: err.message });
   }
 });
